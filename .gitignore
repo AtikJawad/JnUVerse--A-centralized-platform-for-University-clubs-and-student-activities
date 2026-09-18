@@ -1,0 +1,45 @@
+# ============================================================
+# JnUVerse — root .gitignore
+# ============================================================
+
+# --- Environment / secrets (never commit) ---
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+venv/
+env/
+.venv/
+*.egg-info/
+.pytest_cache/
+staticfiles/
+media/
+
+# --- Node / React / Vite ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Editors / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/
