@@ -11,6 +11,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,7 +75,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "corsheaders",
     # "rest_framework_simplejwt",  # enabled when JWT auth is wired up (Week 5)
-    # "drf_spectacular",           # enabled when OpenAPI/Swagger docs are wired up
+    "drf_spectacular",           # enabled when OpenAPI/Swagger docs are wired up
 ]
 
 # JnUVerse modular-monolith apps: one Django app per business domain,
@@ -90,6 +91,8 @@ LOCAL_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -180,7 +183,12 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    
 }
 
 # ---------------------------------------------------------------------------
@@ -193,3 +201,15 @@ CORS_ALLOWED_ORIGINS = env_list(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:5173,http://127.0.0.1:5173",
 )
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "JnUVerse API",
+    "DESCRIPTION": "Backend API for JnUVerse (JnU clubs & student activities).",
+    "VERSION": "0.2.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

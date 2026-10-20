@@ -1,0 +1,291 @@
+openapi: 3.0.3
+info:
+  title: JnUVerse API
+  version: 0.2.0
+  description: Backend API for JnUVerse (JnU clubs & student activities).
+paths:
+  /api/auth/login/:
+    post:
+      operationId: api_auth_login_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+  /api/auth/me/:
+    get:
+      operationId: api_auth_me_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: api_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/register/club/:
+    post:
+      operationId: api_auth_register_club_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClubRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClubRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClubRegistration'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubRegistrationResponse'
+          description: ''
+  /api/auth/register/student/:
+    post:
+      operationId: api_auth_register_student_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudentRegistration'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    Club:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+        is_verified:
+          type: boolean
+      required:
+      - id
+      - name
+    ClubRegistration:
+      type: object
+      properties:
+        club_name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+          default: ''
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+      required:
+      - club_name
+      - email
+      - password
+      - password_confirm
+    ClubRegistrationResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        club:
+          $ref: '#/components/schemas/Club'
+      required:
+      - club
+      - user
+    Login:
+      type: object
+      properties:
+        identifier:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - identifier
+      - password
+    LoginResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - access
+      - refresh
+      - user
+    MeResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        student_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        role:
+          type: string
+        club:
+          $ref: '#/components/schemas/Club'
+      required:
+      - email
+      - id
+      - name
+      - role
+      - student_id
+    RoleEnum:
+      enum:
+      - student
+      - club_operator
+      type: string
+      description: |-
+        * `student` - Student
+        * `club_operator` - Club Operator
+    StudentRegistration:
+      type: object
+      properties:
+        student_id:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+      - password_confirm
+      - student_id
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        student_id:
+          type: string
+          nullable: true
+          maxLength: 30
+        name:
+          type: string
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - id
+      - name
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

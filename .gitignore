@@ -43,3 +43,6 @@ Thumbs.db
 # --- Logs ---
 *.log
 logs/
+
+# --- data ---
+backend/data/student_records.csv
