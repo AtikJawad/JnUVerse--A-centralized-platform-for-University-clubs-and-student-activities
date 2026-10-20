@@ -30,7 +30,7 @@ function App() {
         </p>
         <p className="mt-6 text-sm text-slate-500">
           Week 1 — Project foundation established. Feature development begins
-          in the weeks ahead per the 14-week roadmap.
+          in the weeks ahead per the 10-week development plan.
         </p>
         <p className="mt-4 text-xs text-slate-400">
           Backend health check:{" "}

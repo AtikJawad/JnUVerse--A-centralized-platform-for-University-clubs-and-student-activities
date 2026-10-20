@@ -3,7 +3,7 @@
 **A Centralized Platform for University Clubs & Student Activities**
 Jagannath University (JnU), Bangladesh — Software Engineering course project.
 
-> Status: **Week 1 of 14 — Project Foundation.** No product features are
+> Status: **Week 1 of 10 — Project Foundation.** No product features are
 > implemented yet. This repository currently contains the initialized
 > repository structure, frontend/backend scaffolding, and environment
 > configuration only. See [Current Development Status](#current-development-status).
@@ -16,16 +16,26 @@ JnUVerse is a centralized web platform, built specifically for Jagannath
 University, that connects students with verified university clubs and the
 activities those clubs organize. It brings club discovery, membership
 (follow/join), event publishing and registration, notifications, club
-collaboration, and post-event feedback into one system, under University
-Admin oversight and moderation.
+collaboration, and post-event rating feedback into one system.
 
-The system defines three locked system-level roles:
+The system defines two system-level roles:
 
 1. **Student**
 2. **Club Officer / Club Operator** — exactly one authorized account per
    club for system-level club operations (executive-committee titles like
    President or Secretary are informational only, not separate system roles)
-3. **University Admin**
+
+### Updated requirements (10-week plan)
+
+- There is **no University Admin role**. A club is considered **verified
+  as soon as its account is successfully created** — there is no separate
+  admin approval step.
+- **Student verification**: Student ID + email must match a valid JnU
+  student record stored in the database (records imported by the team;
+  implemented in Week 2).
+- **Event feedback is rating-only** — no written comments.
+- **Five analytical reports** are planned; their specifications will be
+  decided in a later week (Week 8 in the plan).
 
 ## 2. Technology Stack
 
@@ -69,11 +79,11 @@ JnUVerse/
 │   ├── manage.py
 │   ├── config/               # Django project settings, root URLs, WSGI/ASGI
 │   ├── apps/
-│   │   ├── accounts/          # Users & the three system roles
-│   │   ├── clubs/             # Clubs, membership, Club Officer workflow
+│   │   ├── accounts/          # Users & the two system roles
+│   │   ├── clubs/             # Clubs, membership, Club Operator workflow
 │   │   ├── events/            # Event creation, browsing, registration
 │   │   ├── notifications/     # MVP notification audiences
-│   │   ├── feedback/          # Post-event feedback
+│   │   ├── feedback/          # Post-event ratings (rating-only)
 │   │   ├── collaborations/    # Club-to-club collaboration requests
 │   │   └── reports/           # Reporting inappropriate clubs/events
 │   ├── requirements.txt
@@ -150,43 +160,61 @@ Run the backend and frontend commands above in two separate terminals. The
 placeholder homepage will show whether the frontend can successfully reach
 the backend's health-check endpoint.
 
-## 6. Current Development Status
+## 6. Development Plan & Current Status
 
-This repository reflects **Week 1 of the 14-week JnUVerse roadmap**:
-project foundation only.
+The project follows the **10-week development plan** (`10_week_development_plan.pdf`):
 
-**Implemented this week:**
-- Locked repository structure (backend, frontend, docs)
-- Django project (`config`) and all seven planned app skeletons
-  (`accounts`, `clubs`, `events`, `notifications`, `feedback`,
-  `collaborations`, `reports`) — apps registered in `INSTALLED_APPS`, no
-  business models yet except the `accounts` app's role definition
-- Django settings reading all secrets/config from environment variables,
-  pre-wired for Supabase PostgreSQL
-- A minimal `/api/health/` endpoint
-- React + Vite + Tailwind CSS + ESLint frontend scaffold, with a
-  placeholder homepage that checks backend connectivity
-- `.gitignore` covering secrets, dependencies, and build artifacts on both
-  sides
-- `requirements.txt` and `package.json` with the locked dependency set
-
-**Not implemented yet (scheduled in later weeks per the roadmap):**
-- Authentication, JWT issuance, and RBAC enforcement (Week 5)
-- Any club, event, notification, feedback, collaboration, or report
-  business logic or models beyond placeholders
-- Real UI screens beyond the placeholder homepage
-- OpenAPI/Swagger documentation generation
-
-See `docs/weekly-progress/` for per-week updates as the project continues.
-
-## 7. Team
-
-| Role | Responsibility |
+| Week | Focus |
 |---|---|
-| Requirement Engineer | Requirements, use cases, requirement documentation |
-| Database Designer | ERD, schema, relationships, database design |
-| UML Designer | Use Case, Class, Activity, Sequence diagrams |
-| UI Designer | Wireframes, UI/UX, design consistency |
-| MVP Coder (Frontend) | React/Vite frontend implementation |
-| MVP Coder (Backend, Database) | Django/DRF backend, APIs, business logic |
-| Tester | Test cases, integration testing, validation |
+| 1 | Project foundation |
+| 2 | Database design & authentication (models, migrations, registration, login, JWT, student verification, diagrams) |
+| 3 | Clubs & memberships |
+| 4 | Events & registration |
+| 5 | Notices & notifications |
+| 6 | Ratings & collaboration |
+| 7 | Reports (inappropriate club/event) & dashboards |
+| 8 | Five analytical reports |
+| 9 | Integration & testing |
+| 10 | Finalization & delivery |
+
+**Week 1 — what exists in the repository:**
+- Locked repository structure (backend, frontend, docs)
+- Django project (`config`) and seven app skeletons, registered in
+  `INSTALLED_APPS`; the only model is a placeholder `accounts.User` role
+  definition (Student / Club Officer)
+- Settings read from environment variables, pre-wired for Supabase PostgreSQL
+- A minimal `/api/health/` endpoint
+- React + Vite + Tailwind + ESLint scaffold with a placeholder page that
+  calls `/api/health/`
+- `.gitignore`, `requirements.txt`, `package.json`
+
+**Verification status (be honest about it):**
+- Verified in the automated environment used to prepare this update: Python
+  syntax compiles. 
+- **Not verified there** (no package-registry or Supabase network access):
+  `pip install`, `manage.py check/migrate/runserver`, `npm install/build/lint`,
+  the live Supabase connection, and frontend→backend calls. Each member
+  should run the setup below and record results in `docs/weekly-progress/`.
+
+**Not implemented yet (later weeks):** authentication/JWT/RBAC, student
+verification, any club/event/notification/rating/collaboration/report logic,
+real UI screens, Swagger generation.
+
+## 7. Team & Roles
+
+Responsibilities come from the team's role matrix. Individual Week 1
+contributions have **not** been recorded in this repository yet — each owner
+should add theirs to `docs/weekly-progress/` rather than have them assumed here.
+
+| Member | Course role | Responsibility | Week 1 contribution |
+|---|---|---|---|
+| Tahmida Aziza | Requirement Engineer | Requirements, use cases, documentation | TBD by member |
+| Md Sohag | Database Designer | ERD, schema, relationships | TBD by member |
+| Lutfun Nahar | UML Designer | Use Case, Class, Activity, Sequence diagrams | TBD by member |
+| Md Jahid Hasan | UI Designer | Wireframes, UI/UX consistency | TBD by member |
+| Anik Khondokar | MVP Coder (Frontend) | React/Vite implementation | TBD by member |
+| Atik Jawad | MVP Coder (Backend, Database) | Django/DRF, APIs, business logic | TBD by member |
+| Sheak Noor Muhammad Nabil | Tester | Test cases, integration testing, validation | TBD by member |
+
+From Week 2, backend work is done by Claude and frontend work by Antigravity,
+under the team's decisions.

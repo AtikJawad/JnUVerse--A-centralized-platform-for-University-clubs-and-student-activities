@@ -3,7 +3,7 @@ Django settings for the JnUVerse backend (config project).
 
 Week 1 scope: project foundation only. Authentication (JWT/RBAC),
 CORS, and app-specific business logic are wired up progressively in
-their scheduled weeks per the 14-week roadmap — this file establishes
+their scheduled weeks per the 10-week development plan — this file establishes
 the environment-variable-driven foundation they will build on.
 """
 

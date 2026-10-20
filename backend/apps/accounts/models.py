@@ -6,17 +6,16 @@ class User(models.Model):
     """
     Foundation-level placeholder for the JnUVerse user/profile model.
 
-    Week 1 scope: define the three locked system-level roles only.
+    Week 1 scope: define the two system-level roles only (the University Admin role was removed).
     Full registration, JWT authentication, and RBAC enforcement are
-    implemented in Week 5 (Authentication + Student/Club Core) per the
-    14-week roadmap. This model intentionally does NOT implement auth
+    implemented in Week 2 (Database Design & Authentication) per the
+    10-week development plan. This model intentionally does NOT implement auth
     logic yet.
     """
 
     class Role(models.TextChoices):
         STUDENT = "student", "Student"
         CLUB_OFFICER = "club_officer", "Club Officer / Club Operator"
-        UNIVERSITY_ADMIN = "university_admin", "University Admin"
 
     role = models.CharField(
         max_length=20,
