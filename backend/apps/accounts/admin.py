@@ -1,7 +1,8 @@
-# Admin registrations for the accounts app will be added as models are implemented.
 from django.contrib import admin
-from .models import StudentRecord, User
+
+from .models import Interest, StudentProfile, User, ValidStudentRecord
 
 admin.site.register(User)
-admin.site.register(StudentRecord)
-
+admin.site.register(ValidStudentRecord)
+admin.site.register(StudentProfile)
+admin.site.register(Interest)

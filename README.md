@@ -3,10 +3,15 @@
 **A Centralized Platform for University Clubs & Student Activities**
 Jagannath University (JnU), Bangladesh — Software Engineering course project.
 
-> Status: **Week 1 of 10 — Project Foundation.** No product features are
-> implemented yet. This repository currently contains the initialized
-> repository structure, frontend/backend scaffolding, and environment
-> configuration only. See [Current Development Status](#current-development-status).
+> Status: **Week 2 of 10 — Database design & authentication (backend complete, frontend pending)** 
+Verified by the team on a real Supabase database:
+The migrations for all 7 apps applied cleanly.
+check reports no issues.
+All 14 database constraints were tested and rolled back.
+Student registration, club registration, login by email or Student ID, token refresh and me all work.
+Swagger loads, and spectacular --validate prints no warnings.
+Built but with no endpoints yet: ClubFollow, ClubMembership, Event, EventRegistration, Notice, Notification, EventRating, CollaborationRequest and ContentReport.
+Not done yet: the Week 2 frontend (Antigravity), and the use-case, class and architecture diagrams.
 
 ---
 
@@ -115,6 +120,7 @@ JnUVerse/
 ```
 
 ## 5. Setup & Run Instructions
+after migrate, run python manage.py import_student_records data\student_records_sample.csv, with the team’s real list kept out of git.
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -196,9 +202,7 @@ The project follows the **10-week development plan** (`10_week_development_plan.
   the live Supabase connection, and frontend→backend calls. Each member
   should run the setup below and record results in `docs/weekly-progress/`.
 
-**Not implemented yet (later weeks):** authentication/JWT/RBAC, student
-verification, any club/event/notification/rating/collaboration/report logic,
-real UI screens, Swagger generation.
+**Not implemented yet (later weeks):** club and membership endpoints, events, notices and notifications, ratings, collaboration, reports, and the five analytical reports.
 
 ## 7. Team & Roles
 

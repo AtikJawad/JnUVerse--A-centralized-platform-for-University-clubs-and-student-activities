@@ -2,7 +2,7 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.accounts.models import StudentRecord
+from apps.accounts.models import ValidStudentRecord
 
 
 def pick(row, *names):
@@ -35,8 +35,8 @@ class Command(BaseCommand):
                     skipped += 1
                     continue
                 try:
-                    _, was_created = StudentRecord.objects.update_or_create(
-                        student_id=sid, defaults={"name": name, "email": email}
+                    _, was_created = ValidStudentRecord.objects.update_or_create(
+                        student_id=sid, defaults={"full_name": name, "email": email}
                     )
                 except Exception as e:  # e.g. email already used by another ID
                     self.stderr.write(f"Row {i} ({sid}): {e}")

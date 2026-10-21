@@ -9,7 +9,7 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
 from .serializers import ClubRegistrationSerializer, ClubSerializer, StudentRegistrationSerializer, UserSerializer, LoginSerializer
-
+from .constants import DEPARTMENTS
 
 class StudentRegisterView(APIView):
     authentication_classes = []
@@ -70,12 +70,24 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses=inline_serializer("MeResponse", {
-        "id": serializers.IntegerField(), "email": serializers.EmailField(),
+        "id": serializers.UUIDField(), "email": serializers.EmailField(),
         "student_id": serializers.CharField(allow_null=True), "name": serializers.CharField(),
+        "department": serializers.CharField(allow_null=True),
+        "batch": serializers.IntegerField(allow_null=True),
         "role": serializers.CharField(), "club": ClubSerializer(required=False)}))
-
+    
     def get(self, request):
         data = UserSerializer(request.user).data
         if hasattr(request.user, "club"):
             data["club"] = ClubSerializer(request.user.club).data
         return Response(data)
+
+
+class DepartmentListView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses=inline_serializer("DepartmentList", {
+        "departments": serializers.ListField(child=serializers.CharField())}))
+    def get(self, request):
+        return Response({"departments": DEPARTMENTS})
