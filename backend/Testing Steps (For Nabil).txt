@@ -1,0 +1,45 @@
+----------TESTING using LOCAL POSTGRE DATABASE-------------
+
+You dont have to create any database on postgreSQL manually.
+Everytime you run the tests, just follow the steps. 
+It will create a test database by itself and delete it when done.
+
+All you have to do is have PostGRESQL Installed and 
+Use the password you chose when installing PostgreSQL.
+
+Steps:
+
+1. CONFIRM POSTGRESQL IS RUNNING.
+
+	open PGadmin (PostGRESQL software).
+	Open Windows Services (services.msc) and check that a service named postgresql-x64-NN is Running. Start it if not.
+	
+2. SET YOUR DETAILS FOR THIS POWERSHELL WINDOW. THEY ARE LOST WHEN YOU CLOSE IT.
+	
+	Activate venv on backend then. Then in Backend Terminal,
+	
+	$env:TEST_DB_PASSWORD = "your-postgres-password" (এইটা দিলেই হবে Just)
+	
+	# only if different from the defaults:
+	# $env:TEST_DB_PORT = "5433"
+	# $env:TEST_DB_USER = "your-role"
+	
+3. CHECK THAT THE CONNECTION WORKS. THIS DOESN’T NEED PSQL ON YOUR PATH.
+	
+	In backend terminal With venv active:
+	
+	python -c "import os,psycopg2; psycopg2.connect(dbname='postgres',user=os.environ.get('TEST_DB_USER','postgres'),password=os.environ.get('TEST_DB_PASSWORD','postgres'),host='localhost',port=os.environ.get('TEST_DB_PORT','5432')).close(); print('connected')"
+	
+	
+	Expected: connected. 
+	If you see password authentication failed, the password in step 2 is wrong. 
+	If you see connection refused, the service isn’t running or the port is wrong.
+	
+4.	INSTALL AND RUN: 
+	
+	in Backend Terminal: 
+
+	pip install -r requirements-dev.txt
+	python -m pytest          	#(এতে File based test হয় )or,
+	pytest -v 					#(এতে প্রত্যেকটা test individually দেখায় )
+	
