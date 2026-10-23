@@ -22,7 +22,6 @@ env/
 .pytest_cache/
 staticfiles/
 media/
-.pytest_cache/
 
 # --- Node / React / Vite ---
 node_modules/

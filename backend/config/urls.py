@@ -21,6 +21,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/auth/", include("apps.accounts.urls")),
+    path("api/clubs/", include("apps.clubs.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     # Example of how per-app routes will be wired up as each app grows:

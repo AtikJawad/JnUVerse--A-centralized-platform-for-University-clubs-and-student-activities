@@ -137,6 +137,326 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
+  /api/clubs/:
+    get:
+      operationId: api_clubs_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClubPublicList'
+          description: ''
+  /api/clubs/{slug}/:
+    get:
+      operationId: api_clubs_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubPublic'
+          description: ''
+    patch:
+      operationId: api_clubs_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedClubUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedClubUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedClubUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubUpdate'
+          description: ''
+  /api/clubs/{slug}/follow/:
+    post:
+      operationId: api_clubs_follow_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowState'
+          description: ''
+    delete:
+      operationId: api_clubs_follow_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clubs/{slug}/members/:
+    get:
+      operationId: api_clubs_members_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembershipList'
+          description: ''
+  /api/clubs/{slug}/membership/:
+    get:
+      operationId: api_clubs_membership_retrieve
+      description: 'Student''s own membership with a club: request / status / leave.'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipState'
+          description: ''
+    post:
+      operationId: api_clubs_membership_create
+      description: 'Student''s own membership with a club: request / status / leave.'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipStateExisting'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipStateRequested'
+          description: ''
+    delete:
+      operationId: api_clubs_membership_destroy
+      description: 'Student''s own membership with a club: request / status / leave.'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clubs/{slug}/membership-requests/:
+    get:
+      operationId: api_clubs_membership_requests_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembershipList'
+          description: ''
+  /api/clubs/{slug}/memberships/{id}/:
+    delete:
+      operationId: api_clubs_memberships_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/clubs/{slug}/memberships/{id}/approve/:
+    post:
+      operationId: api_clubs_memberships_approve_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+          description: ''
+  /api/clubs/{slug}/memberships/{id}/reject/:
+    post:
+      operationId: api_clubs_memberships_reject_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+          description: ''
 components:
   schemas:
     Club:
@@ -169,6 +489,60 @@ components:
       required:
       - id
       - is_verified
+      - name
+    ClubPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 170
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        logo:
+          type: string
+          format: uri
+          maxLength: 200
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        is_verified:
+          type: boolean
+          readOnly: true
+        follower_count:
+          type: integer
+          readOnly: true
+        member_count:
+          type: integer
+          readOnly: true
+        is_following:
+          type: boolean
+          readOnly: true
+          nullable: true
+        my_membership:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - follower_count
+      - id
+      - is_following
+      - is_verified
+      - member_count
+      - my_membership
       - name
     ClubRegistration:
       type: object
@@ -207,6 +581,19 @@ components:
       required:
       - club
       - user
+    ClubUpdate:
+      type: object
+      properties:
+        description:
+          type: string
+        logo:
+          type: string
+          format: uri
+          maxLength: 200
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
     DepartmentEnum:
       enum:
       - Bangla
@@ -296,6 +683,16 @@ components:
             type: string
       required:
       - departments
+    FollowState:
+      type: object
+      properties:
+        following:
+          type: boolean
+        follower_count:
+          type: integer
+      required:
+      - follower_count
+      - following
     Login:
       type: object
       properties:
@@ -352,6 +749,134 @@ components:
       - name
       - role
       - student_id
+    Membership:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        student_id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        department:
+          type: string
+          readOnly: true
+        batch:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        requested_at:
+          type: string
+          format: date-time
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - batch
+      - department
+      - id
+      - name
+      - student_id
+    MembershipState:
+      type: object
+      properties:
+        status:
+          type: string
+          nullable: true
+        requested_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - requested_at
+      - status
+    MembershipStateExisting:
+      type: object
+      properties:
+        status:
+          type: string
+        requested_at:
+          type: string
+          format: date-time
+      required:
+      - requested_at
+      - status
+    MembershipStateRequested:
+      type: object
+      properties:
+        status:
+          type: string
+        requested_at:
+          type: string
+          format: date-time
+      required:
+      - requested_at
+      - status
+    PaginatedClubPublicList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClubPublic'
+    PaginatedMembershipList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Membership'
+    PatchedClubUpdate:
+      type: object
+      properties:
+        description:
+          type: string
+        logo:
+          type: string
+          format: uri
+          maxLength: 200
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
     RoleEnum:
       enum:
       - student
@@ -360,6 +885,20 @@ components:
       description: |-
         * `student` - Student
         * `club_operator` - Club Operator
+    StatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      - left
+      - removed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `rejected` - Rejected
+        * `left` - Left
+        * `removed` - Removed
     StudentRegistration:
       type: object
       properties:

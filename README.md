@@ -3,7 +3,7 @@
 **A Centralized Platform for University Clubs & Student Activities**
 Jagannath University (JnU), Bangladesh — Software Engineering course project.
 
-> Status: **Week 2 of 10 — Database design & authentication (backend complete, frontend pending)** 
+> Status: **Week 3 of 10: clubs and memberships (backend complete, frontend pending)** 
 Verified by the team on a real Supabase database:
 The migrations for all 7 apps applied cleanly.
 check reports no issues.
@@ -166,6 +166,14 @@ Run the backend and frontend commands above in two separate terminals. The
 placeholder homepage will show whether the frontend can successfully reach
 the backend's health-check endpoint.
 
+### Running tests
+cd backend
+pip install -r requirements-dev.txt
+# local PostgreSQL only; defaults: user postgres, password postgres, localhost:5432
+# override with TEST_DB_PASSWORD / TEST_DB_PORT / TEST_DB_USER if needed
+python -m pytest
+
+
 ## 6. Development Plan & Current Status
 
 The project follows the **10-week development plan** (`10_week_development_plan.pdf`):
@@ -195,14 +203,9 @@ The project follows the **10-week development plan** (`10_week_development_plan.
 - `.gitignore`, `requirements.txt`, `package.json`
 
 **Verification status (be honest about it):**
-- Verified in the automated environment used to prepare this update: Python
-  syntax compiles. 
-- **Not verified there** (no package-registry or Supabase network access):
-  `pip install`, `manage.py check/migrate/runserver`, `npm install/build/lint`,
-  the live Supabase connection, and frontend→backend calls. Each member
-  should run the setup below and record results in `docs/weekly-progress/`.
+- club list, detail and update; follow and unfollow; the full membership workflow (request, approve, reject, leave, remove, rejoin); and 57 automated tests on a local PostgreSQL.
 
-**Not implemented yet (later weeks):** club and membership endpoints, events, notices and notifications, ratings, collaboration, reports, and the five analytical reports.
+**Not implemented yet (later weeks):**  events, notices and notifications, ratings, collaboration, reports, and the five analytical reports.
 
 ## 7. Team & Roles
 
@@ -216,9 +219,8 @@ should add theirs to `docs/weekly-progress/` rather than have them assumed here.
 | Md Sohag | Database Designer | ERD, schema, relationships | TBD by member |
 | Lutfun Nahar | UML Designer | Use Case, Class, Activity, Sequence diagrams | TBD by member |
 | Md Jahid Hasan | UI Designer | Wireframes, UI/UX consistency | TBD by member |
-| Anik Khondokar | MVP Coder (Frontend) | React/Vite implementation | TBD by member |
-| Atik Jawad | MVP Coder (Backend, Database) | Django/DRF, APIs, business logic | TBD by member |
+| Anik Khondokar | MVC Coder (Frontend) | React/Vite implementation | TBD by member |
+| Atik Jawad | MVC Coder (Backend, Database) | Django/DRF, APIs, business logic | TBD by member |
 | Sheak Noor Muhammad Nabil | Tester | Test cases, integration testing, validation | TBD by member |
 
-From Week 2, backend work is done by Claude and frontend work by Antigravity,
-under the team's decisions.
+
