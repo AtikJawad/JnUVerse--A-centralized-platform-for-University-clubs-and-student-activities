@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"secondary-fixed-dim":"#c3c0ff","surface-container-low":"#f4f2ff","on-surface":"#181a2c","on-tertiary-fixed-variant":"#31466f","inverse-surface":"#2d2f41","primary":"#0810a4","on-tertiary-fixed":"#001a41","on-primary":"#ffffff","on-secondary":"#ffffff","secondary-container":"#b3b1ff","surface-white":"#FFFFFF","surface-variant":"#e0e0f9","inverse-primary":"#bec2ff","inverse-on-surface":"#f1efff","surface-tint":"#444ed0","primary-hover":"#1F2792","border-subtle":"#E2E4F3","on-error":"#ffffff","error":"#ba1a1a","surface-container-high":"#e6e6ff","surface-container-highest":"#e0e0f9","surface-container-lowest":"#ffffff","surface-bright":"#fbf8ff","background":"#fbf8ff","on-error-container":"#93000a","canvas-base":"#F8F8FF","tertiary":"#1b3158","secondary-fixed":"#e2dfff","primary-container":"#2b34b9","on-tertiary":"#ffffff","on-secondary-container":"#434186","outline":"#767685","primary-fixed":"#e0e0ff","tertiary-fixed-dim":"#b1c6f6","on-secondary-fixed":"#130e56","surface-container":"#edecff","on-secondary-fixed-variant":"#403e83","on-background":"#181a2c","surface-dim":"#d8d8f0","on-primary-container":"#abb1ff","text-muted":"#686B7D","on-tertiary-container":"#a2b7e6","on-primary-fixed-variant":"#2932b8","on-primary-fixed":"#00026c","surface-lavender":"#EBECF9","primary-fixed-dim":"#bec2ff","tertiary-container":"#334871","on-surface-variant":"#454654","outline-variant":"#c6c5d6","tertiary-fixed":"#d8e2ff","error-container":"#ffdad6","surface":"#fbf8ff","secondary":"#58579d"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","margin-desktop":"4rem","space-sm":"0.5rem","space-3xl":"6rem","margin-tablet":"2.5rem","gutter-desktop":"2rem","gutter":"1.5rem","space-xl":"2.5rem","space-lg":"1.5rem","space-2xl":"4rem","margin":"1.25rem","space-md":"1rem"},"fontFamily":{"headline-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"title-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"display-mobile":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"]},"fontSize":{"headline-lg":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"title-lg":["20px",{"lineHeight":"28px","fontWeight":"600"}],"headline-sm":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-md":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"700"}],"title-md":["18px",{"lineHeight":"26px","fontWeight":"600"}],"display-mobile":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"800"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-lg":["17px",{"lineHeight":"28px","fontWeight":"400"}],"display":["64px",{"lineHeight":"72px","letterSpacing":"-0.03em","fontWeight":"800"}],"headline-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"700"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}]}}}};</script></head><body class="bg-canvas-base text-on-surface antialiased selection:bg-surface-variant selection:text-primary"><header class="fixed top-0 left-0 w-full z-50 bg-canvas-base/90 backdrop-blur-md border-b border-border-subtle"><div class="h-20 max-w-[1360px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><div class="flex items-center gap-space-xs"><div class="w-9 h-9 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container shadow-[0_2px_8px_rgba(43,52,185,0.08)]"><span class="material-symbols-outlined text-[20px]">hub</span></div><span class="font-title-lg text-title-lg text-on-surface font-bold tracking-tight">JnU<span class="text-primary-container">Verse</span></span></div><span class="hidden sm:inline-flex items-center px-space-sm py-0.5 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm uppercase tracking-wider">STUDENT PORTAL</span></div><nav class="hidden md:flex items-center p-1 bg-surface-white/70 rounded-full shadow-[0_2px_12px_-2px_rgba(43,52,185,0.04)]" data-active-classes="bg-surface-lavender text-primary-container font-semibold shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]"><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all" data-path="overview" href="#">Overview</a><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all" data-path="explore-clubs" href="#">Explore Clubs</a><a class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all" data-path="my-clubs" href="#">My Clubs</a><a aria-current="page" class="px-space-md py-1.5 rounded-full transition-all bg-surface-lavender text-primary-container font-semibold shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]" data-path="events" href="#">Events</a></nav><div class="flex items-center gap-space-sm"><button aria-label="Notifications" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container ring-2 ring-canvas-base"></span></button><div class="hidden lg:flex items-center gap-space-sm pl-space-xs pr-space-md py-1 rounded-full bg-surface-white shadow-[0_2px_6px_-1px_rgba(19,21,38,0.03)]"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col text-left"><span class="font-label-sm text-label-sm text-on-surface font-semibold leading-tight">Rafid Ahmed</span><span class="font-label-sm text-[10px] text-text-muted leading-tight">Batch 18 CSE</span></div></div><div class="lg:hidden w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><a aria-label="Sign out" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-colors" data-path="login" href="#"><span class="material-symbols-outlined text-[20px]">logout</span></a></div></div></header><main class="w-full pt-20 bg-canvas-base min-h-screen"><div class="flex flex-col w-full">
+<!-- Subtle ambient decorative glow strictly contained -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[920px] h-96 bg-gradient-to-b from-surface-lavender/70 via-secondary-fixed/30 to-transparent blur-3xl pointer-events-none -z-10"></div>
+<!-- Page Content Container -->
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl space-y-space-2xl">
+<!-- 1. Page Introduction / Header -->
+<section class="flex flex-col items-start gap-space-sm max-w-3xl">
+<div class="inline-flex items-center gap-space-xs px-3.5 py-1 rounded-full bg-surface-lavender text-primary-container shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">CAMPUS LIFE, HAPPENING NOW</span>
+</div>
+<h1 class="font-display text-headline-lg md:text-display text-on-surface tracking-tight font-extrabold leading-tight">
+          Discover <span class="bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent">what’s happening.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-text-muted max-w-2xl">
+          Find campus events, meet new people, and make your university experience unforgettable at Jagannath University.
+        </p>
+</section>
+<!-- 2. Featured Event Card -->
+<section aria-label="Featured Campus Event">
+<div class="w-full bg-surface-white rounded-3xl p-space-md md:p-space-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
+<!-- Left Info Panel (7 cols on lg) -->
+<div class="lg:col-span-7 flex flex-col justify-between p-space-md md:p-space-lg bg-surface-container-low rounded-2xl">
+<div class="space-y-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm uppercase font-bold tracking-wider">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    FEATURED EVENT
+                  </div>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-white text-primary-container font-label-sm text-label-sm font-semibold shadow-sm">
+                    Upcoming
+                  </span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="material-symbols-outlined text-[18px] text-primary-container">groups</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">JnU IT Society</span>
+<span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
+                    Annual Campus Tech Fest &amp; National Hackathon '25
+                  </h2>
+</div>
+<!-- Event Logistics Metadata -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm pt-space-xs">
+<div class="flex items-start gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-white flex items-center justify-center text-primary-container flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Date &amp; Schedule</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium leading-snug">Mon, Nov 24, 2025<br/>09:30 AM – 06:00 PM BST</span>
+</div>
+</div>
+<div class="flex items-start gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-white flex items-center justify-center text-primary-container flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted font-bold">Venue Location</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium leading-snug">Central Auditorium,<br/>JnU Campus</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3 pt-space-xs">
+                  A flagship 36-hour sprint featuring algorithmic puzzles, hardware prototypes, machine learning clinics, and keynote addresses from leading industry tech pioneers.
+                </p>
+</div>
+<!-- Action Link -->
+<div class="pt-space-lg flex items-center justify-between flex-wrap gap-space-sm">
+<button class="inline-flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-primary-container hover:bg-primary-hover text-on-primary font-label-lg text-label-lg shadow-sm transition-all hover:-translate-y-0.5" type="button">
+<span>View Event</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<span class="font-label-sm text-label-sm text-text-muted flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">confirmation_number</span>
+                  Open to all registered JnU students
+                </span>
+</div>
+</div>
+<!-- Right Visual Banner (5 cols on lg) -->
+<div class="lg:col-span-5 relative min-h-[280px] lg:min-h-full rounded-2xl overflow-hidden shadow-inner group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A modern university hackathon in a packed historic auditorium. Students collaborate intensely in teams with glowing laptops, ambient blue and lavender stage lighting, high vaulted academic ceiling of Jagannath University, candid energetic atmosphere, clean editorial documentary photography with vibrant contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-uowPJvaBtiuQ6DF-X_m_omaKbWXZMWyeWIk5mjI1w18TJNHUlS9gSi3L4OeRoh-Li1KcLUJO4aqVqdMS4Wx4uXicJzktyhvbkTGNueocT2xrN_nQTP5Pbb9KE5sF6VJVBf0G38cFs6GGa5NmLEXoGO9LZLmPwDir4mfodVCYZCdBlWLWxY9IUHnleDD9WV28iFKb4Yinjws503mdMQ5Q5bdgictvWbiGJW6Rt1wDbk6jIb8YYnPsrQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/60 via-transparent to-transparent flex items-end p-space-md">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-white/90 backdrop-blur-md shadow-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]">sensors</span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">36h Mainstage Sprint</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Search and Filters Bar -->
+<section aria-label="Event Search and Filters" class="flex flex-col gap-space-md">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Search Input Box -->
+<div class="relative flex-1 max-w-lg">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-[20px]">search</span>
+<input class="w-full h-12 pl-11 pr-4 bg-surface-white rounded-full font-body-md text-body-md text-on-surface placeholder:text-text-muted shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-container/20 transition-all" id="event-search-input" placeholder="Search events by name or club…" type="text"/>
+</div>
+<!-- Filter Pills & Semester Selector -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<div class="inline-flex items-center p-1 bg-surface-white rounded-full shadow-sm" role="tablist">
+<button class="filter-tab active px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-primary-container text-on-primary transition-all" data-category="all" type="button">
+                All Events
+              </button>
+<button class="filter-tab px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all flex items-center gap-1" data-category="upcoming" type="button">
+                Upcoming <span class="text-[11px] font-semibold opacity-75">4</span>
+</button>
+<button class="filter-tab px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all flex items-center gap-1" data-category="ongoing" type="button">
+                Ongoing <span class="text-[11px] font-semibold opacity-75">1</span>
+</button>
+<button class="filter-tab px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-lavender/50 transition-all flex items-center gap-1" data-category="past" type="button">
+                Past <span class="text-[11px] font-semibold opacity-75">8</span>
+</button>
+</div>
+<!-- Semester Dropdown Pill -->
+<div class="relative">
+<button class="h-10 px-4 rounded-full bg-surface-white text-on-surface font-label-md text-label-md flex items-center gap-2 shadow-sm hover:bg-surface-lavender/40 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary-container">calendar_month</span>
+<span>Fall Semester 2025</span>
+<span class="material-symbols-outlined text-[16px] text-text-muted">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+</div>
+<!-- System Architecture Pill / Notice Badge -->
+<div class="flex items-center justify-between flex-wrap gap-2 px-4 py-2 rounded-xl bg-surface-container-low text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[18px]">info</span>
+<span class="font-label-sm text-label-sm">
+              UI Concept Preview • Backend Event API Integration Pending
+            </span>
+</div>
+<span class="font-label-sm text-[11px] text-text-muted font-mono tracking-tight">Endpoint: /api/v1/events/campus</span>
+</div>
+</section>
+<!-- 4. Dynamic Content Area (Toggled by Developer HUD below) -->
+<!-- STATE 1: Live Event Grid -->
+<section class="space-y-space-lg" id="state-live-grid">
+<div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-space-xs">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Explore campus events</h2>
+<p class="font-body-sm text-body-sm text-text-muted">From creative showcases to academic gatherings, find something worth joining.</p>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Showing 6 verified guild events</span>
+</div>
+<!-- 3-Column Responsive Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+<!-- Card 1: Old Dhaka Heritage & Street Lens 2025 -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="upcoming" data-title="Old Dhaka Heritage &amp; Street Lens 2025">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="An atmospheric photography exhibition inside an airy university gallery hall with historic Old Dhaka street black and white prints hanging on crisp white panels. Warm museum lighting, young Bangladeshi university art students observing photos thoughtfully, high resolution fine art realism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMl8iPlhSBOXF_QZnZBfwV97e1nqa5wfelyF2jrOjQPklTgoL89MQt2cfObJJvOHVF1JxRSKq6-LInuu-neFinN45SV3GjtV57JRYVU9hMgrq9oDw8SWnTvmTYxQAZB7CoqXObiDnoJYOeMkL5GPGo8IQw9enYfsc9DQwEgwTa_bJJFxjfNs8ydVqnFMcwEFaKVl_SUYW6NIPA1TjUFR-hsNyC0rYFFmx8SGYHNJatoTYIF3SmOZWnow"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-white/95 backdrop-blur-md text-primary-container font-label-sm text-label-sm font-bold shadow-sm">
+                    Upcoming
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">JnU Photographic Society</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Chartered</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  Old Dhaka Heritage &amp; Street Lens 2025
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">schedule</span>
+<span>Wed, Dec 03, 2025 • 10:00 AM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">location_on</span>
+<span class="truncate">Faculty of Fine Arts Gallery, JnU</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-secondary-fixed/50 text-primary-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</article>
+<!-- Card 2: National Inter-Varsity Parliamentary Debate Championship -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="ongoing" data-title="National Inter-Varsity Parliamentary Debate Championship">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A collegiate parliamentary debate tournament inside an imposing university senate hall. A student orator at a wooden rostrum with university insignia, dual gooseneck microphones, attentive adjudicators in formal attire, deep blue banners, and warm interior lighting in documentary style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6nEPB36Ri2xPUl5svwQPvxs2x4QYSpzD60d8stUz7CpItA-o2tfUKAWZ1d6gH9RU5ir27aigBKJNh2e4_oYJF-Hlu5eZxx-86WXunJTafHLCYUMmzbHNVaj_oK_DnxBA_3xm4MG3MS4OMO1SMRrK4EupKEJYZjZNaivSdNE9JzO-LB7rfpFlmPG9w5Cg01S51eDywTuHf6EJiY0zSat5_d1WX3zpmMqmrkYzwhlnK6bVR8GO_SLs7xQ"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-label-sm text-label-sm font-bold shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
+                    Ongoing
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">JnU Debating Society</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Chartered</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  National Inter-Varsity Parliamentary Debate Championship
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">schedule</span>
+<span>Fri, Nov 28, 2025 • 02:00 PM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">location_on</span>
+<span class="truncate">Senate Hall, Administrative Building</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-secondary-fixed/50 text-primary-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</article>
+<!-- Card 3: Basanta Utsav: Spring Rhythms & Folk Showcase -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="upcoming" data-title="Basanta Utsav: Spring Rhythms &amp; Folk Showcase">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Traditional Bengali spring cultural festival at an outdoor open-air campus amphitheatre. Female students wearing vibrant yellow and saffron sarees, playing dotara and ektara folk instruments, floral garlands, warm sunny morning light under lush campus trees at Jagannath University." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAZ3e5JN2LzvRX3x22EyFtcJ-w7bgv7PQl0pATs-bOxfrDfr_Gyv5QMtR8jXWsgW8TcbMFVmx4-Orj2EC8XwuO2myxpSwS6uszUhc-IwH__deTCJIRp-001cVHvjX0MsH9jasLy0C9rwstbDyObzsvk_XrGlabkIusrKh9J7TKPsvpK3LKZseLBGnfsO32cB-VBk9_giAcMFv7FPD8w7Afk3y2rBXW-zWghTfID47TXbBuNY_gyOGn9w"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-white/95 backdrop-blur-md text-primary-container font-label-sm text-label-sm font-bold shadow-sm">
+                    Upcoming
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">JnU Cultural Wing</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Official Wing</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  Basanta Utsav: Spring Rhythms &amp; Folk Showcase
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">schedule</span>
+<span>Thu, Dec 11, 2025 • 11:30 AM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">location_on</span>
+<span class="truncate">Open Amphitheatre, Science Ground</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-secondary-fixed/50 text-primary-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</article>
+<!-- Card 4: Inter-University Science Carnival & Project Showcase -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="upcoming" data-title="Inter-University Science Carnival &amp; Project Showcase">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A lively inter-university academic science symposium hall. Undergraduate researchers presenting poster boards and chemistry laboratory demonstrations to judges, clean high tech displays, focused bright academic setting, professional university conference aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRfsZ4MSmMhMUGFL4Azb1lkgejpfmfMkdIjzpizKXWjRw5oVMnV5wAP-5KmYUA61NlimpVDrVtfzHJJs_93aPlWoDLEOjIBKfW5gvujREFSl4LSEewXQTrzAeUt3tzzQfB6BKQaCvViiZ_7-Qxco7Xz17a2AI37SowpM7OkRRqMOB_pfO5Ivsa0_2dAg0ossS9yetSzvIzlU0Na7lXwKSSWfjy5_T0Zl5eLHMvbw3aPHP8u4N2GpA9oA"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-white/95 backdrop-blur-md text-primary-container font-label-sm text-label-sm font-bold shadow-sm">
+                    Upcoming
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">JnU Science Club</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Chartered</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  Inter-University Science Carnival &amp; Project Showcase
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">schedule</span>
+<span>Sat, Dec 20, 2025 • 09:00 AM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">location_on</span>
+<span class="truncate">Central Science Complex</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-secondary-fixed/50 text-primary-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</article>
+<!-- Card 5: Annual Campus Camporee & Disaster Response Drill -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="upcoming" data-title="Annual Campus Camporee &amp; Disaster Response Drill">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="University Rover Scout disaster response training and outdoor camporee by the riverbank lawn. Uniformed student scouts assembling tactical field tents and demonstrating emergency rescue drills under golden hour daylight, crisp outdoors action photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-FJkw0zlygmfSYIP2Y3UDfxylmaNtlzivIoMeODnpeKWPKTdVK6TiQgukWGbkeOPHE1VblGbQalv_lB2Vl_ue7Ny7ffdWyJdgYVoofaELku36d3mbW6FKnk-brZkLCevfqr4ioRDRRrHSkYhuoC4iXtTuKjrCuY8vfd44Dgv_5t4vNbP3OYJjESY57qaeUjVG7EKtbkiECPbaMg1Q8do6QF7Ut1rpXWcDsCCUmmBRynWeJBoMVkmQzA"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-white/95 backdrop-blur-md text-primary-container font-label-sm text-label-sm font-bold shadow-sm">
+                    Upcoming
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">JnU Rover Scout Group</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Student Affairs</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  Annual Campus Camporee &amp; Disaster Response Drill
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">schedule</span>
+<span>Tue, Jan 06, 2026 • 08:00 AM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-primary-container">location_on</span>
+<span class="truncate">University Sports Ground &amp; Riverbank</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-secondary-fixed/50 text-primary-container font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</button>
+</div>
+</article>
+<!-- Card 6: Corporate Placement Summit & Resume Masterclass -->
+<article class="event-card bg-surface-white rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group" data-category="past" data-title="Corporate Placement Summit &amp; Resume Masterclass">
+<div>
+<div class="relative h-52 w-full overflow-hidden bg-surface-lavender">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter grayscale-[25%]" data-alt="An executive career development seminar inside a university business faculty auditorium. An industry HR executive speaking with presentation slides on corporate leadership in the background, graduating students listening intently with notebooks, professional clean corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsyr9OoKrbG6QJ4OdPNwUnqtepMG04YF-95Id7iLi-PQ7H97xcrGHkmMiLBwwo9SjEJKKF-atPZxLQx4gzVwD8B8zzcuMeQ125ztl19kmgJDy6Pu_c2Aa_03sqXl5Kk_h4W2ehdBamj0hjk1M7GcrRI0M5WfUYfTtUGvJzOUP02iL5ENpMlntR2ZAna3oDfnOwrztHENMblcEyrlMEMQUUSAjx2ZSsKBtF9j7P6vZiyBV2FNOsNYgPCw"/>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-bold shadow-sm">
+                    Past
+                  </span>
+</div>
+</div>
+<div class="p-space-lg space-y-space-sm">
+<div class="flex items-center gap-1.5 text-text-muted">
+<span class="font-label-sm text-label-sm text-text-muted font-semibold">JnU Career Club</span>
+<span class="inline-block w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-[11px] text-text-muted">Verified</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary-container transition-colors">
+                  Corporate Placement Summit &amp; Resume Masterclass
+                </h3>
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-text-muted">schedule</span>
+<span>Sun, Oct 12, 2025 • 03:00 PM</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[17px] text-text-muted">location_on</span>
+<span class="truncate">Faculty of Business Studies Auditorium</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs">
+<button class="w-full py-2.5 rounded-full bg-surface-lavender/60 hover:bg-surface-lavender text-text-muted font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1.5" type="button">
+<span>View Archive</span>
+<span class="material-symbols-outlined text-[16px]">history</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- STATE 2: Skeleton Loading Shimmer State (Hidden by default) -->
+<section aria-hidden="true" class="hidden space-y-space-lg" id="state-skeleton">
+<div class="space-y-2">
+<div class="h-6 w-52 bg-surface-container rounded-lg animate-pulse"></div>
+<div class="h-4 w-80 bg-surface-container-low rounded-lg animate-pulse"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+<!-- 3 skeleton mock cards -->
+<div class="bg-surface-white rounded-3xl overflow-hidden shadow-sm p-4 space-y-4">
+<div class="h-48 w-full bg-surface-container rounded-2xl animate-pulse"></div>
+<div class="space-y-2">
+<div class="h-3 w-1/3 bg-surface-container rounded-full animate-pulse"></div>
+<div class="h-5 w-4/5 bg-surface-container rounded-lg animate-pulse"></div>
+<div class="h-3 w-1/2 bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+<div class="h-10 w-full bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+<div class="bg-surface-white rounded-3xl overflow-hidden shadow-sm p-4 space-y-4">
+<div class="h-48 w-full bg-surface-container rounded-2xl animate-pulse"></div>
+<div class="space-y-2">
+<div class="h-3 w-1/3 bg-surface-container rounded-full animate-pulse"></div>
+<div class="h-5 w-4/5 bg-surface-container rounded-lg animate-pulse"></div>
+<div class="h-3 w-1/2 bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+<div class="h-10 w-full bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+<div class="bg-surface-white rounded-3xl overflow-hidden shadow-sm p-4 space-y-4">
+<div class="h-48 w-full bg-surface-container rounded-2xl animate-pulse"></div>
+<div class="space-y-2">
+<div class="h-3 w-1/3 bg-surface-container rounded-full animate-pulse"></div>
+<div class="h-5 w-4/5 bg-surface-container rounded-lg animate-pulse"></div>
+<div class="h-3 w-1/2 bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+<div class="h-10 w-full bg-surface-container-low rounded-full animate-pulse"></div>
+</div>
+</div>
+</section>
+<!-- STATE 3: Empty State (Hidden by default) -->
+<section aria-hidden="true" class="hidden" id="state-empty">
+<div class="w-full bg-surface-white rounded-3xl p-space-2xl text-center shadow-sm flex flex-col items-center justify-center max-w-2xl mx-auto space-y-space-md">
+<div class="w-16 h-16 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container shadow-sm">
+<span class="material-symbols-outlined text-[32px]">event_busy</span>
+</div>
+<div class="space-y-space-xs max-w-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Your next campus memory starts here.
+            </h3>
+<p class="font-body-md text-body-md text-text-muted">
+              Events will appear here when event listings are available for this semester filter.
+            </p>
+</div>
+<a class="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-hover transition-colors" data-path="explore-clubs" href="#">
+<span>Explore Clubs</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- STATE 4: API Error State (Hidden by default) -->
+<section aria-hidden="true" class="hidden" id="state-error">
+<div class="w-full bg-surface-white rounded-3xl p-space-2xl text-center shadow-sm flex flex-col items-center justify-center max-w-2xl mx-auto space-y-space-md border border-error-container">
+<div class="w-16 h-16 rounded-full bg-error-container/40 flex items-center justify-center text-error shadow-sm">
+<span class="material-symbols-outlined text-[32px]">cloud_off</span>
+</div>
+<div class="space-y-space-xs max-w-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Unable to synchronize campus events.
+            </h3>
+<p class="font-body-md text-body-md text-text-muted">
+              Failed to connect to the JnUVerse event repository [HTTP 500: Internal Gateway Timeout].
+            </p>
+</div>
+<button class="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-hover transition-colors" onclick="switchToState('live')" type="button">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+<span>Retry Connection</span>
+</button>
+</div>
+</section>
+<!-- 5. Interactive State Switcher / Backend Contract Inspector HUD -->
+<section aria-label="Developer Contract Inspector" class="mt-space-2xl pt-space-md">
+<div class="w-full rounded-2xl bg-surface-white p-space-md md:p-space-lg shadow-sm">
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm font-mono uppercase tracking-wider text-primary-container font-bold">
+                  DRF CONTRACT PREVIEW
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">
+                Event models specified in Django; API endpoints pending release. Preview frontend state simulations:
+              </p>
+</div>
+<!-- HUD Simulation Buttons -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary font-semibold shadow-sm hover:opacity-95 transition-all" id="btn-hud-live" onclick="switchToState('live')" type="button">
+                Live Preview (Active)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-lavender text-primary-container font-semibold hover:bg-secondary-fixed/50 transition-all" id="btn-hud-skeleton" onclick="switchToState('skeleton')" type="button">
+                Skeleton Shimmer
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-lavender text-primary-container font-semibold hover:bg-secondary-fixed/50 transition-all" id="btn-hud-empty" onclick="switchToState('empty')" type="button">
+                Empty State
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-lavender text-error font-semibold hover:bg-error-container/40 transition-all" id="btn-hud-error" onclick="switchToState('error')" type="button">
+                API 500 Retry
+              </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<script>
+  // State Switcher Controller for Developer Contract HUD
+  function switchToState(state) {
+    const states = ['live', 'skeleton', 'empty', 'error'];
+    
+    // Toggle Section Visibilities
+    states.forEach(s => {
+      const el = document.getElementById(s === 'live' ? 'state-live-grid' : 'state-' + s);
+      const hudBtn = document.getElementById('btn-hud-' + s);
+      
+      if (s === state) {
+        el.classList.remove('hidden');
+        if (hudBtn) {
+          hudBtn.className = "px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-primary-container text-on-primary font-semibold shadow-sm transition-all";
+          if (s === 'live') hudBtn.textContent = "Live Preview (Active)";
+        }
+      } else {
+        el.classList.add('hidden');
+        if (hudBtn) {
+          hudBtn.className = "px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-lavender text-primary-container font-semibold hover:bg-secondary-fixed/50 transition-all";
+          if (s === 'error') {
+            hudBtn.className = "px-3.5 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-lavender text-error font-semibold hover:bg-error-container/40 transition-all";
+          }
+          if (s === 'live') hudBtn.textContent = "Live Preview";
+        }
+      }
+    });
+  }
+
+  // Interactive Live Filtering logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('event-search-input');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.event-card');
+    let currentCategory = 'all';
+
+    function filterEvents() {
+      const query = (searchInput?.value || '').toLowerCase().trim();
+
+      cards.forEach(card => {
+        const title = (card.getAttribute('data-title') || '').toLowerCase();
+        const cat = card.getAttribute('data-category');
+        
+        const matchesQuery = !query || title.includes(query);
+        const matchesCat = currentCategory === 'all' || cat === currentCategory;
+
+        if (matchesQuery && matchesCat) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', filterEvents);
+    }
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => {
+          t.classList.remove('bg-primary-container', 'text-on-primary');
+          t.classList.add('text-on-surface-variant');
+        });
+
+        tab.classList.remove('text-on-surface-variant');
+        tab.classList.add('bg-primary-container', 'text-on-primary');
+
+        currentCategory = tab.getAttribute('data-category') || 'all';
+        filterEvents();
+      });
+    });
+  });
+</script></main><footer class="w-full bg-surface-container-low border-t border-border-subtle mt-space-3xl"><div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl"><div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg pb-space-lg border-b border-border-subtle"><div class="space-y-space-xs"><div class="flex items-center gap-space-xs"><div class="w-7 h-7 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[16px]">hub</span></div><span class="font-title-md text-title-md text-on-surface font-bold tracking-tight">JnU<span class="text-primary-container">Verse</span></span></div><p class="font-body-sm text-body-sm text-text-muted">The academic, guild &amp; cultural student digital network of Jagannath University.</p><p class="font-body-sm text-body-sm text-text-muted">Dhaka-1100, Bangladesh</p></div><nav class="flex flex-wrap items-center gap-x-space-lg gap-y-space-sm"><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors" data-path="overview" href="#">Student Portal</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors" data-path="explore-clubs" href="#">Guilds &amp; Clubs</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors" data-path="events" href="#">Campus Calendar</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-primary-container transition-colors" data-path="privacy-notice" href="#">Student Privacy Notice</a></nav></div><div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left"><p class="font-body-sm text-body-sm text-text-muted">© 2024 Jagannath University (JnUVerse). All rights reserved.</p><span class="font-label-sm text-label-sm text-secondary tracking-wide uppercase">JnU Student Affairs &amp; IT Directorate</span></div></div></footer></body></html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#434186","secondary-container":"#b3b1ff","surface-variant":"#e0e0f9","tertiary":"#1b3158","secondary":"#58579d","on-surface":"#181a2c","on-secondary":"#ffffff","surface-lavender":"#EBECF9","surface-white":"#FFFFFF","surface-bright":"#fbf8ff","surface-container-high":"#e6e6ff","on-background":"#181a2c","surface-container-lowest":"#ffffff","primary-hover":"#1F2792","tertiary-container":"#334871","secondary-fixed-dim":"#c3c0ff","on-primary":"#ffffff","secondary-fixed":"#e2dfff","primary":"#0810a4","surface-container":"#edecff","on-surface-variant":"#454654","primary-container":"#2b34b9","border-subtle":"#E2E4F3","error":"#ba1a1a","on-tertiary-fixed-variant":"#31466f","on-error":"#ffffff","inverse-primary":"#bec2ff","surface-tint":"#444ed0","primary-fixed":"#e0e0ff","inverse-surface":"#2d2f41","surface":"#fbf8ff","tertiary-fixed":"#d8e2ff","on-tertiary-container":"#a2b7e6","inverse-on-surface":"#f1efff","tertiary-fixed-dim":"#b1c6f6","on-primary-container":"#abb1ff","on-tertiary-fixed":"#001a41","outline":"#767685","on-primary-fixed":"#00026c","surface-container-low":"#f4f2ff","on-primary-fixed-variant":"#2932b8","primary-fixed-dim":"#bec2ff","surface-container-highest":"#e0e0f9","canvas-base":"#F8F8FF","error-container":"#ffdad6","on-secondary-fixed-variant":"#403e83","on-error-container":"#93000a","surface-dim":"#d8d8f0","on-secondary-fixed":"#130e56","text-muted":"#686B7D","outline-variant":"#c6c5d6","background":"#fbf8ff","on-tertiary":"#ffffff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"margin-desktop":"4rem","space-xl":"2.5rem","space-3xl":"6rem","margin-tablet":"2.5rem",gutter:"1.5rem","space-sm":"0.5rem","space-xs":"0.25rem","gutter-desktop":"2rem","space-md":"1rem","space-lg":"1.5rem","space-2xl":"4rem",margin:"1.25rem"},fontFamily:{"display-mobile":["Plus Jakarta Sans"],display:["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"title-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"]},fontSize:{"display-mobile":["40px",{lineHeight:"48px",letterSpacing:"-0.025em",fontWeight:"800"}],display:["64px",{lineHeight:"72px",letterSpacing:"-0.03em",fontWeight:"800"}],"body-lg":["17px",{lineHeight:"28px",fontWeight:"400"}],"label-lg":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"600"}],"title-md":["18px",{lineHeight:"26px",fontWeight:"600"}],"headline-lg-mobile":["32px",{lineHeight:"40px",letterSpacing:"-0.015em",fontWeight:"700"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.04em",fontWeight:"700"}],"headline-sm":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"title-lg":["20px",{lineHeight:"28px",fontWeight:"600"}],"headline-lg":["44px",{lineHeight:"52px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["15px",{lineHeight:"24px",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"20px",fontWeight:"400"}],"headline-md":["32px",{lineHeight:"40px",letterSpacing:"-0.015em",fontWeight:"700"}]}}}};</script></head><body class="bg-canvas-base font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(43,52,185,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm"><img alt="Minimalist modern university IT society logo for JnU IT Society (Jagannath University). Clean geometric stylized lettermark 'J' or 'IT' with subtle cyber/circuit tech node, flat vector design, royal blue #2B34B9 and periwinkle #AEACF9, sleek professional student organization emblem, isolated on transparent or crisp clean background.. Design context: - Primary color: #2b34b9
+- Font: plusJakartaSans
+- Mode: light
+- Roundness: rounded-md
+. The logo should be visually consistent with these brand tokens." class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XtQKoCAixnNtG6liYy_irtlB2ETzczIyuPajZ9ll2HxVCJncstXMtExEmgudLCj3XsFjQkVxwIwJ-YVeUuUmCWJcb2u9d9NBwgwRHWbnnbQ9rGQG_RNKNxYAW72lZCt4BW_Rmyu76omD6JwmT7Bc93QY2-wkF9uK8RI_JIhCdJNmZILNJHNij9axBtUAJA_zzTFX2rpLARQkC7cCKEJPqMsJFQZ3KElDh-OLJoP8KcYoO1DmrsuZ9jwp2d"/><div class="flex flex-col"><span class="font-title-md text-title-md text-on-surface tracking-tight leading-none">JnUVerse</span><span class="font-label-sm text-label-sm text-primary-container tracking-wider uppercase mt-0.5">Operator Studio</span></div></div><div class="px-space-md mt-space-md"><span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider px-space-sm">Operator Management</span><nav class="mt-space-xs flex flex-col gap-1" data-active-classes="bg-surface-lavender text-primary-container font-label-lg font-bold rounded-full shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-all duration-200" data-path="overview" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span>Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-all duration-200" data-path="club-profile" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Club Profile</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-all duration-200" data-path="members" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Members</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-all duration-200" data-path="membership-requests" href="#"><span class="material-symbols-outlined text-[20px]">how_to_reg</span><span>Membership Requests</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-all duration-200 bg-surface-lavender text-primary-container font-label-lg font-bold rounded-full shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]" data-path="collaborations" href="#"><span class="material-symbols-outlined text-[20px]">handshake</span><span>Collaborations</span></a></nav></div><div class="px-space-md mt-space-lg"><span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider px-space-sm">Public Scope</span><div class="mt-space-xs"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-all duration-200" data-path="public-club-page" href="#"><span class="material-symbols-outlined text-[20px]">open_in_new</span><span>View Public Club Page</span></a></div></div></div><div class="p-space-md flex flex-col gap-space-sm"><div class="bg-surface-lavender rounded-xl p-space-sm flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant">Managing Authority</span><span class="font-label-md text-label-md text-primary-container font-semibold">JnU IT Society</span></div></div><span class="material-symbols-outlined text-primary-container text-[18px]">verified</span></div><a class="flex items-center gap-space-sm px-space-md py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-all duration-200" data-path="sign-out" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span>Sign Out</span></a></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-white/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(43,52,185,0.04)]"><div class="h-16 w-full px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-sm"><span class="font-label-md text-label-md text-text-muted">Workspace</span><span class="material-symbols-outlined text-text-muted text-[16px]">chevron_right</span><span class="font-label-md text-label-md text-on-surface font-semibold">Operator Console</span></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-lavender"><div class="w-2 h-2 rounded-full bg-primary-container animate-ping"></div><span class="font-label-sm text-label-sm text-primary-container font-semibold">Live System Active</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_2px_6px_rgba(43,52,185,0.2)]"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-canvas-base flex-1"><div class="flex flex-col w-full">
+<!-- Toast Notification Center -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-space-md py-3 bg-surface-white rounded-xl shadow-[0_16px_36px_-4px_rgba(43,52,185,0.12),0_6px_12px_-2px_rgba(19,21,38,0.04)] border border-border-subtle max-w-md" id="toastNotification">
+<div class="w-8 h-8 rounded-full bg-surface-lavender flex items-center justify-center flex-shrink-0 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-bold" id="toastTitle">Invitation Accepted</span>
+<span class="font-body-sm text-body-sm text-text-muted truncate" id="toastMessage">Partnership charter drafted for Proctorial endorsement.</span>
+</div>
+<button class="text-text-muted hover:text-on-surface ml-auto p-1" onclick="hideToast()">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Decline Confirmation Modal -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm hidden items-center justify-center p-4" id="declineModal">
+<div class="bg-surface-white w-full max-w-lg rounded-2xl p-space-lg shadow-[0_20px_40px_-6px_rgba(43,52,185,0.14)] border border-border-subtle transform scale-95 opacity-0 transition-all duration-200" id="declineModalContent">
+<div class="flex items-start justify-between mb-space-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[20px]">cancel</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Decline Collaboration?</h3>
+<p class="font-body-sm text-body-sm text-text-muted" id="modalTargetClub">JnU Debating Society</p>
+</div>
+</div>
+<button class="text-text-muted hover:text-on-surface p-1 rounded-full hover:bg-surface-lavender transition-colors" onclick="closeDeclineModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant my-space-md">
+        This action will formally notify the requesting club's executive operator. The proposal draft will be marked as rejected in the JnU intra-club register.
+      </p>
+<div class="flex flex-col gap-1.5 mb-space-lg">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="declineReason">Reason for Declining (Optional)</label>
+<div class="relative">
+<select class="w-full h-12 px-space-md bg-surface-white border border-border-subtle rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 appearance-none cursor-pointer" id="declineReason">
+<option value="schedule_conflict">Schedule / Timeline conflict with planned hackathon</option>
+<option value="outside_charter">Scope falls outside current technical charter</option>
+<option value="capacity_limit">Executive and resource capacity limitations</option>
+<option value="other">Other institutional priority</option>
+</select>
+<span class="material-symbols-outlined text-text-muted text-[20px] absolute right-3 top-3 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 pt-space-xs">
+<button class="px-5 py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender transition-all" onclick="closeDeclineModal()">
+          Keep Invitation
+        </button>
+<button class="px-6 py-2.5 rounded-full bg-error text-on-error font-label-lg text-label-lg font-semibold hover:bg-on-error-container transition-all shadow-[0_2px_8px_rgba(186,26,26,0.25)]" onclick="confirmDecline()">
+          Decline Proposal
+        </button>
+</div>
+</div>
+</div>
+<!-- Proposal Detail Sheet / Drawer -->
+<div class="fixed inset-0 z-50 bg-on-surface/30 backdrop-blur-xs hidden justify-end" id="proposalDetailSheet">
+<div class="bg-surface-white w-full max-w-xl h-full shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="proposalSheetContent">
+<div class="h-16 px-space-lg border-b border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[20px]">assignment</span>
+<span class="font-title-md text-title-md text-on-surface">Collaboration Brief Details</span>
+</div>
+<button class="p-1 rounded-full text-text-muted hover:text-on-surface hover:bg-surface-lavender" onclick="closeDetailSheet()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
+<div class="flex items-center gap-3 p-space-md bg-surface-lavender rounded-xl">
+<div class="w-12 h-12 rounded-xl bg-surface-white flex items-center justify-center font-title-lg text-primary-container font-bold shadow-sm" id="sheetClubInitials">
+            DS
+          </div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold" id="sheetClubName">JnU Debating Society</span>
+<span class="font-label-sm text-label-sm text-primary-container font-bold uppercase tracking-wider">Formal Request Protocol #CR-2025-084</span>
+</div>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider block mb-1">Proposal Topic &amp; Scope</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface" id="sheetScope">Joint Tech-Debate Gala 2025: AI Ethics &amp; National Policy</h4>
+</div>
+<div class="p-space-md bg-canvas-base rounded-xl border border-border-subtle flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Core Statement</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed" id="sheetBody">
+            Proposed collaborative workshop and panel session during JnU Tech Week. Seeking technical judges, technical moderation team, and co-branding for auditorium booking clearance with the Jagannath University Proctor Office.
+          </p>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div class="p-space-md bg-surface-white border border-border-subtle rounded-xl">
+<span class="font-label-sm text-label-sm text-text-muted block">Target Timeline</span>
+<span class="font-label-lg text-label-lg text-on-surface mt-1 block">November 24, 2025</span>
+</div>
+<div class="p-space-md bg-surface-white border border-border-subtle rounded-xl">
+<span class="font-label-sm text-label-sm text-text-muted block">Venue Allocation</span>
+<span class="font-label-lg text-label-lg text-on-surface mt-1 block">JnU Central Auditorium</span>
+</div>
+</div>
+<div class="p-space-md bg-surface-white border border-border-subtle rounded-xl">
+<span class="font-label-sm text-label-sm text-text-muted block">Signatory Representative</span>
+<div class="flex items-center gap-2 mt-2">
+<span class="material-symbols-outlined text-primary-container text-[18px]">badge</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Naimur Rahman (President, Debate Society)</span>
+</div>
+</div>
+</div>
+<div class="p-space-lg border-t border-border-subtle bg-canvas-base flex items-center justify-end gap-3">
+<button class="px-5 py-2.5 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-lavender transition-all" onclick="closeDetailSheet()">
+          Close Preview
+        </button>
+<button class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_14px_rgba(43,52,185,0.25)] hover:bg-primary-hover transition-all" onclick="acceptFromSheet()">
+          Accept Partnership
+        </button>
+</div>
+</div>
+</div>
+<!-- Primary Page Body Container -->
+<div class="max-w-[1360px] mx-auto w-full px-margin-tablet lg:px-margin-desktop py-space-xl flex flex-col gap-space-xl">
+<!-- Header Section with Editorial Asymmetry -->
+<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div class="flex flex-col max-w-2xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label-sm text-label-sm text-primary-container font-bold tracking-widest uppercase">CLUB PARTNERSHIPS</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-text-muted">Inter-Society Dispatch</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
+          Manage collaborations.
+        </h1>
+<p class="font-body-lg text-body-lg text-text-muted mt-2">
+          Review incoming invitations and keep track of collaboration requests involving your club.
+        </p>
+</div>
+<!-- Operator Context Banner Pill -->
+<div class="flex items-center self-start lg:self-auto gap-3 px-4 py-2.5 bg-surface-white rounded-full border border-border-subtle shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04)]">
+<div class="relative flex items-center justify-center">
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container animate-ping absolute opacity-75"></div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-text-muted">Active Club:</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">JnU IT Society</span>
+</div>
+<span class="text-text-muted text-[12px]">·</span>
+<span class="font-label-sm text-label-sm text-primary-container font-semibold tracking-wide">Single-Club Management Protocol</span>
+</div>
+</section>
+<!-- Navigation & Filter Strip -->
+<section class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<!-- Segmented Tabs -->
+<div class="inline-flex p-1 bg-surface-white rounded-full border border-border-subtle shadow-sm overflow-x-auto max-w-full" id="segmentedTabs">
+<button class="flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg transition-all duration-200 bg-surface-lavender text-primary-container font-bold shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]" id="tab-incoming" onclick="switchTab('incoming')">
+<span>Incoming</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm" id="badge-incoming">2</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-canvas-base transition-all duration-200 font-semibold" id="tab-sent" onclick="switchTab('sent')">
+<span>Sent</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-lavender text-text-muted font-label-sm text-label-sm" id="badge-sent">1</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-canvas-base transition-all duration-200 font-semibold" id="tab-accepted" onclick="switchTab('accepted')">
+<span>Accepted</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-lavender text-text-muted font-label-sm text-label-sm">3</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-canvas-base transition-all duration-200 font-semibold" id="tab-rejected" onclick="switchTab('rejected')">
+<span>Rejected</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-lavender text-text-muted font-label-sm text-label-sm">1</span>
+</button>
+</div>
+<!-- Live Dispatch Queue Indicator -->
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-lavender text-primary-container self-start sm:self-auto border border-border-subtle">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-wide">Real-time partner dispatch queue</span>
+</div>
+</section>
+<!-- Main Content State Stage -->
+<section class="min-h-[420px] relative" id="contentStage">
+<!-- VIEW: Incoming Requests Container -->
+<div class="flex flex-col gap-space-lg" id="view-incoming">
+<!-- Incoming Request Card 1 -->
+<article class="group bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04),0_2px_6px_-1px_rgba(19,21,38,0.03)] hover:shadow-[0_20px_40px_-6px_rgba(43,52,185,0.09)] transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg" id="request-card-1">
+<div class="flex items-start gap-space-md flex-1">
+<!-- Club Monogram Emblem -->
+<div class="w-14 h-14 rounded-2xl bg-surface-lavender flex items-center justify-center text-primary-container font-headline-sm font-bold flex-shrink-0 border border-secondary-container/30">
+              DS
+            </div>
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">JnU Debating Society</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                  Verified Club
+                </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                  Pending Operator Review
+                </span>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold mt-1">
+                Joint Tech-Debate Gala 2025: AI Ethics &amp; National Policy
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 max-w-3xl mt-0.5">
+                Proposed collaborative workshop and panel session during JnU Tech Week. Seeking technical judges and co-branding for auditorium booking clearance.
+              </p>
+<div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 font-body-sm text-body-sm text-text-muted">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-primary-container text-[18px]">calendar_month</span>
+                  Proposed for November 24, 2025 · Central Auditorium
+                </span>
+<span>·</span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                  Submitted 2 days ago
+                </span>
+<span>·</span>
+<span>Verified Operator: <strong class="font-semibold text-on-surface">Naimur Rahman</strong> (President, Debate Society)</span>
+</div>
+</div>
+</div>
+<!-- Actions Stack -->
+<div class="flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end gap-2.5 flex-shrink-0 pt-space-sm lg:pt-0 border-t lg:border-t-0 border-border-subtle">
+<div class="flex items-center gap-2.5">
+<button class="flex-1 sm:flex-initial px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_14px_rgba(43,52,185,0.2)] hover:bg-primary-hover hover:-translate-y-0.5 transition-all" onclick="acceptRequest('request-card-1', 'JnU Debating Society')">
+                Accept Invitation
+              </button>
+<button class="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-surface-lavender text-primary-container font-label-lg text-label-lg font-semibold hover:bg-secondary-container/40 transition-all" onclick="openDeclineModal('request-card-1', 'JnU Debating Society')">
+                Decline
+              </button>
+</div>
+<button class="inline-flex items-center justify-center lg:justify-end gap-1 text-primary-container hover:text-primary-hover font-label-md text-label-md font-semibold transition-colors mt-1" onclick="openDetailSheet('JnU Debating Society', 'DS', 'Joint Tech-Debate Gala 2025: AI Ethics &amp; National Policy', 'Proposed collaborative workshop and panel session during JnU Tech Week. Seeking technical judges and co-branding for auditorium booking clearance with the Jagannath University Proctor Office.', 'request-card-1')">
+<span>View Proposal Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Incoming Request Card 2 -->
+<article class="group bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04),0_2px_6px_-1px_rgba(19,21,38,0.03)] hover:shadow-[0_20px_40px_-6px_rgba(43,52,185,0.09)] transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg" id="request-card-2">
+<div class="flex items-start gap-space-md flex-1">
+<!-- Club Monogram Emblem -->
+<div class="w-14 h-14 rounded-2xl bg-secondary-fixed flex items-center justify-center text-primary font-headline-sm font-bold flex-shrink-0 border border-secondary-container/40">
+              CC
+            </div>
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">JnU Career Club</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                  Verified Club
+                </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-primary-container/10 text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                  Pending Operator Review
+                </span>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold mt-1">
+                University Tech Career Fair 2025: Engineering Roster Outreach
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 max-w-3xl mt-0.5">
+                Invitation to co-host the software developer &amp; IT tracks for 17th and 18th batch graduates. Joint sponsor outreach with alumni.
+              </p>
+<div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 font-body-sm text-body-sm text-text-muted">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-primary-container text-[18px]">calendar_month</span>
+                  Proposed for December 12, 2025 · Science Faculty Grounds
+                </span>
+<span>·</span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                  Submitted Yesterday at 4:15 PM
+                </span>
+<span>·</span>
+<span>Verified Operator: <strong class="font-semibold text-on-surface">S. Farhana</strong> (Head of Operations)</span>
+</div>
+</div>
+</div>
+<!-- Actions Stack -->
+<div class="flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end gap-2.5 flex-shrink-0 pt-space-sm lg:pt-0 border-t lg:border-t-0 border-border-subtle">
+<div class="flex items-center gap-2.5">
+<button class="flex-1 sm:flex-initial px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_14px_rgba(43,52,185,0.2)] hover:bg-primary-hover hover:-translate-y-0.5 transition-all" onclick="acceptRequest('request-card-2', 'JnU Career Club')">
+                Accept Invitation
+              </button>
+<button class="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-surface-lavender text-primary-container font-label-lg text-label-lg font-semibold hover:bg-secondary-container/40 transition-all" onclick="openDeclineModal('request-card-2', 'JnU Career Club')">
+                Decline
+              </button>
+</div>
+<button class="inline-flex items-center justify-center lg:justify-end gap-1 text-primary-container hover:text-primary-hover font-label-md text-label-md font-semibold transition-colors mt-1" onclick="openDetailSheet('JnU Career Club', 'CC', 'University Tech Career Fair 2025: Engineering Roster Outreach', 'Invitation to co-host the software developer &amp; IT tracks for 17th and 18th batch graduates. Joint sponsor outreach with alumni and technical workshop logistics.', 'request-card-2')">
+<span>View Proposal Details</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+</div>
+<!-- VIEW: Sent Requests Container -->
+<div class="hidden flex-col gap-space-lg" id="view-sent">
+<!-- Sent Request Card 3 -->
+<article class="bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04),0_2px_6px_-1px_rgba(19,21,38,0.03)] flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-md flex-1">
+<div class="w-14 h-14 rounded-2xl bg-surface-lavender flex items-center justify-center text-primary-container font-headline-sm font-bold flex-shrink-0 border border-secondary-container/30">
+              PS
+            </div>
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">JnU Photographic Society</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                  Verified Club
+                </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface-lavender text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Under Review by JnU Photographic Society
+                </span>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold mt-1">
+                Official Media &amp; Documentation Partner for CodeStorm Hackathon 2025
+              </h2>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 max-w-3xl mt-0.5">
+                Requested dedicated event coverage squad, live keynote photography, and retrospective highlight recap reel production for the annual university hackathon.
+              </p>
+<div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 font-body-sm text-body-sm text-text-muted">
+<span class="inline-flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-primary-container text-[18px]">calendar_month</span>
+                  Event Window: January 18–19, 2026
+                </span>
+<span>·</span>
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                  Submitted 5 days ago
+                </span>
+<span>·</span>
+<span>Sender: JnU IT Society Operator Dispatch</span>
+</div>
+</div>
+</div>
+<!-- Action -->
+<div class="flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end gap-2.5 flex-shrink-0 pt-space-sm lg:pt-0 border-t lg:border-t-0 border-border-subtle">
+<button class="px-5 py-2.5 rounded-full bg-surface-lavender text-primary-container font-label-lg text-label-lg font-semibold hover:bg-secondary-container/40 transition-all flex items-center justify-center gap-1.5" onclick="openDetailSheet('JnU Photographic Society', 'PS', 'Official Media &amp; Documentation Partner for CodeStorm Hackathon 2025', 'Requested dedicated event coverage squad, live keynote photography, and retrospective highlight recap reel production for the annual university hackathon. Equipment and hospitality stipends backed by IT Society treasury.', null)">
+<span>View Sent Brief</span>
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<span class="font-label-sm text-label-sm text-text-muted mt-0.5">Dispatched via Registrar Route</span>
+</div>
+</article>
+</div>
+<!-- VIEW: Accepted Requests Container -->
+<div class="hidden flex-col gap-space-lg" id="view-accepted">
+<article class="bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-lavender flex items-center justify-center text-primary-container font-bold">RC</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">JnU Rover Scout Group</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container font-label-sm text-label-sm">Charter Active</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Campus Blood Donor Registry Web Platform</h3>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">Status: Proctorial approval sealed · Execution phase underway.</p>
+</div>
+</div>
+<span class="font-label-md text-label-md text-primary-container font-semibold">Approved Oct 14, 2025</span>
+</article>
+</div>
+<!-- VIEW: Rejected Requests Container -->
+<div class="hidden flex-col gap-space-lg" id="view-rejected">
+<article class="bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-space-md opacity-85">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-error-container/40 flex items-center justify-center text-error font-bold">ES</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">JnU Economics Syndicate</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">Declined</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Cryptocurrency Trading Bootcamp</h3>
+<p class="font-body-sm text-body-sm text-text-muted mt-1">Reason: Scope outside student IT charter guidelines.</p>
+</div>
+</div>
+<span class="font-label-md text-label-md text-text-muted">Archived Sep 29, 2025</span>
+</article>
+</div>
+<!-- VIEW: Empty State Incoming -->
+<div class="hidden py-space-2xl flex flex-col items-center justify-center text-center bg-surface-white rounded-3xl border border-border-subtle p-space-xl" id="view-empty-incoming">
+<div class="w-16 h-16 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container mb-space-md">
+<span class="material-symbols-outlined text-[32px]">handshake</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">No incoming requests.</h3>
+<p class="font-body-md text-body-md text-text-muted max-w-md mt-1 mb-space-lg">
+          Collaboration invitations from other clubs will appear here when available.
+        </p>
+<button class="px-6 py-2.5 rounded-full bg-surface-lavender text-primary-container font-label-lg text-label-lg font-semibold hover:bg-secondary-container/40 transition-all" onclick="switchTab('sent')">
+          Check Sent Requests
+        </button>
+</div>
+<!-- VIEW: Empty State Sent -->
+<div class="hidden py-space-2xl flex flex-col items-center justify-center text-center bg-surface-white rounded-3xl border border-border-subtle p-space-xl" id="view-empty-sent">
+<div class="w-16 h-16 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container mb-space-md">
+<span class="material-symbols-outlined text-[32px]">forward_to_inbox</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">No sent requests.</h3>
+<p class="font-body-md text-body-md text-text-muted max-w-md mt-1 mb-space-lg">
+          Collaboration requests initiated by your club will appear here when available.
+        </p>
+</div>
+<!-- VIEW: Skeleton Loading State -->
+<div class="hidden flex-col gap-space-lg animate-pulse" id="view-skeleton">
+<div class="bg-surface-white rounded-2xl border border-border-subtle p-space-lg flex flex-col lg:flex-row items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-md flex-1 w-full">
+<div class="w-14 h-14 rounded-2xl bg-surface-lavender/60"></div>
+<div class="flex-1 flex flex-col gap-2">
+<div class="h-4 w-48 bg-surface-lavender/70 rounded"></div>
+<div class="h-6 w-3/4 bg-surface-lavender rounded"></div>
+<div class="h-4 w-full bg-surface-lavender/50 rounded"></div>
+<div class="h-3 w-1/2 bg-surface-lavender/40 rounded mt-2"></div>
+</div>
+</div>
+<div class="h-10 w-44 bg-surface-lavender/60 rounded-full"></div>
+</div>
+<div class="bg-surface-white rounded-2xl border border-border-subtle p-space-lg flex flex-col lg:flex-row items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-md flex-1 w-full">
+<div class="w-14 h-14 rounded-2xl bg-surface-lavender/60"></div>
+<div class="flex-1 flex flex-col gap-2">
+<div class="h-4 w-40 bg-surface-lavender/70 rounded"></div>
+<div class="h-6 w-2/3 bg-surface-lavender rounded"></div>
+<div class="h-4 w-5/6 bg-surface-lavender/50 rounded"></div>
+<div class="h-3 w-1/3 bg-surface-lavender/40 rounded mt-2"></div>
+</div>
+</div>
+<div class="h-10 w-44 bg-surface-lavender/60 rounded-full"></div>
+</div>
+</div>
+<!-- VIEW: API 500 Fault State -->
+<div class="hidden py-space-2xl flex flex-col items-center justify-center text-center bg-surface-white rounded-3xl border border-error/20 p-space-xl" id="view-error">
+<div class="w-16 h-16 rounded-full bg-error-container flex items-center justify-center text-error mb-space-md">
+<span class="material-symbols-outlined text-[32px]">cloud_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Failed to load collaboration ledger</h3>
+<p class="font-body-md text-body-md text-text-muted max-w-md mt-1 mb-space-lg">
+          The JnUVerse synchronization service encountered an unexpected 500 network timeout while fetching partner briefs.
+        </p>
+<button class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-bold hover:bg-primary-hover transition-all flex items-center gap-2 shadow-md" onclick="simulateState('incoming')">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+<span>Retry Connection</span>
+</button>
+</div>
+</section>
+<!-- Bottom Operator Protocol Reference & Summary Card -->
+<section class="mt-space-lg bg-surface-white rounded-2xl border border-border-subtle p-space-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-lavender flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[24px]">gavel</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Jagannath University Society Regulations 2024-2025</h4>
+<p class="font-body-sm text-body-sm text-text-muted">All inter-club engagements require verified operator signatures prior to facility bookings.</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm px-3 py-1 bg-surface-lavender text-primary-container rounded-full font-semibold">Proctorial Co-sign Enabled</span>
+</div>
+</section>
+<!-- Interactive State Simulator Tool (Bottom Developer / Reviewer Bar) -->
+<div class="mt-space-2xl pt-space-lg border-t border-border-subtle flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted text-[16px]">tune</span>
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider font-bold">Operator Studio State Simulator</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Review fidelity testing toggles</span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold transition-all shadow-sm" id="btn-sim-incoming" onclick="simulateState('incoming')">
+          Incoming Active (2)
+        </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white border border-border-subtle text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-lavender transition-all" id="btn-sim-sent" onclick="simulateState('sent')">
+          Sent Active (1)
+        </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white border border-border-subtle text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-lavender transition-all" id="btn-sim-empty-in" onclick="simulateState('empty-incoming')">
+          Empty Incoming
+        </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white border border-border-subtle text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-lavender transition-all" id="btn-sim-empty-sent" onclick="simulateState('empty-sent')">
+          Empty Sent
+        </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white border border-border-subtle text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-lavender transition-all" id="btn-sim-skeleton" onclick="simulateState('skeleton')">
+          Skeleton Loading
+        </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white border border-error/30 text-error font-label-sm text-label-sm font-semibold hover:bg-error-container/20 transition-all" id="btn-sim-error" onclick="simulateState('error')">
+          API 500 Fault (with Retry)
+        </button>
+</div>
+</div>
+</div>
+<script>
+    let pendingDeclineTarget = null;
+    let pendingDetailTarget = null;
+    let toastTimeout = null;
+
+    function showToast(title, message) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
+      
+      clearTimeout(toastTimeout);
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      toastTimeout = setTimeout(() => {
+        hideToast();
+      }, 4500);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toastNotification');
+      toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }
+
+    function acceptRequest(cardId, clubName) {
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.style.transition = 'all 0.3s ease-out';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          card.remove();
+          updateIncomingBadge();
+          showToast('Invitation Accepted', `Collaboration with ${clubName} accepted. Charter drafted for Proctorial endorsement.`);
+        }, 300);
+      }
+    }
+
+    function openDeclineModal(cardId, clubName) {
+      pendingDeclineTarget = cardId;
+      document.getElementById('modalTargetClub').textContent = clubName;
+      const modal = document.getElementById('declineModal');
+      const content = document.getElementById('declineModalContent');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeDeclineModal() {
+      const modal = document.getElementById('declineModal');
+      const content = document.getElementById('declineModalContent');
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingDeclineTarget = null;
+      }, 200);
+    }
+
+    function confirmDecline() {
+      if (pendingDeclineTarget) {
+        const card = document.getElementById(pendingDeclineTarget);
+        const reasonSelect = document.getElementById('declineReason');
+        const reason = reasonSelect.options[reasonSelect.selectedIndex].text;
+        
+        if (card) {
+          card.style.transition = 'all 0.3s ease-out';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.96)';
+          setTimeout(() => {
+            card.remove();
+            updateIncomingBadge();
+            showToast('Invitation Declined', `The executive operator was informed: "${reason}".`);
+          }, 300);
+        }
+      }
+      closeDeclineModal();
+    }
+
+    function updateIncomingBadge() {
+      const container = document.getElementById('view-incoming');
+      const remaining = container ? container.querySelectorAll('article').length : 0;
+      const badge = document.getElementById('badge-incoming');
+      if (badge) {
+        badge.textContent = remaining;
+      }
+      if (remaining === 0) {
+        simulateState('empty-incoming');
+      }
+    }
+
+    function openDetailSheet(clubName, initials, scope, body, associatedCardId) {
+      pendingDetailTarget = associatedCardId;
+      document.getElementById('sheetClubName').textContent = clubName;
+      document.getElementById('sheetClubInitials').textContent = initials;
+      document.getElementById('sheetScope').textContent = scope;
+      document.getElementById('sheetBody').textContent = body;
+
+      const sheet = document.getElementById('proposalDetailSheet');
+      const content = document.getElementById('proposalSheetContent');
+      sheet.classList.remove('hidden');
+      sheet.classList.add('flex');
+      setTimeout(() => {
+        content.classList.remove('translate-x-full');
+      }, 10);
+    }
+
+    function closeDetailSheet() {
+      const sheet = document.getElementById('proposalDetailSheet');
+      const content = document.getElementById('proposalSheetContent');
+      content.classList.add('translate-x-full');
+      setTimeout(() => {
+        sheet.classList.add('hidden');
+        sheet.classList.remove('flex');
+        pendingDetailTarget = null;
+      }, 300);
+    }
+
+    function acceptFromSheet() {
+      const clubName = document.getElementById('sheetClubName').textContent;
+      if (pendingDetailTarget) {
+        acceptRequest(pendingDetailTarget, clubName);
+      } else {
+        showToast('Brief Verified', `Collaboration details confirmed with ${clubName}.`);
+      }
+      closeDetailSheet();
+    }
+
+    function hideAllViews() {
+      const views = [
+        'view-incoming',
+        'view-sent',
+        'view-accepted',
+        'view-rejected',
+        'view-empty-incoming',
+        'view-empty-sent',
+        'view-skeleton',
+        'view-error'
+      ];
+      views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('hidden');
+          el.classList.remove('flex');
+        }
+      });
+    }
+
+    function resetTabStyles() {
+      const tabs = ['tab-incoming', 'tab-sent', 'tab-accepted', 'tab-rejected'];
+      tabs.forEach(id => {
+        const tab = document.getElementById(id);
+        if (tab) {
+          tab.className = 'flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface hover:bg-canvas-base transition-all duration-200 font-semibold';
+        }
+      });
+    }
+
+    function switchTab(tabKey) {
+      hideAllViews();
+      resetTabStyles();
+
+      const activeTab = document.getElementById(`tab-${tabKey}`);
+      if (activeTab) {
+        activeTab.className = 'flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg transition-all duration-200 bg-surface-lavender text-primary-container font-bold shadow-[0_2px_6px_-1px_rgba(43,52,185,0.06)]';
+      }
+
+      const targetView = document.getElementById(`view-${tabKey}`);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('flex');
+      }
+    }
+
+    function highlightSimBtn(activeId) {
+      const buttons = [
+        'btn-sim-incoming',
+        'btn-sim-sent',
+        'btn-sim-empty-in',
+        'btn-sim-empty-sent',
+        'btn-sim-skeleton',
+        'btn-sim-error'
+      ];
+      buttons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.className = 'px-3.5 py-1.5 rounded-full bg-surface-white border border-border-subtle text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-lavender transition-all';
+        }
+      });
+      const activeBtn = document.getElementById(activeId);
+      if (activeBtn) {
+        activeBtn.className = 'px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold transition-all shadow-sm';
+      }
+    }
+
+    function simulateState(stateKey) {
+      hideAllViews();
+      resetTabStyles();
+
+      if (stateKey === 'incoming') {
+        highlightSimBtn('btn-sim-incoming');
+        switchTab('incoming');
+      } else if (stateKey === 'sent') {
+        highlightSimBtn('btn-sim-sent');
+        switchTab('sent');
+      } else if (stateKey === 'empty-incoming') {
+        highlightSimBtn('btn-sim-empty-in');
+        const tab = document.getElementById('tab-incoming');
+        if (tab) tab.className = 'flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg bg-surface-lavender text-primary-container font-bold shadow-sm';
+        const v = document.getElementById('view-empty-incoming');
+        v.classList.remove('hidden');
+        v.classList.add('flex');
+      } else if (stateKey === 'empty-sent') {
+        highlightSimBtn('btn-sim-empty-sent');
+        const tab = document.getElementById('tab-sent');
+        if (tab) tab.className = 'flex items-center gap-2 px-5 py-2 rounded-full font-label-lg text-label-lg bg-surface-lavender text-primary-container font-bold shadow-sm';
+        const v = document.getElementById('view-empty-sent');
+        v.classList.remove('hidden');
+        v.classList.add('flex');
+      } else if (stateKey === 'skeleton') {
+        highlightSimBtn('btn-sim-skeleton');
+        const v = document.getElementById('view-skeleton');
+        v.classList.remove('hidden');
+        v.classList.add('flex');
+      } else if (stateKey === 'error') {
+        highlightSimBtn('btn-sim-error');
+        const v = document.getElementById('view-error');
+        v.classList.remove('hidden');
+        v.classList.add('flex');
+      }
+    }
+  </script>
+</div></main></div></body></html>

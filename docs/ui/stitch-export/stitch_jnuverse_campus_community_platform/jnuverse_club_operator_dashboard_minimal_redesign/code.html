@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>JnUVerse — Club Operator</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..600,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            canvas: '#FAFAFD',
+            slate: {
+              25: '#FCFCFE',
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              300: '#CBD5E1',
+              400: '#94A3B8',
+              500: '#64748B',
+              600: '#475569',
+              700: '#334155',
+              800: '#1E293B',
+              900: '#0F172A',
+            },
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FE',
+              500: '#3B49DF',
+              600: '#2B34B9',
+              700: '#1F2792',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #FAFAFD;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #0F172A;
+        -webkit-font-smoothing: antialiased;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-canvas text-slate-900 min-h-screen flex selection:bg-brand-50 selection:text-brand-600">
+<!-- Slim, Whisper-Light Sidebar (220px) -->
+<aside class="fixed left-0 top-0 h-full w-[220px] bg-white border-r border-slate-200/60 z-50 flex flex-col justify-between py-6 px-4">
+<div class="flex flex-col gap-6">
+<!-- Brand Minimal Wordmark -->
+<div class="px-2 pt-1 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-brand-600"></span>
+<span class="font-bold text-[15px] tracking-tight text-slate-900">JnUVerse</span>
+</div>
+<span class="text-[11px] font-medium tracking-wide uppercase text-slate-400 bg-slate-100/70 px-2 py-0.5 rounded-full">Operator</span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1 text-[13px] font-normal" data-active-classes="bg-slate-100/80 text-brand-600 font-medium">
+<a aria-current="page" class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-100/80 text-brand-600 font-medium relative transition-colors" data-path="overview" href="#">
+<div class="flex items-center gap-2.5">
+<span class="w-1 h-3.5 rounded-full bg-brand-600 -ml-1"></span>
+<span class="material-symbols-outlined text-[17px]">grid_view</span>
+<span>Overview</span>
+</div>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" data-path="club-profile" href="#">
+<span class="material-symbols-outlined text-[17px] text-slate-400">tune</span>
+<span>Club Profile</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" data-path="members" href="#">
+<span class="material-symbols-outlined text-[17px] text-slate-400">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" data-path="membership-requests" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[17px] text-slate-400">mail</span>
+<span>Requests</span>
+</div>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] font-semibold bg-brand-50 text-brand-600 border border-brand-100" id="sidebar-badge">3</span>
+</a>
+<div class="my-2 border-t border-slate-100"></div>
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors" data-path="view-public-club" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[17px] text-slate-400">north_east</span>
+<span>Public Page</span>
+</div>
+</a>
+</nav>
+</div>
+<!-- Bottom Operator Profile -->
+<div class="pt-4 border-t border-slate-100 flex items-center justify-between px-2">
+<div class="flex flex-col min-w-0">
+<span class="text-[13px] font-medium text-slate-900 truncate">Tanzim Sakib</span>
+<span class="text-[11px] text-slate-400 truncate">Lead Operator</span>
+</div>
+<a class="text-slate-400 hover:text-slate-700 transition-colors" data-path="login" href="#" title="Sign Out">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas Area -->
+<div class="pl-[220px] w-full flex flex-col min-h-screen">
+<!-- Ultra-Minimal Top Header -->
+<header class="h-14 border-b border-slate-200/60 bg-white/70 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-8">
+<div class="flex items-center gap-2.5 text-[12px] text-slate-400">
+<span class="hover:text-slate-600 transition-colors cursor-pointer">Workspace</span>
+<span>/</span>
+<span class="text-slate-700 font-medium">Overview</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/70 border border-slate-200/40 text-[11px] text-slate-600 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>JnU IT Society</span>
+<span class="text-slate-400 font-mono text-[10px]">#2024</span>
+</div>
+</div>
+</header>
+<!-- Main Content Container -->
+<main class="flex-1 px-8 lg:px-14 py-10 max-w-6xl mx-auto w-full flex flex-col gap-10">
+<!-- Club Editorial Headline -->
+<section class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-2 border-b border-slate-200/50">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<h1 class="text-2xl font-bold tracking-[-0.02em] text-slate-900">JnU IT Society</h1>
+<span class="material-symbols-outlined text-brand-600 text-[18px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="text-[13px] text-slate-500 font-normal">
+            Chartered Guild · Department of Computer Science &amp; Engineering
+          </p>
+</div>
+<!-- Understated Header Actions -->
+<div class="flex items-center gap-2 shrink-0">
+<a class="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 text-[12px] font-medium transition-all inline-flex items-center gap-1.5" data-path="view-public-club" href="#">
+<span>Public Page</span>
+<span class="material-symbols-outlined text-[13px] text-slate-400">north_east</span>
+</a>
+<a class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700 text-[12px] font-medium transition-all" data-path="club-profile" href="#">
+            Edit Profile
+          </a>
+</div>
+</section>
+<!-- Minimal Metric Hairline Row (Airy, unboxed) -->
+<section class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200/60 border border-slate-200/60 rounded-xl bg-white">
+<!-- Metric 1 -->
+<div class="px-6 py-5 flex flex-col gap-1">
+<span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Approved Members</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-bold tracking-tight text-slate-900" id="metric-members-val">112</span>
+<span class="text-[11px] font-medium text-emerald-600">+14 this mo</span>
+</div>
+<span class="text-[12px] text-slate-400">Enrolled student operators</span>
+</div>
+<!-- Metric 2 -->
+<div class="px-6 py-5 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Pending Requests</span>
+<span class="w-1.5 h-1.5 rounded-full bg-brand-600"></span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-bold tracking-tight text-brand-600" id="metric-requests-val">3</span>
+<span class="text-[11px] text-slate-400">Action needed</span>
+</div>
+<span class="text-[12px] text-slate-400">Requires lead operator review</span>
+</div>
+<!-- Metric 3 -->
+<div class="px-6 py-5 flex flex-col gap-1">
+<span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Campus Followers</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-bold tracking-tight text-slate-900">1,420</span>
+<span class="text-[11px] text-slate-400">Network reach</span>
+</div>
+<span class="text-[12px] text-slate-400">Subscribed university accounts</span>
+</div>
+</section>
+<!-- Core Section: Membership Requests -->
+<section class="bg-white border border-slate-200/60 rounded-xl p-6 sm:p-7 flex flex-col gap-5">
+<!-- Header & Toolbar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2.5">
+<h2 class="text-base font-semibold tracking-tight text-slate-900">Membership Requests</h2>
+<span class="px-2 py-0.5 rounded-full bg-brand-50 border border-brand-100 text-brand-600 text-[11px] font-semibold" id="requests-badge">
+              3 Pending
+            </span>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-56 text-[12px] bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600 transition-all" id="request-search" placeholder="Search by name or department..." type="text"/>
+<a class="text-[12px] font-medium text-slate-500 hover:text-brand-600 transition-colors" data-path="membership-requests" href="#">
+              View all
+            </a>
+</div>
+</div>
+<!-- Discreet Privacy Notice -->
+<div class="flex items-center gap-2 text-[12px] text-slate-400 bg-slate-50/70 px-3.5 py-2 rounded-lg border border-slate-100">
+<span class="material-symbols-outlined text-[15px] text-slate-400">lock</span>
+<span>Student institutional emails are protected under Jagannath University privacy standards.</span>
+</div>
+<!-- Requests List -->
+<div class="divide-y divide-slate-100" id="requests-list">
+<!-- Student Row 1 -->
+<div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all" id="req-row-1">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-slate-900 truncate">Farhan Tanvir</span>
+<span class="text-slate-300">·</span>
+<span class="text-[12px] text-slate-500 font-mono">CSE-2022-048</span>
+</div>
+<p class="text-[12px] text-slate-500">
+                Batch 19 · Department of Computer Science &amp; Engineering · <span class="text-slate-400">Applied today</span>
+</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="px-3 py-1 rounded-md bg-brand-600 hover:bg-brand-700 text-white text-[12px] font-medium transition-colors" onclick="approveStudent(1, 'Farhan Tanvir')">
+                Approve
+              </button>
+<button class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-[12px] font-medium transition-colors" onclick="rejectStudent(1, 'Farhan Tanvir')">
+                Reject
+              </button>
+</div>
+</div>
+<!-- Student Row 2 -->
+<div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all" id="req-row-2">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-slate-900 truncate">Nusrat Jahan</span>
+<span class="text-slate-300">·</span>
+<span class="text-[12px] text-slate-500 font-mono">PHY-2021-019</span>
+</div>
+<p class="text-[12px] text-slate-500">
+                Batch 18 · Department of Physics · <span class="text-slate-400">Applied yesterday</span>
+</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="px-3 py-1 rounded-md bg-brand-600 hover:bg-brand-700 text-white text-[12px] font-medium transition-colors" onclick="approveStudent(2, 'Nusrat Jahan')">
+                Approve
+              </button>
+<button class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-[12px] font-medium transition-colors" onclick="rejectStudent(2, 'Nusrat Jahan')">
+                Reject
+              </button>
+</div>
+</div>
+<!-- Student Row 3 -->
+<div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all" id="req-row-3">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-slate-900 truncate">Ahsan Habib</span>
+<span class="text-slate-300">·</span>
+<span class="text-[12px] text-slate-500 font-mono">MAT-2023-102</span>
+</div>
+<p class="text-[12px] text-slate-500">
+                Batch 20 · Department of Mathematics · <span class="text-slate-400">Applied 2 days ago</span>
+</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="px-3 py-1 rounded-md bg-brand-600 hover:bg-brand-700 text-white text-[12px] font-medium transition-colors" onclick="approveStudent(3, 'Ahsan Habib')">
+                Approve
+              </button>
+<button class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-[12px] font-medium transition-colors" onclick="rejectStudent(3, 'Ahsan Habib')">
+                Reject
+              </button>
+</div>
+</div>
+</div>
+<!-- Zero State (Quiet & Minimal) -->
+<div class="hidden flex-col items-center justify-center py-10 text-center" id="requests-empty">
+<span class="material-symbols-outlined text-slate-300 text-[28px] mb-2">check_circle</span>
+<p class="text-[13px] font-medium text-slate-700">No pending requests</p>
+<p class="text-[12px] text-slate-400 mt-0.5">All student applications have been processed.</p>
+</div>
+<!-- Skeleton Loader (Minimal Shimmer) -->
+<div class="hidden flex-col gap-3 animate-pulse py-2" id="requests-skeleton">
+<div class="h-10 bg-slate-100 rounded-md w-full"></div>
+<div class="h-10 bg-slate-100 rounded-md w-full"></div>
+<div class="h-10 bg-slate-100 rounded-md w-full"></div>
+</div>
+</section>
+<!-- Bottom Balanced 2-Column Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+<!-- Left: Club Public Snapshot -->
+<div class="bg-white border border-slate-200/60 rounded-xl p-6 flex flex-col justify-between gap-5">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Public Snapshot</span>
+<span class="text-[11px] text-slate-400 font-mono">@jnuit-society</span>
+</div>
+<p class="text-[13px] text-slate-600 leading-relaxed font-normal">
+              Fostering technical talent, competitive programming teams, machine learning research, and open-source contribution across Jagannath University.
+            </p>
+<div class="flex flex-wrap gap-1.5 pt-1">
+<span class="px-2.5 py-0.5 text-[11px] rounded bg-slate-100/80 text-slate-600 font-medium">Competitive Programming</span>
+<span class="px-2.5 py-0.5 text-[11px] rounded bg-slate-100/80 text-slate-600 font-medium">Machine Learning</span>
+<span class="px-2.5 py-0.5 text-[11px] rounded bg-slate-100/80 text-slate-600 font-medium">Open Source</span>
+</div>
+</div>
+<div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[12px] text-slate-400">
+<span>Direct campus registry sync enabled</span>
+<a class="text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1" data-path="view-public-club" href="#">
+<span>View live</span>
+<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Right: Quick Actions List -->
+<div class="bg-white border border-slate-200/60 rounded-xl p-6 flex flex-col justify-between gap-4">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Quick Actions</span>
+</div>
+<div class="flex flex-col divide-y divide-slate-100">
+<a class="py-2.5 flex items-center justify-between text-[13px] text-slate-700 hover:text-brand-600 transition-colors group" data-path="members" href="#">
+<span class="font-medium">Manage Members Roster</span>
+<span class="text-[12px] text-slate-400 group-hover:text-brand-600">112 enrolled →</span>
+</a>
+<a class="py-2.5 flex items-center justify-between text-[13px] text-slate-700 hover:text-brand-600 transition-colors group" data-path="club-profile" href="#">
+<span class="font-medium">Update Guild Guidelines</span>
+<span class="text-[12px] text-slate-400 group-hover:text-brand-600">Focus areas &amp; links →</span>
+</a>
+<a class="py-2.5 flex items-center justify-between text-[13px] text-slate-700 hover:text-brand-600 transition-colors group" data-path="membership-requests" href="#">
+<span class="font-medium">Audit Decision Logs</span>
+<span class="text-[12px] text-slate-400 group-hover:text-brand-600">Archive &amp; records →</span>
+</a>
+</div>
+<div class="pt-2 text-[11px] text-slate-400">
+            Jagannath University CSE Student Guild System
+          </div>
+</div>
+</section>
+<!-- Minimal Interactive State Inspector Pill Switcher -->
+<footer class="pt-2 pb-6 border-t border-slate-200/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-slate-400">
+<span class="text-[11px] tracking-wide uppercase font-medium text-slate-400">State Inspector</span>
+<div class="flex items-center gap-1 bg-white border border-slate-200/60 p-1 rounded-lg">
+<button class="px-2.5 py-1 rounded text-[11px] font-medium bg-slate-900 text-white transition-all" id="state-btn-live" onclick="setDashboardState('live')">
+            Active Live
+          </button>
+<button class="px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition-all" id="state-btn-skeleton" onclick="setDashboardState('skeleton')">
+            Skeleton Shimmer
+          </button>
+<button class="px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition-all" id="state-btn-empty" onclick="setDashboardState('empty')">
+            Zero State
+          </button>
+<button class="px-2.5 py-1 rounded text-[11px] font-medium text-rose-600 hover:text-rose-700 transition-all" id="state-btn-error" onclick="setDashboardState('error')">
+            API Error
+          </button>
+</div>
+</footer>
+</main>
+</div>
+<!-- Minimal Bottom Toast Notification -->
+<div class="fixed bottom-6 right-6 hidden items-center gap-2.5 px-4 py-2.5 rounded-lg bg-slate-900 text-white text-[12px] shadow-lg border border-slate-800 z-50 transition-all" id="action-toast">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span id="toast-message">Action successful</span>
+<button class="ml-2 text-slate-400 hover:text-white" onclick="dismissToast()">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<script>
+    let pendingCount = 3;
+    let approvedTotal = 112;
+
+    function approveStudent(id, name) {
+      const row = document.getElementById(`req-row-${id}`);
+      if (!row) return;
+
+      row.innerHTML = `
+        <div class="py-2 flex items-center justify-between w-full text-[12px]">
+          <span class="font-medium text-slate-900">${name} — Approved</span>
+          <span class="text-slate-400">Enrolled into guild</span>
+        </div>
+      `;
+
+      setTimeout(() => {
+        row.remove();
+        pendingCount--;
+        approvedTotal++;
+        updateCounters();
+        showToast(`${name} enrolled into JnU IT Society.`);
+        if (pendingCount === 0) {
+          showEmptyState(true);
+        }
+      }, 700);
+    }
+
+    function rejectStudent(id, name) {
+      const row = document.getElementById(`req-row-${id}`);
+      if (!row) return;
+
+      row.innerHTML = `
+        <div class="py-2 flex items-center justify-between w-full text-[12px]">
+          <span class="font-medium text-slate-400 line-through">${name}</span>
+          <span class="text-rose-600">Application declined</span>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        row.remove();
+        pendingCount--;
+        updateCounters();
+        showToast(`Application for ${name} declined.`);
+        if (pendingCount === 0) {
+          showEmptyState(true);
+        }
+      }, 700);
+    }
+
+    function updateCounters() {
+      const reqVal = document.getElementById('metric-requests-val');
+      const memVal = document.getElementById('metric-members-val');
+      const badge = document.getElementById('requests-badge');
+      const sideBadge = document.getElementById('sidebar-badge');
+
+      if (reqVal) reqVal.textContent = pendingCount;
+      if (memVal) memVal.textContent = approvedTotal;
+      if (badge) badge.textContent = `${pendingCount} Pending`;
+      if (sideBadge) sideBadge.textContent = pendingCount;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('action-toast');
+      const toastMsg = document.getElementById('toast-message');
+      if (toast && toastMsg) {
+        toastMsg.textContent = msg;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        setTimeout(() => {
+          dismissToast();
+        }, 3000);
+      }
+    }
+
+    function dismissToast() {
+      const toast = document.getElementById('action-toast');
+      if (toast) {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }
+    }
+
+    function showEmptyState(show) {
+      const emptyBox = document.getElementById('requests-empty');
+      const list = document.getElementById('requests-list');
+      if (show) {
+        if (list) list.classList.add('hidden');
+        if (emptyBox) {
+          emptyBox.classList.remove('hidden');
+          emptyBox.classList.add('flex');
+        }
+      } else {
+        if (list) list.classList.remove('hidden');
+        if (emptyBox) {
+          emptyBox.classList.add('hidden');
+          emptyBox.classList.remove('flex');
+        }
+      }
+    }
+
+    function setDashboardState(state) {
+      const list = document.getElementById('requests-list');
+      const emptyBox = document.getElementById('requests-empty');
+      const skeleton = document.getElementById('requests-skeleton');
+      const btns = ['live', 'skeleton', 'empty', 'error'];
+
+      btns.forEach(b => {
+        const btn = document.getElementById(`state-btn-${b}`);
+        if (btn) {
+          if (b === state) {
+            btn.className = b === 'error' 
+              ? 'px-2.5 py-1 rounded text-[11px] font-medium bg-rose-600 text-white transition-all'
+              : 'px-2.5 py-1 rounded text-[11px] font-medium bg-slate-900 text-white transition-all';
+          } else {
+            btn.className = b === 'error'
+              ? 'px-2.5 py-1 rounded text-[11px] font-medium text-rose-600 hover:text-rose-700 transition-all'
+              : 'px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition-all';
+          }
+        }
+      });
+
+      if (state === 'live') {
+        skeleton.classList.add('hidden');
+        emptyBox.classList.add('hidden');
+        emptyBox.classList.remove('flex');
+        list.classList.remove('hidden');
+        showToast("Live connected state active.");
+      } else if (state === 'skeleton') {
+        list.classList.add('hidden');
+        emptyBox.classList.add('hidden');
+        emptyBox.classList.remove('flex');
+        skeleton.classList.remove('hidden');
+        skeleton.classList.add('flex');
+      } else if (state === 'empty') {
+        skeleton.classList.add('hidden');
+        skeleton.classList.remove('flex');
+        list.classList.add('hidden');
+        emptyBox.classList.remove('hidden');
+        emptyBox.classList.add('flex');
+      } else if (state === 'error') {
+        skeleton.classList.add('hidden');
+        list.classList.remove('hidden');
+        emptyBox.classList.add('hidden');
+        showToast("Network latency spike: 500 DRF endpoint retry.");
+      }
+    }
+
+    // Search filter
+    const searchInput = document.getElementById('request-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#requests-list > div');
+        rows.forEach(r => {
+          const text = r.textContent.toLowerCase();
+          r.style.display = text.includes(query) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body></html>

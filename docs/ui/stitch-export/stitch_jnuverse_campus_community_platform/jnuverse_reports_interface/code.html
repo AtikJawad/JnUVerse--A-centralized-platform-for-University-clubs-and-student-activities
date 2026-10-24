@@ -1,0 +1,440 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error-container": "#ffdad6",
+          "surface-tint": "#444ed0",
+          "on-error-container": "#93000a",
+          "surface-container": "#edecff",
+          "secondary-container": "#b3b1ff",
+          "surface-container-highest": "#e0e0f9",
+          "secondary-fixed-dim": "#c3c0ff",
+          "on-error": "#ffffff",
+          "on-secondary": "#ffffff",
+          "on-secondary-container": "#434186",
+          "surface-bright": "#fbf8ff",
+          "on-primary-container": "#abb1ff",
+          "on-surface": "#181a2c",
+          "outline": "#767685",
+          "surface-white": "#FFFFFF",
+          "on-secondary-fixed": "#130e56",
+          "error": "#ba1a1a",
+          "on-primary": "#ffffff",
+          "inverse-on-surface": "#f1efff",
+          "tertiary-fixed": "#d8e2ff",
+          "surface-container-low": "#f4f2ff",
+          "on-background": "#181a2c",
+          "tertiary-container": "#334871",
+          "inverse-surface": "#2d2f41",
+          "on-tertiary": "#ffffff",
+          "background": "#fbf8ff",
+          "on-tertiary-container": "#a2b7e6",
+          "on-tertiary-fixed-variant": "#31466f",
+          "surface-variant": "#e0e0f9",
+          "primary-fixed": "#e0e0ff",
+          "primary": "#0810a4",
+          "border-subtle": "#E2E4F3",
+          "on-primary-fixed": "#00026c",
+          "primary-fixed-dim": "#bec2ff",
+          "on-surface-variant": "#454654",
+          "inverse-primary": "#bec2ff",
+          "secondary-fixed": "#e2dfff",
+          "tertiary-fixed-dim": "#b1c6f6",
+          "tertiary": "#1b3158",
+          "secondary": "#58579d",
+          "primary-hover": "#1F2792",
+          "surface-lavender": "#EBECF9",
+          "canvas-base": "#F8F8FF",
+          "primary-container": "#2b34b9",
+          "outline-variant": "#c6c5d6",
+          "text-muted": "#686B7D",
+          "surface-container-high": "#e6e6ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed": "#001a41",
+          "on-secondary-fixed-variant": "#403e83",
+          "on-primary-fixed-variant": "#2932b8",
+          "surface-dim": "#d8d8f0",
+          "surface": "#fbf8ff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-3xl": "6rem",
+          "gutter-desktop": "2rem",
+          "space-sm": "0.5rem",
+          "margin": "1.25rem",
+          "space-md": "1rem",
+          "margin-tablet": "2.5rem",
+          "space-xs": "0.25rem",
+          "space-2xl": "4rem",
+          "margin-desktop": "4rem",
+          "gutter": "1.5rem",
+          "space-lg": "1.5rem",
+          "space-xl": "2.5rem"
+        },
+        "fontFamily": {
+          "title-md": ["Plus Jakarta Sans"],
+          "display": ["Plus Jakarta Sans"],
+          "headline-md": ["Plus Jakarta Sans"],
+          "title-lg": ["Plus Jakarta Sans"],
+          "body-sm": ["Plus Jakarta Sans"],
+          "label-sm": ["Plus Jakarta Sans"],
+          "label-md": ["Plus Jakarta Sans"],
+          "headline-lg-mobile": ["Plus Jakarta Sans"],
+          "body-lg": ["Plus Jakarta Sans"],
+          "headline-sm": ["Plus Jakarta Sans"],
+          "display-mobile": ["Plus Jakarta Sans"],
+          "label-lg": ["Plus Jakarta Sans"],
+          "headline-lg": ["Plus Jakarta Sans"],
+          "body-md": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+          "title-md": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+          "display": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "headline-md": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+          "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "body-sm": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+          "headline-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+          "body-lg": ["17px", {"lineHeight": "28px", "fontWeight": "400"}],
+          "headline-sm": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "display-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.025em", "fontWeight": "800"}],
+          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+          "headline-lg": ["44px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script><style id="jnuverse-design-tokens">:root { --canvas: #F8F8FF; --surface: #FFFFFF; --border: #EBECF9; --text-main: #131526; --text-muted: #686B7D; --primary-action: #2B34B9; --primary-hover: #202794; } body { background-color: #F8F8FF !important; color: #131526 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; } .bg-canvas-base { background-color: #F8F8FF !important; } .bg-surface-white { background-color: #FFFFFF !important; border: 1px solid #EBECF9; } .bg-primary-container { background-color: #2B34B9 !important; } .hover\:bg-primary-hover:hover { background-color: #202794 !important; } .text-on-surface { color: #131526 !important; } .text-text-muted { color: #686B7D !important; } .hud-btn.bg-primary-container { background-color: #2B34B9 !important; color: #FFFFFF !important; font-weight: 500 !important; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; } .hud-btn.bg-primary-container:hover { background-color: #202794 !important; } .hud-btn.bg-surface-lavender { background-color: #FFFFFF !important; border: 1px solid #EBECF9 !important; color: #131526 !important; font-weight: 500 !important; } .hud-btn.bg-surface-lavender:hover { background-color: #F8F8FF !important; } table thead tr { border-bottom: 1px solid #EBECF9; } table tbody tr { border-bottom: 1px solid #EBECF9; }</style></head><body class="bg-canvas-base text-on-surface font-body-md text-body-md"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-lavender z-50 flex flex-col justify-between py-6 px-4 shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04)]"><div class="flex flex-col gap-6"><div class="px-3 flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-[0_4px_20px_-2px_rgba(43,52,185,0.2)]"><span class="material-symbols-outlined text-[20px]">hub</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-extrabold tracking-tight">JnU<span class="text-primary-container">Verse</span></span><span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Guild Console</span></div></div><div class="p-3 bg-surface-white rounded-xl shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04)] flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[18px]">terminal</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold truncate max-w-[120px]">JnU CS Club</span><span class="font-label-sm text-label-sm text-text-muted">Scope: Managed</span></div></div><div class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase">Operator</div></div><nav class="flex flex-col gap-1.5 mt-2" data-active-classes="bg-primary-container text-on-primary font-bold shadow-[0_4px_20px_-2px_rgba(43,52,185,0.2)]"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-white hover:text-on-surface transition-all" data-path="operator-overview" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="">Overview</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-white hover:text-on-surface transition-all" data-path="club-profile" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span class="">Club Profile</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-white hover:text-on-surface transition-all" data-path="members" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="">Members</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-white hover:text-on-surface transition-all" data-path="membership-requests" href="#"><span class="material-symbols-outlined text-[20px]">person_add</span><span class="">Membership Requests</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-white hover:text-on-surface transition-all" data-path="collaborations" href="#"><span class="material-symbols-outlined text-[20px]">handshake</span><span class="">Collaborations</span></a><a aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-[0_4px_20px_-2px_rgba(43,52,185,0.2)]" data-path="reports" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span class="">Reports</span></a></nav></div><div class="flex flex-col gap-3"><div class="p-3 bg-surface-white/60 rounded-xl flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-container"></span><span class="font-label-sm text-label-sm text-on-surface font-semibold">Academic Fall 2025</span></div><span class="font-label-sm text-label-sm text-text-muted">v2.4</span></div><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="login" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="">Sign Out</span></a></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-canvas-base/80 backdrop-blur-xl z-40 px-gutter-desktop flex items-center justify-between shadow-[0_1px_8px_rgba(43,52,185,0.04)]"><div class="flex items-center gap-2 font-label-md text-label-md"><a class="text-text-muted hover:text-on-surface transition-colors" data-path="operator-overview" href="#">Operator Console</a><span class="text-outline-variant font-label-sm text-label-sm">/</span><span class="text-on-surface font-semibold">Workspace</span></div><div class="flex items-center gap-4"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 bg-canvas-base w-full min-h-screen"><div class="flex flex-col w-full">
+<!-- Content Canvas Area -->
+<div class="px-gutter-desktop py-space-lg flex flex-col gap-space-lg max-w-[1360px] mx-auto w-full">
+<!-- Top Metadata Breadcrumb & Live Health Strip -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary bg-surface-lavender px-3 py-1 rounded-full">Reporting</span>
+<span class="text-text-muted font-label-sm text-label-sm">•</span>
+<span class="font-label-md text-label-md text-text-muted">JnU IT Society — Operator Portal</span>
+</div>
+<!-- Scope Indicator Pill -->
+<div class="flex items-center gap-2.5 bg-surface-white px-3.5 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Managing: JnU IT Society • Single Club Scope</span>
+</div>
+</div>
+<!-- Editorial Header & Asymmetric Context Banner -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+<div class="lg:col-span-7 flex flex-col gap-2">
+<h1 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Reports</h1>
+<p class="font-body-md text-body-md text-text-muted max-w-2xl">
+          Review reporting information available to your account.
+        </p>
+</div>
+<div class="lg:col-span-5 bg-surface-white rounded-xl p-space-md shadow-sm relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-28 h-28 bg-surface-lavender rounded-full opacity-60 pointer-events-none"></div>
+<div class="flex items-start gap-3 relative z-10">
+<div class="w-8 h-8 rounded-lg bg-surface-lavender flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Proctorial Alignment</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium leading-relaxed">
+              Operator Context: Reports relevant to JnU IT Society activity records and university proctorial compliance.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Dynamic Container for State Simulator -->
+<div class="flex flex-col gap-space-md">
+<!-- View 1: Active Reports List (Default Active) -->
+<div class="flex flex-col gap-space-md transition-all duration-300" id="view-active-list">
+<!-- Metrics / Summary Quick-Strip -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-text-muted font-bold tracking-wider">Total Filed</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-extrabold mt-0.5">3</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-lavender flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">assignment</span>
+</div>
+</div>
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-text-muted font-bold tracking-wider">In Proctor Review</span>
+<span class="font-headline-sm text-headline-sm text-primary-container font-extrabold mt-0.5">1</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-primary-hover">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</div>
+</div>
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-text-muted font-bold tracking-wider">Resolved / Archived</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-extrabold mt-0.5">2</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+</div>
+</div>
+</div>
+<!-- Strict Table Container (Pure White surface, No invented fields) -->
+<div class="bg-surface-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Bar / Filter Mock Header -->
+<div class="p-space-md bg-surface-white flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">Activity Log</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary font-label-sm text-label-sm font-bold">3 Records</span>
+</div>
+<div class="flex items-center gap-2 text-text-muted font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span class="">Scoped exclusively to student operator credentials</span>
+</div>
+</div>
+<!-- Semantic Table Structure -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-lavender/40 text-text-muted font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-space-md font-bold">Report Identifier</th>
+<th class="py-3 px-space-md font-bold">Report Subject / Scope</th>
+<th class="py-3 px-space-md font-bold">Status</th>
+<th class="py-3 px-space-md font-bold">Creation Date</th>
+<th class="py-3 px-space-md font-bold text-right">Reference Scope</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-lavender/25 transition-colors">
+<td class="py-4 px-space-md font-semibold text-primary font-mono text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-text-muted">description</span>
+<span class="">REP-2025-0819</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-md">Event Logistics Clarification</span>
+<span class="text-text-muted font-label-sm text-label-sm">Venue allocation &amp; acoustic boundary setup</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                      Under Review
+                    </span>
+</td>
+<td class="py-4 px-space-md text-text-muted font-medium">Nov 12, 2025</td>
+<td class="py-4 px-space-md text-right">
+<span class="px-2.5 py-1 rounded-lg bg-surface-lavender text-text-muted font-label-sm text-label-sm">Central Admin</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-lavender/25 transition-colors bg-surface-lavender/10">
+<td class="py-4 px-space-md font-semibold text-primary font-mono text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-text-muted">description</span>
+<span class="">REP-2025-0412</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-md">Auditorium Reservation Notice</span>
+<span class="text-text-muted font-label-sm text-label-sm">Jagannath Central Hall • Slot sync adjustment</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                      Resolved
+                    </span>
+</td>
+<td class="py-4 px-space-md text-text-muted font-medium">Oct 28, 2025</td>
+<td class="py-4 px-space-md text-right">
+<span class="px-2.5 py-1 rounded-lg bg-surface-lavender text-text-muted font-label-sm text-label-sm">Proctorial Board</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-lavender/25 transition-colors">
+<td class="py-4 px-space-md font-semibold text-primary font-mono text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-text-muted">description</span>
+<span class="">REP-2024-1104</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-body-md">Charter Standing Verification</span>
+<span class="text-text-muted font-label-sm text-label-sm">Fall 2024 active constitution validation</span>
+</div>
+</td>
+<td class="py-4 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                      Archived
+                    </span>
+</td>
+<td class="py-4 px-space-md text-text-muted font-medium">Sep 15, 2024</td>
+<td class="py-4 px-space-md text-right">
+<span class="px-2.5 py-1 rounded-lg bg-surface-lavender text-text-muted font-label-sm text-label-sm">Guild Affairs</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Institutional Notice Footnote -->
+<div class="p-space-md bg-canvas-base flex items-start gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-text-muted leading-relaxed">
+<strong class="text-on-surface font-semibold">Institutional Notice:</strong> JnUVerse maintains strict privacy boundaries. Detailed resolution logs and proctorial investigations are handled exclusively through the University Directorate.
+            </p>
+</div>
+</div>
+</div>
+<!-- View 2: Polished Empty State Component (Hidden by default) -->
+<div class="hidden flex-col items-center justify-center p-space-2xl bg-surface-white rounded-xl shadow-sm text-center" id="view-empty-state">
+<div class="w-20 h-20 rounded-full bg-surface-lavender flex items-center justify-center text-primary mb-space-md shadow-sm">
+<span class="material-symbols-outlined text-[36px]">folder_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">No reports to display.</h3>
+<p class="font-body-md text-body-md text-text-muted max-w-md mt-2">
+          Reports will appear here when reporting data is available to your account.
+        </p>
+<div class="mt-space-lg flex items-center gap-2 px-4 py-2 rounded-full bg-canvas-base text-text-muted font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="">Scope Status: Clear • No active flagged matters for JnU IT Society</span>
+</div>
+</div>
+<!-- View 3: Skeleton Loading State (Hidden by default) -->
+<div class="hidden flex-col gap-space-md" id="view-skeleton-state">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm animate-pulse flex flex-col gap-2">
+<div class="h-3 w-20 bg-surface-lavender rounded"></div>
+<div class="h-8 w-12 bg-surface-lavender rounded mt-1"></div>
+</div>
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm animate-pulse flex flex-col gap-2">
+<div class="h-3 w-28 bg-surface-lavender rounded"></div>
+<div class="h-8 w-12 bg-surface-lavender rounded mt-1"></div>
+</div>
+<div class="bg-surface-white p-space-md rounded-xl shadow-sm animate-pulse flex flex-col gap-2">
+<div class="h-3 w-32 bg-surface-lavender rounded"></div>
+<div class="h-8 w-12 bg-surface-lavender rounded mt-1"></div>
+</div>
+</div>
+<div class="bg-surface-white rounded-xl p-space-md shadow-sm flex flex-col gap-space-md animate-pulse">
+<div class="flex justify-between items-center pb-2">
+<div class="h-6 w-32 bg-surface-lavender rounded"></div>
+<div class="h-4 w-48 bg-surface-lavender rounded"></div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="h-12 bg-surface-lavender/50 rounded-lg w-full"></div>
+<div class="h-12 bg-surface-lavender/50 rounded-lg w-full"></div>
+<div class="h-12 bg-surface-lavender/50 rounded-lg w-full"></div>
+</div>
+<div class="h-8 bg-surface-lavender/30 rounded-lg w-3/4 mt-2"></div>
+</div>
+</div>
+<!-- View 4: API 500 Fault (Hidden by default) -->
+<div class="hidden flex-col items-center justify-center p-space-2xl bg-surface-white rounded-xl shadow-sm text-center" id="view-error-state">
+<div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center mb-space-md">
+<span class="material-symbols-outlined text-[32px]">warning</span>
+</div>
+<div class="px-3 py-1 rounded-full bg-error-container text-on-error-container font-mono font-bold text-label-sm mb-2">HTTP 500 — Internal Directory Error</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Failed to synchronize reporting records</h3>
+<p class="font-body-md text-body-md text-text-muted max-w-md mt-2">
+          JnUVerse API was unable to retrieve proctorial records for session token <code>AUTH_OP_8829</code>.
+        </p>
+<button class="mt-space-lg px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-medium text-label-lg shadow-sm hover:bg-primary-hover transition-all flex items-center gap-2" id="retry-trigger-btn" type="button"><span class="material-symbols-outlined text-[18px]">refresh</span><span class="">Retry Trigger</span></button>
+</div>
+</div>
+<!-- Interactive State Simulator HUD Card -->
+<div class="mt-space-lg bg-surface-white rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center gap-2.5">
+<span class="w-3 h-3 rounded-full bg-primary-container"></span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-bold">Operator Reports State Simulator</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-lavender text-primary font-label-sm text-label-sm">Developer Tools</span>
+</div>
+<div class="font-label-sm text-label-sm text-text-muted">
+          Click state buttons below to review interface resilience
+        </div>
+</div>
+<!-- State Toggle Buttons -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+<button class="hud-btn px-4 py-2.5 rounded-full bg-primary-container text-on-primary font-medium text-label-md shadow-sm hover:bg-primary-hover transition-all flex items-center justify-center gap-2" id="btn-state-active" type="button"><span class="material-symbols-outlined text-[16px]">list</span><span class="">Active (3 Logged)</span></button>
+<button class="hud-btn px-4 py-2.5 rounded-full bg-surface-white text-on-surface font-medium text-label-md hover:bg-canvas-base transition-all flex items-center justify-center gap-2" id="btn-state-empty" type="button"><span class="material-symbols-outlined text-[16px]">inbox</span><span class="">Empty State</span></button>
+<button class="hud-btn px-4 py-2.5 rounded-full bg-surface-white text-on-surface font-medium text-label-md hover:bg-canvas-base transition-all flex items-center justify-center gap-2" id="btn-state-skeleton" type="button"><span class="material-symbols-outlined text-[16px]">hourglass_empty</span><span class="">Skeleton Rows</span></button>
+<button class="hud-btn px-4 py-2.5 rounded-full bg-surface-white text-on-surface font-medium text-label-md hover:bg-canvas-base transition-all flex items-center justify-center gap-2" id="btn-state-error" type="button"><span class="material-symbols-outlined text-[16px]">error</span><span class="">API 500 Fault</span></button>
+</div>
+<!-- Footnote with Backend Architecture Constraints -->
+<div class="pt-2 flex items-center gap-2 text-text-muted font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">terminal</span>
+<span class="">Aligned with Django REST Framework reporting models; moderation workflows and arbitrary categories strictly omitted.</span>
+</div>
+</div>
+</div>
+<!-- Interactive State Control Script -->
+<script>
+    (function initOperatorReportsSimulator() {
+      const views = {
+        active: document.getElementById('view-active-list'),
+        empty: document.getElementById('view-empty-state'),
+        skeleton: document.getElementById('view-skeleton-state'),
+        error: document.getElementById('view-error-state')
+      };
+
+      const buttons = {
+        active: document.getElementById('btn-state-active'),
+        empty: document.getElementById('btn-state-empty'),
+        skeleton: document.getElementById('btn-state-skeleton'),
+        error: document.getElementById('btn-state-error')
+      };
+
+      const retryBtn = document.getElementById('retry-trigger-btn');
+
+      function switchState(targetKey) {
+        // Toggle view containers
+        Object.keys(views).forEach(key => {
+          if (key === targetKey) {
+            views[key].classList.remove('hidden');
+            views[key].classList.add('flex');
+          } else {
+            views[key].classList.add('hidden');
+            views[key].classList.remove('flex');
+          }
+        });
+
+        // Update button styles
+        Object.keys(buttons).forEach(key => {
+          const btn = buttons[key];
+          if (key === targetKey) {
+            btn.className = 'hud-btn px-4 py-2.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-all flex items-center justify-center gap-2 shadow-sm';
+          } else {
+            btn.className = 'hud-btn px-4 py-2.5 rounded-full bg-surface-lavender text-primary font-label-md text-label-md font-bold hover:bg-secondary-container/40 transition-all flex items-center justify-center gap-2';
+          }
+        });
+      }
+
+      buttons.active.addEventListener('click', () => switchState('active'));
+      buttons.empty.addEventListener('click', () => switchState('empty'));
+      buttons.skeleton.addEventListener('click', () => switchState('skeleton'));
+      buttons.error.addEventListener('click', () => switchState('error'));
+      
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          switchState('skeleton');
+          setTimeout(() => switchState('active'), 600);
+        });
+      }
+    })();
+  </script>
+</div></main></div>
+
+</body></html>

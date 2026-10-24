@@ -1,0 +1,475 @@
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"><style>
+@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}
+::-webkit-scrollbar{display:none;}
+
+/* Interactive subtle background styling */
+.bg-dot-pattern {
+  background-color: #FAF9FE;
+  background-image: radial-gradient(circle, rgba(147, 155, 255, 0.18) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+/* Luminous hero aurora background */
+.aurora-hero-bg {
+  background: 
+    radial-gradient(ellipse 65% 55% at 50% 25%, rgba(220, 212, 255, 0.65) 0%, rgba(233, 229, 255, 0.35) 45%, transparent 75%),
+    radial-gradient(circle 500px at 18% 30%, rgba(220, 235, 255, 0.85) 0%, rgba(220, 235, 255, 0.2) 60%, transparent 80%),
+    radial-gradient(circle 520px at 82% 28%, rgba(233, 229, 255, 0.9) 0%, rgba(244, 235, 255, 0.3) 65%, transparent 80%),
+    linear-gradient(180deg, #F0F4FF 0%, #F5F3FF 45%, #FAF9FE 100%);
+}
+
+/* Hero fading perspective grid mask */
+.hero-grid-fade {
+  background-image: 
+    linear-gradient(to right, rgba(165, 175, 240, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(165, 175, 240, 0.14) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.25) 40%, transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.25) 40%, transparent 85%);
+}
+
+/* Hero Pill Primary CTA */
+.btn-aurora-primary {
+  background: linear-gradient(135deg, #B8C6FF 0%, #8D91F5 100%);
+  color: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 28px -4px rgba(141, 145, 245, 0.38), 0 2px 6px -1px rgba(141, 145, 245, 0.2), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-aurora-primary:hover {
+  background: linear-gradient(135deg, #C4D1FF 0%, #9DA1FA 100%);
+  box-shadow: 0 14px 34px -2px rgba(141, 145, 245, 0.48), 0 4px 12px -1px rgba(141, 145, 245, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+  color: #0B1120;
+}
+
+.btn-aurora-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px -2px rgba(141, 145, 245, 0.32);
+}
+
+/* Secondary Button gradient */
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #A5B4FC 0%, #818CF8 50%, #6366F1 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 20px -3px rgba(99, 102, 241, 0.28), 0 2px 6px -1px rgba(99, 102, 241, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-gradient-primary:hover {
+  background: linear-gradient(135deg, #B4C2FF 0%, #8E98FA 50%, #7073F5 100%);
+  box-shadow: 0 12px 24px -2px rgba(99, 102, 241, 0.36), inset 0 1px 1.5px rgba(255, 255, 255, 0.7);
+  transform: translateY(-1.5px);
+}
+
+/* Idle organic floating keyframes */
+@keyframes floatGentle1 {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50% { transform: translate3d(0, -9px, 0); }
+}
+@keyframes floatGentle2 {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50% { transform: translate3d(0, -13px, 0); }
+}
+@keyframes floatGentle3 {
+  0%, 100% { transform: translate3d(0, 0px, 0); }
+  50% { transform: translate3d(0, -11px, 0); }
+}
+
+.anim-float-1 { animation: floatGentle1 6.5s ease-in-out infinite; }
+.anim-float-2 { animation: floatGentle2 8s ease-in-out infinite 0.7s; }
+.anim-float-3 { animation: floatGentle3 7.2s ease-in-out infinite 1.4s; }
+
+/* Parallax element smoothing */
+.parallax-item {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1), box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.floating-tile {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 30px -6px rgba(120, 130, 200, 0.15), 0 4px 10px -2px rgba(120, 130, 200, 0.08);
+}
+.floating-tile:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 38px -6px rgba(100, 115, 210, 0.22), 0 6px 14px -2px rgba(100, 115, 210, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-float-1, .anim-float-2, .anim-float-3 { animation: none !important; }
+  .parallax-item { transform: none !important; }
+}
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container-lowest": "#ffffff", "primary-fixed": "#e0e0ff", "secondary-container": "#b3b1ff", "on-primary": "#ffffff", "surface": "#fbf8ff", "primary-hover": "#1F2792", "on-primary-fixed": "#00026c", "tertiary-fixed": "#d8e2ff", "surface-container": "#edecff", "tertiary": "#1b3158", "surface-container-low": "#f4f2ff", "primary-fixed-dim": "#bec2ff", "outline": "#767685", "primary": "#0810a4", "on-primary-container": "#abb1ff", "tertiary-fixed-dim": "#b1c6f6", "secondary": "#58579d", "surface-lavender": "#EBECF9", "secondary-fixed": "#e2dfff", "on-secondary": "#ffffff", "border-subtle": "#E2E8F0", "surface-variant": "#e0e0f9", "surface-dim": "#d8d8f0", "surface-white": "#FFFFFF", "secondary-fixed-dim": "#c3c0ff", "canvas-base": "#FAF9FE", "tertiary-container": "#334871", "background": "#fbf8ff", "on-tertiary-fixed-variant": "#31466f", "outline-variant": "#c6c5d6", "error": "#ba1a1a", "primary-container": "#2b34b9", "inverse-on-surface": "#f1efff", "on-primary-fixed-variant": "#2932b8", "inverse-primary": "#bec2ff", "on-tertiary-fixed": "#001a41", "on-secondary-fixed-variant": "#403e83", "error-container": "#ffdad6", "surface-container-highest": "#e0e0f9", "on-tertiary": "#ffffff", "surface-bright": "#fbf8ff", "on-secondary-container": "#434186", "on-surface": "#111827", "on-error": "#ffffff", "on-error-container": "#93000a", "surface-container-high": "#e6e6ff", "on-background": "#111827", "on-tertiary-container": "#a2b7e6", "inverse-surface": "#2d2f41", "text-muted": "#64748B", "on-surface-variant": "#475569", "surface-tint": "#444ed0", "on-secondary-fixed": "#130e56" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-md": "1rem", "space-2xl": "4rem", "gutter-desktop": "2rem", "margin-tablet": "2.5rem", "space-3xl": "6rem", "margin": "1.25rem", "margin-desktop": "4rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-xl": "2.5rem" }, fontFamily: { "headline-md": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-mobile": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "display": ["Plus Jakarta Sans"], "title-lg": ["Plus Jakarta Sans"], "title-md": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"] }, fontSize: { "headline-md": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-lg": ["17px", { "lineHeight": "28px", "fontWeight": "400" }], "display-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.025em", "fontWeight": "800" }], "headline-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "display": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "title-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script></head><body class="bg-canvas-base text-on-surface font-body-md text-body-md antialiased selection:bg-primary-fixed selection:text-on-primary-fixed relative" style="background-color: rgb(238, 242, 251);">
+<!-- 1. TRANSLUCENT LIGHT NAVIGATION -->
+<header class="fixed top-0 left-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-indigo-100/50 transition-all duration-300">
+<div class="h-18 md:h-20 max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop flex items-center justify-between gap-space-md">
+<!-- Brand Logo -->
+<div class="flex items-center gap-space-md">
+<a class="flex items-center gap-2.5 group" data-path="landing-page" href="#">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-primary-container flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+</div>
+<span class="font-title-lg text-title-lg tracking-tight font-extrabold text-[#0F172A] flex items-center">
+          JnU<span class="bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent">Verse</span>
+</span>
+</a>
+</div>
+<!-- Restrained Navigation Links -->
+<nav class="hidden md:flex items-center gap-1.5 p-1 rounded-full bg-indigo-50/50 border border-indigo-100/40">
+<a class="px-4 py-1.5 rounded-full font-label-lg text-label-lg text-slate-600 hover:text-indigo-900 hover:bg-white/80 transition-all duration-200" data-path="explore-clubs" href="#">Explore Clubs</a>
+<a class="px-4 py-1.5 rounded-full font-label-lg text-label-lg text-slate-600 hover:text-indigo-900 hover:bg-white/80 transition-all duration-200" data-path="campus-events" href="#">Events</a>
+<a class="px-4 py-1.5 rounded-full font-label-lg text-label-lg text-slate-600 hover:text-indigo-900 hover:bg-white/80 transition-all duration-200" data-path="about-community" href="#">About</a>
+</nav>
+<!-- Navigation Actions -->
+<div class="flex items-center gap-3 md:gap-4">
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-[#0F172A] px-3 py-1.5 transition-colors" data-path="login" href="#">Log In</a>
+<a class="inline-flex items-center justify-center h-10 px-5 rounded-full btn-aurora-primary font-label-lg text-label-lg font-bold" data-path="register" href="#" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.45) 0px 6px 18px -3px !important; font-weight: 700 !important;">
+        Sign Up
+      </a>
+<div class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-700 shrink-0">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-18 md:pt-20">
+<div class="flex flex-col w-full">
+<!-- 2 & 3. HERO SECTION (Aurora Composition with Floating Parallax Club Icons) -->
+<section class="relative w-full overflow-hidden aurora-hero-bg min-h-[720px] lg:min-h-[820px] flex items-center justify-center py-20 lg:py-28" id="heroAurora" style="background: linear-gradient(rgb(212, 227, 252) 0%, rgb(216, 210, 251) 48%, rgb(234, 230, 255) 85%, rgb(238, 242, 251) 100%) !important;">
+<!-- Subtle Geometric Grid / Fine-Line Pattern fading seamlessly upwards -->
+<div class="absolute inset-0 hero-grid-fade pointer-events-none z-0"></div>
+<!-- Ambient Light Orbs -->
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[400px] rounded-full bg-gradient-to-b from-white/80 to-indigo-100/20 blur-3xl pointer-events-none z-0"></div>
+<div class="absolute bottom-4 left-1/4 w-80 h-80 rounded-full bg-indigo-200/30 blur-3xl pointer-events-none z-0"></div>
+<div class="absolute bottom-10 right-1/4 w-96 h-96 rounded-full bg-purple-200/25 blur-3xl pointer-events-none z-0"></div>
+<!-- FLOATING CLUB ICONS LAYER (8 distinctive university communities) -->
+<div class="absolute inset-0 max-w-[1400px] mx-auto pointer-events-none z-10 overflow-hidden">
+<!-- 1. Programming & Technology (Cyan/Sky-Blue) - Top Left -->
+<div class="absolute top-[16%] left-[6%] md:left-[9%] pointer-events-auto parallax-item anim-float-1" data-depth="0.04" data-rot="-4" style="transform: translate3d(0px, 0px, 0px) rotate(-4deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center shadow-inner group-hover:bg-cyan-500 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">Programming &amp; Tech</span>
+<span class="text-[10px] font-medium text-cyan-600">JnU IT Society</span>
+</div>
+</a>
+</div>
+<!-- 2. Photography Club (Warm Peach/Lavender) - Top Right -->
+<div class="absolute top-[18%] right-[6%] md:right-[9%] pointer-events-auto parallax-item anim-float-2" data-depth="-0.035" data-rot="3" style="transform: translate3d(0px, 0px, 0px) rotate(3deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-orange-50 border border-orange-100 text-amber-600 flex items-center justify-center shadow-inner group-hover:bg-amber-500 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">photo_camera</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">Photographic Society</span>
+<span class="text-[10px] font-medium text-amber-600">JnUPS • 1.2k Peers</span>
+</div>
+</a>
+</div>
+<!-- 3. Debating Society (Soft Mint Accent) - Mid Left -->
+<div class="absolute top-[48%] left-[3%] md:left-[6%] pointer-events-auto parallax-item anim-float-3" data-depth="0.05" data-rot="-2" style="transform: translate3d(0px, 0px, 0px) rotate(-2deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">mic</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">Debating Society</span>
+<span class="text-[10px] font-medium text-emerald-600">National Champions</span>
+</div>
+</a>
+</div>
+<!-- 4. Cultural Council (Pastel Pink/Rose Accent) - Mid Right -->
+<div class="absolute top-[46%] right-[3%] md:right-[6%] pointer-events-auto parallax-item anim-float-1" data-depth="-0.045" data-rot="4" style="transform: translate3d(0px, 0px, 0px) rotate(4deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 text-rose-500 flex items-center justify-center shadow-inner group-hover:bg-rose-500 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">theater_comedy</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">Cultural Council</span>
+<span class="text-[10px] font-medium text-rose-600">Music &amp; Drama Guild</span>
+</div>
+</a>
+</div>
+<!-- 5. Business & Entrepreneurship (Soft Amber/Lavender Accent) - Bottom Left -->
+<div class="absolute bottom-[14%] left-[7%] md:left-[11%] pointer-events-auto parallax-item anim-float-2 hidden sm:block" data-depth="0.03" data-rot="2" style="transform: translate3d(0px, 0px, 0px) rotate(2deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center shadow-inner group-hover:bg-amber-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">JnU Career &amp; Business</span>
+<span class="text-[10px] font-medium text-amber-700">Entrepreneurship Cell</span>
+</div>
+</a>
+</div>
+<!-- 6. Sports Club (Fresh Mint/Sky Accent) - Bottom Right -->
+<div class="absolute bottom-[16%] right-[7%] md:right-[11%] pointer-events-auto parallax-item anim-float-3 hidden sm:block" data-depth="-0.035" data-rot="-3" style="transform: translate3d(0px, 0px, 0px) rotate(-3deg);">
+<a class="group flex items-center gap-2.5 p-2.5 pr-4 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-105 block" data-path="explore-clubs" href="#">
+<div class="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center shadow-inner group-hover:bg-teal-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">sports_soccer</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-800 tracking-tight">JnU Sports Wing</span>
+<span class="text-[10px] font-medium text-teal-700">Inter-University Leagues</span>
+</div>
+</a>
+</div>
+<!-- 7. Art & Design Club (Violet/Blush Accent) - Lower Outer Edge Left -->
+<div class="absolute top-[28%] left-[1%] lg:left-[2%] pointer-events-auto parallax-item anim-float-1 hidden xl:block" data-depth="0.06" data-rot="-5" style="transform: translate3d(0.01px, -0.01px, 0px) rotate(-5deg);">
+<a class="group p-3 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-110 flex items-center justify-center shadow-md block" data-path="explore-clubs" href="#" title="JnU Art &amp; Design Club">
+<div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">palette</span>
+</div>
+</a>
+</div>
+<!-- 8. Environmental & Sustainability Club (Soft Emerald/Pastel Green) - Lower Outer Edge Right -->
+<div class="absolute top-[28%] right-[1%] lg:right-[2%] pointer-events-auto parallax-item anim-float-2 hidden xl:block" data-depth="-0.05" data-rot="5" style="transform: translate3d(0px, 0px, 0px) rotate(5deg);">
+<a class="group p-3 rounded-2xl floating-tile border border-white/90 transition-all hover:scale-110 flex items-center justify-center shadow-md block" data-path="explore-clubs" href="#" title="Green Campus &amp; Sustainability">
+<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">eco</span>
+</div>
+</a>
+</div>
+</div>
+<!-- CENTERED HERO CONTENT -->
+<div class="relative z-20 max-w-3xl mx-auto px-margin md:px-margin-tablet text-center flex flex-col items-center"><div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 shadow-[0_2px_12px_rgba(147,155,255,0.18)] border border-indigo-100/80 backdrop-blur-md mb-6 transition-all hover:bg-white hover:border-indigo-200"><span class="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span><span class="text-[14px] font-medium text-slate-700 tracking-wide">Discover your campus community</span><span class="text-indigo-400 font-bold text-xs">•</span><span class="text-[12px] text-indigo-700 font-bold">JnU 2025</span></div><h1 class="font-display text-[36px] sm:text-[46px] md:text-[54px] lg:text-[58px] leading-[1.12] text-[#0F172A] tracking-tight font-extrabold mb-6 max-w-3xl mx-auto"><span class="block">Your Campus Your Clubs</span><span class="block bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-500 bg-clip-text text-transparent">Your Community.</span></h1><p class="text-[18px] text-slate-600 max-w-xl mx-auto mb-8 leading-relaxed font-normal">Discover student clubs, explore campus events, and connect with the communities that make university life unforgettable.</p><div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-11"><a class="inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-full btn-aurora-primary text-[16px] font-bold tracking-tight shadow-lg" data-path="explore-clubs" href="#" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.5) 0px 10px 24px -4px !important; font-weight: 700 !important;"><span class="">Explore Your Campus</span><span class="material-symbols-outlined text-[19px] transition-transform group-hover:translate-x-1">arrow_forward</span></a><a class="inline-flex items-center gap-1.5 px-4 py-2 text-[15px] text-slate-700 hover:text-indigo-600 font-medium transition-colors group" data-path="register" href="#"><span class="">Join JnUVerse</span><span class="material-symbols-outlined text-[17px] group-hover:translate-x-0.5 transition-transform text-indigo-500">chevron_right</span></a></div><div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 backdrop-blur-md border border-indigo-100/60 shadow-sm"><div class="flex items-center -space-x-2"><img class="w-7 h-7 rounded-full border-2 border-white object-cover" data-alt="Female JnU student avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnm75LUxq4Lk4FD7C8estaCQ30rZ4IuplOmlu3v8M8Ag1cbGWc6vHKUgtmiGiS_6h4PQE7fvXZuYbDzKC1FMd0YVxFmnyzpN6Kei-UutOtecHopcHThMOzU04jfrohSnTO-wPN6r4b0-Vo37nRxaA7yOFfnb95hLF3DGhAV2rCeiYqHZymIDb4b1U2z2ogTlxD8D1hGrb6aGxM2U5VcsbKNdkLC9sEthVzV_ossF1x8CCsaP9m1swi5w"><img class="w-7 h-7 rounded-full border-2 border-white object-cover" data-alt="Student debater portrait avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAX98AQBRF5VaENCbQQSXu4raokLbJNhaQyn-ORh_RqeY_O1gVJmioTGjNleOC2mhzjVUflT44ZYpZ5tbYiG9ruCtlJdP6w75i_OZv6xZo08aZnzwmvBSUapEv66FpKm-UDtLDtJOd2BTkbsmsYVAI3cFrNjFF-W5yKO_As9f0iIgI12d0VNvqji_EGXzjc_FoNDQnNClCF3t4PbEPlNCkHxaPf7GCVOHZaPZ8YAn3BPkibhGrjN9A6Q"><img class="w-7 h-7 rounded-full border-2 border-white object-cover" data-alt="Arts student avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtDNkIZI-CdxwAPOQzErSKNVu9WNZxJS3pdTTY9_kocoSxeD5qcDD87D6W-WpUIn2M-eIQs3yFhjqtXftBl33YV106Okn8906fJnek3CNzxGV-SLK7lqA1JnqUayBGFBUXTh08jc3SBzXY6HcK0YIkQ3vCXwaQcpxP-WOWAHk_DdA8iRLfFEvt8MD-5yRxIylcpVnQM7p5GyGM_SfEfqTQ56axwWK6yFXBmjagHh5NFuGGrrzfEM-vKQ"><div class="w-7 h-7 rounded-full border-2 border-white bg-indigo-600 text-white font-label-sm text-[10px] flex items-center justify-center font-bold">+4k</div></div><span class="text-[12px] font-semibold text-slate-700">4,200+ verified campus students connected</span></div></div>
+</section>
+<!-- 4. INTRODUCTION / CAMPUS MANIFESTO -->
+<section class="w-full bg-white py-space-2xl lg:py-space-3xl border-y border-border-subtle" style="background-color: rgb(246, 248, 254);">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop"><div class="max-w-2xl mb-space-2xl"><span class="text-[12px] tracking-wider uppercase text-indigo-600 font-bold block mb-2">WHY JNUVERSE</span><h2 class="text-[36px] font-bold text-[#0F172A] tracking-tight leading-[1.2] mb-4">University life extends far beyond lecture halls.</h2><p class="text-[17px] text-slate-600 leading-relaxed max-w-2xl">JnUVerse unites student journalism, technological innovation, cultural heritage, and collegiate sports in one harmonious digital ecosystem engineered specifically for the vibrant Jagannath community.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-gutter lg:gap-gutter-desktop"><div class="group p-space-xl rounded-3xl bg-white border border-border-subtle hover:border-indigo-200 hover:shadow-lg transition-all duration-300 flex flex-col justify-between"><div><div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-space-lg group-hover:scale-105 transition-transform"><span class="material-symbols-outlined text-[28px]">account_tree</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2">Unified Campus Directory</h3><p class="text-[15px] text-slate-600 leading-relaxed mb-4">Every department, accredited club, and student union cataloged with transparent leadership rosters, constitution files, and office hours.</p></div><div class="pt-space-lg mt-space-lg border-t border-slate-100 flex items-center gap-1 text-[14px] text-indigo-600 font-semibold"><span class="">Explore directory matrix</span><span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span></div></div><div class="group p-space-xl rounded-3xl bg-white border border-border-subtle hover:border-indigo-200 hover:shadow-lg transition-all duration-300 flex flex-col justify-between"><div><div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-space-lg group-hover:scale-105 transition-transform"><span class="material-symbols-outlined text-[28px]">assignment_turned_in</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2">Frictionless Memberships</h3><p class="text-[15px] text-slate-600 leading-relaxed mb-4">Submit club registration applications, track interview phases, and receive real-time university verification badges on your digital profile.</p></div><div class="pt-space-lg mt-space-lg border-t border-slate-100 flex items-center gap-1 text-[14px] text-indigo-600 font-semibold"><span class="">Direct registration pipeline</span><span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span></div></div><div class="group p-space-xl rounded-3xl bg-white border border-border-subtle hover:border-indigo-200 hover:shadow-lg transition-all duration-300 flex flex-col justify-between"><div><div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-space-lg group-hover:scale-105 transition-transform"><span class="material-symbols-outlined text-[28px]">event_upcoming</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2">Synchronized Events</h3><p class="text-[15px] text-slate-600 leading-relaxed mb-4">Never miss a campus drama showcase, parliamentary debate tournament, or hackathon on the Old Dhaka grounds with automated timetable sync.</p></div><div class="pt-space-lg mt-space-lg border-t border-slate-100 flex items-center gap-1 text-[14px] text-indigo-600 font-semibold"><span class="">Live campus calendar</span><span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span></div></div></div></div>
+</section>
+<!-- 5. FEATURED UNIVERSITY CLUBS -->
+<section class="w-full py-space-2xl lg:py-space-3xl bg-[#FAF9FE]">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-2xl"><div><span class="text-[12px] tracking-wider uppercase text-indigo-600 font-bold block mb-2">Curated Student Communities</span><h2 class="text-[36px] font-bold text-[#0F172A] tracking-tight leading-[1.2]">Explore Leading Campus Clubs</h2></div><a class="inline-flex items-center gap-1 text-indigo-600 text-[15px] hover:text-indigo-800 font-semibold transition-colors pb-1" data-path="explore-clubs" href="#"><span class="">View All 40+ Clubs</span><span class="material-symbols-outlined text-[18px]">arrow_outward</span></a></div>
+<!-- Grid of 4 Distinctive Club Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter"><div class="bg-white rounded-3xl p-space-lg border border-border-subtle hover:border-indigo-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"><div><div class="flex items-center justify-between mb-space-md"><span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[12px] font-medium border border-indigo-100/60">Academic &amp; Speech</span><span class="text-[12px] text-slate-500 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[15px]">group</span>850</span></div><div class="w-full h-36 rounded-2xl mb-space-md overflow-hidden relative"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Jagannath University Debating Society members during an intense parliamentary debate round on stage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxDeE5-IEtyZRhxfrzZuapdsw5HuS1eSLJmYYsKstyX1o7nznn2rTOvCOfUdn_hf-7qKJQmaG3iocT70YpXR4wEGU0cNGbbDsbIJDFeY5euUtYIAHu__7m_Ny3XcjpLZllJeUsf-vnhzZfm2e4hqLHTAzEyWAY7gZENC0Kh9OXzmi6lcAUTviwb3ZmjRBhkRhFkC88z7qAWQgxqL_tjdNZ8rFXBZq1oMcLlmPQoXMT8j1EOEZ03WLpJg"><div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div></div><h3 class="text-[18px] font-bold text-[#0F172A] leading-[1.3] mb-2">JnU Debating Society (JnUDS)</h3><p class="text-[14px] leading-[1.55] text-slate-600 line-clamp-3 mb-space-lg">National Champions 2024. Weekly parliamentary and Asian format debate workshops every Thursday in Room 302.</p></div><div class="pt-space-md border-t border-slate-100 flex items-center justify-between"><div class="flex items-center -space-x-1.5"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Bangladeshi student debater face close-up" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6b_dPcx6dvmr9_YniCWLgOxJWYcZS3dBCxHjNzYo6iiXM-zZ0dSnIZl_kmIMKp1L-L7mzXbcqpVLtUiZvLb0w094HHEAOxTA3Gz6hfTjlK-Ur0HKwKpThEpZ4LrS-Ro5Mow_-S2MFJRKDE07NnMzw-0VrkLQHWDI0S3X9tPynnpBiY3x93mpHTTiPLjjWi8vGrDdxP_BWfi_BjFmVxLzVqVqKXlXieQGOqnTIM8fg802-LQC4UL77Xg"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="University orator portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwyLdZ_WcQ23XmDQIKPQSeS2-q7fnJbQeDfFrhCRV0UBWobYgM7_Xz9MOg3VcXhtgylwoIUUHzLQIuWhtZXVaHe9Q8TJc9l031BIFi_BM56wmzrxyEqXUoPTp5RTbxuDspyCcGhfwUHtTFJSS9iKiAdcCw9PWdlwvVi8ktf8Eqw7RrzEdbZ-burC8vIZiK8VUcEZ3WNF9f7ENKaFF39cyVB78g2aM1v0YOFzWkVdJpc3yJD7MVeOvpcQ"><span class="text-[12px] text-slate-500 pl-2 font-medium">Active roster</span></div><a class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors" data-path="explore-clubs" href="#"><span class="material-symbols-outlined text-[16px]">arrow_forward</span></a></div></div><div class="bg-white rounded-3xl p-space-lg border border-border-subtle hover:border-indigo-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"><div><div class="flex items-center justify-between mb-space-md"><span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[12px] font-medium border border-amber-100/60">Visual Arts</span><span class="text-[12px] text-slate-500 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[15px]">group</span>1,200</span></div><div class="w-full h-36 rounded-2xl mb-space-md overflow-hidden relative"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Vintage camera lenses and prints" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUICn7gndLm74iSTMkxDGv8_GcjnHSbr7qF6n1RG620RKHxYld5jMthC-is8EFnFjUZQV0PD9smlEQpBp_KwoclrQveWCPdJ1wPm_SI6-StkgczYO1yP7E8G3yjTguoCkMZkHzu5ZM-oxqWmAVhHTlblHvjMGC7O83Ea3DxpbMxibqAXyg23y6d3nuF_9NLpcErfHQgLAfTxyDTiamyhx7PFf423uHMNd_AuKtqBHAIkR9I6pYHLSlQg"><div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div></div><h3 class="text-[18px] font-bold text-[#0F172A] leading-[1.3] mb-2">JnU Photographic Society (JnUPS)</h3><p class="text-[14px] leading-[1.55] text-slate-600 line-clamp-3 mb-space-lg">Capturing the historic heritage of Old Dhaka and timeless university memories through photo walks and exhibitions since 2008.</p></div><div class="pt-space-md border-t border-slate-100 flex items-center justify-between"><div class="flex items-center -space-x-1.5"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Student photographer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByiyx2AOuoEipamkElEbmkuS3n4uM0ODyOSLJiFF-yk7pQx0YV4dHVfyjxDT65qTB-u7P6P7qtqSIExOk_gIlj3K4XZNpQSlpMECvk3Ki6iMOuhThv-N03hShpODHHhjSHiAWWYShzE8Cd7xqj2LRhx-hKgskc8LbVgBsPJ_4zN6F4kIOEm199bixKbq3t7ZhYtrso0hymtnDoea7YJilC98xIpDUJqwlsOvk8jv0zDxqT3-i4HaolSg"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Young female photographer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC71Q9aYps4AoC_c5Ml2yJlkiM7CfMBExMzfyOfxhiXRugIFlqzw27o1RcG--mANf3_G6ViuhNOINg1KAaBFLm_dEZ0exh1xrr3ReWTm5aMzKIrZDurmDg4wnHJZKFpeCPvARYyQlK5KrEYFAT-MG-mRXHRRM-QO2sVjUw0pZ44Jh9EvayjbR_wcEgKDSlmKXpP-Zqtah3c6VYANiV72y3O2CaJ6gqGzW6RDJKFHjSwHNnaFj8Mko3Qw"><span class="text-[12px] text-slate-500 pl-2 font-medium">Active roster</span></div><a class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors" data-path="explore-clubs" href="#"><span class="material-symbols-outlined text-[16px]">arrow_forward</span></a></div></div><div class="bg-white rounded-3xl p-space-lg border border-border-subtle hover:border-indigo-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"><div><div class="flex items-center justify-between mb-space-md"><span class="px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 text-[12px] font-medium border border-cyan-100/60">Technology</span><span class="text-[12px] text-slate-500 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[15px]">group</span>640</span></div><div class="w-full h-36 rounded-2xl mb-space-md overflow-hidden relative"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Student hackathon session" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzOUph2wvdot5-2JPST1HGiZUWtYXY43Y4k4Xkpph_YDtvibPAwj_XF5sMPT-GXwLcDz-ZUEIEkOtgWlVIh8JK3XNDVwIMb4nwMV43Ir0kOVQYmlcZipkeMtlSlLDjbHl53IWKsyaW4RXCrKpFmVonpmkDsocNlBpWTx-Vr1_F5h4bGepEzwiMJi5eGtdq2-SN5QXrqvCdUGA52eYCJtiXHaHa8HTaBcZTdPjvSneB__ed3xj7hTqhuQ"><div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div></div><h3 class="text-[18px] font-bold text-[#0F172A] leading-[1.3] mb-2">JnU IT &amp; Coding Club (JnUIT)</h3><p class="text-[14px] leading-[1.55] text-slate-600 line-clamp-3 mb-space-lg">Competitive programming sprints, UI/UX design masterclasses, and software open days with alumni in top global firms.</p></div><div class="pt-space-md border-t border-slate-100 flex items-center justify-between"><div class="flex items-center -space-x-1.5"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Student coder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcf830iakEYteG4_Qa1v5Qku4Ee5htIykJBog-Ee-Qeex-y3NLcEItCQ1ExmldFYia11dpFPuMkWYPCYH8by72OjnG4w1iFu6RZKGV6ziK_0kHXEq1YUTdFuZmjaQHkLoN-1mkVFyyJVY0RujLneh3AOmLwbs6bDp5nBPT1VwlO1KAhi6OWg9nJyeMeEkSceF0AN4YNjuKa408m1dwSI1QvLgmZ54BvZqsgRDlzrWSdFNl3bcJk3Vkcw"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Female algorithm contestant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBTnyHhqQ-nYc3-K2t0ajeo9QolKJePM4CnZpOwAL36rAXXyOMWkCg79QnteU0Ya0Fh_7Njpsu89UWMC5Nn6C0vI_CQV5GNxj9O6BsmfClUmyd2OItGgkGkHtj5fT24I9WXbvpDebmpehlw2ETYI2i_WsqdtJracmCvca-6m39RZCECF8kFSY8k1a2JGsw3YawYjipnUPNI4Qf2ei8Z7DTXdSsxoTVg5DGOgCJmG5tNt2Jrb-6to9jYg"><span class="text-[12px] text-slate-500 pl-2 font-medium">Active roster</span></div><a class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors" data-path="explore-clubs" href="#"><span class="material-symbols-outlined text-[16px]">arrow_forward</span></a></div></div><div class="bg-white rounded-3xl p-space-lg border border-border-subtle hover:border-indigo-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"><div><div class="flex items-center justify-between mb-space-md"><span class="px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[12px] font-medium border border-rose-100/60">Performing Arts</span><span class="text-[12px] text-slate-500 flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[15px]">group</span>920</span></div><div class="w-full h-36 rounded-2xl mb-space-md overflow-hidden relative"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Traditional Bengali theater performance stage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJPwvgoQiwZNuvnkJYWyVeOSMdKrlwaLLKguNeV6gk7Cv-9Dljb0rEuigDQBNHd45uCLRoNX17mUNqP3_SlJsVmf_vtdRiKDbnb5uX4bcav1bGCMRbhebCGvhyZvRT-uPU1_cVW4ReBFQCpPxUNJzWWbsYrDyfSJZ-WdpR0gtM9o0Fu6vx1EmFnN8SQ4Ijtvf8Emncd6DHKSD1m_kyebGp37J6KPjY1YZobO7lUIzRqHTSfaff5z-T2Q"><div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div></div><h3 class="text-[18px] font-bold text-[#0F172A] leading-[1.3] mb-2">JnU Cultural Council</h3><p class="text-[14px] leading-[1.55] text-slate-600 line-clamp-3 mb-space-lg">Rabindra-Nazrul Jayanti commemorations, grand university theater productions, and seasonal musical galas throughout the year.</p></div><div class="pt-space-md border-t border-slate-100 flex items-center justify-between"><div class="flex items-center -space-x-1.5"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Classical music performer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCAmlVxEcvv_PmH2mtsK4qyA81w8bO9IfqISqymNebpLO40etl9Bw3g_fpnqI5YS9tLANiOCBxulBgLZBLMo8SmcLBPcT-LN33U5zF84GSEux5rVy21X4do98hBOTbz6cjf_0_54trTWX6SiZzvP8WiY0lmXJhBciwFLZ48RLKlQztH2AAptrDTSGL6sWNkXMmvEU-C988t1FIXos2ljX_cHRtXItOhkSe71IQMcgljzM-uui4yBGSEw"><img class="w-6 h-6 rounded-full border border-white object-cover" data-alt="Stage actress" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmtg8uOTg-vSpn1J05FZgiy1CQcODZyTXqhgB0mSmsEnq5GIyUZSP14llJ_mKpti00GTLMasouV1ena31wvsS2J_adW01-HPhBFrP4_RiH8WKBSrwJDFbMO8QK0JO8R1zn4phbtoJ4zEeK1zD9aVYGziTO4GHPWOHO06CIbmlRmSz0DaHj8e95JgNfrEY95MzDhNgzWi4oRgcM-lKfMQ6aiuTCOCZvvYqWtniQK9wFexMHiXfGRNPEg"><span class="text-[12px] text-slate-500 pl-2 font-medium">Active roster</span></div><a class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors" data-path="explore-clubs" href="#"><span class="material-symbols-outlined text-[16px]">arrow_forward</span></a></div></div></div>
+</div>
+</section>
+<!-- 6. UPCOMING CAMPUS EVENTS -->
+<section class="w-full bg-white py-space-2xl lg:py-space-3xl border-t border-border-subtle" style="background-color: rgb(246, 248, 254);">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop">
+<!-- Section Header & Filter Tabs -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-2xl"><div><span class="text-[12px] tracking-wider uppercase text-indigo-600 font-bold block mb-2">HAPPENING THIS MONTH</span><h2 class="text-[36px] font-bold text-[#0F172A] tracking-tight leading-[1.2]">Curated Campus Calendar</h2></div><div class="inline-flex p-1.5 rounded-full bg-indigo-50/60 border border-indigo-100/60 overflow-x-auto max-w-full"><button class="px-3.5 py-1.5 rounded-full bg-white text-indigo-800 text-[13px] font-medium shadow-sm whitespace-nowrap">All Events</button><button class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-indigo-900 text-[13px] font-medium whitespace-nowrap">Cultural</button><button class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-indigo-900 text-[13px] font-medium whitespace-nowrap">Academic</button><button class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-indigo-900 text-[13px] font-medium whitespace-nowrap">Tech</button><button class="px-3.5 py-1.5 rounded-full text-slate-600 hover:text-indigo-900 text-[13px] font-medium whitespace-nowrap">Sports</button></div></div>
+<!-- Event Rows / Cards List -->
+<div class="space-y-space-md">
+<!-- Event 1: National Debate Championship -->
+<div class="group bg-[#FAF9FE] hover:bg-indigo-50/40 rounded-3xl p-space-md md:p-space-lg border border-border-subtle hover:border-indigo-200 transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-start md:items-center gap-space-md">
+<!-- Calendar Date Box -->
+<div class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-white text-indigo-950 border border-indigo-100 shadow-sm shrink-0">
+<span class="font-label-sm text-label-sm uppercase font-bold tracking-wider text-slate-400">NOV</span>
+<span class="font-headline-sm text-headline-sm font-extrabold leading-none text-indigo-600">18</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-indigo-100/60 text-indigo-800 font-label-sm text-label-sm font-semibold">
+                  Championship
+                </span>
+<span class="text-xs text-slate-500">• 10:00 AM BST</span>
+<span class="text-xs text-slate-500 hidden sm:inline">• Free Entry • Open to all batches</span>
+</div>
+<h3 class="font-title-lg text-title-lg font-bold text-[#0F172A] group-hover:text-indigo-600 transition-colors">
+                JnU National Debate Championship 2025
+              </h3>
+<p class="font-body-sm text-body-sm text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                Science Building Central Auditorium, Old Dhaka Campus
+              </p>
+</div>
+</div>
+<!-- Right Action & Face-pile -->
+<div class="flex items-center justify-between lg:justify-end gap-space-lg pt-space-sm lg:pt-0 border-t lg:border-t-0 border-slate-200">
+<div class="flex items-center -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Student delegate in formal attire avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYX_HEPwdy4KQphS0w9c1687az_bP2d8wKoORDFxwVJKG7kGrFJao-1D-ysyVPeHc5IP4ewk54cjg3w8n1AiXShy8kUwbEo6lp9MEsw-tjlcIbIG0PfYat8fRK2pNX3ry-jhvmsvbBPNQ7nBOTrl8PecYRT2HVA1TZRGp7cG76i9pEQdK8fHxfdKa8za-BUbTYn78MUavhpZiUD9pe1zndRdufvpHrHBaH5DfhACMHdy3yKuk8q44Yuw">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Young participant smiling portrait avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqqyoiZDYbVHZdM7SSqavAzGQKZrYPu38h1fCTTbL0BXE-48t4tJqssLs-IWzh4vn-Lrj6Da95biMa4shlj4IpJTO3FOIPkBg7aIUD1ZK96OlTN9tIA8arab2nE0-XglGJsYFcNLsGY0LcFIiG20667jhsauKhFd6rC214VlZjwAR0An2Gtr_niaBURcE1ddMnlRSCnPa3Qd5rLHMom4rqUXwEx1-PmXHjZeSbKUQ6S84WDN-S5rpwog">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="University researcher avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuBTLOqvf277DQVUCYc8HVn_aNpwECeqNhn4gwitiqmamYFSCFAZVTluE-DvpYnZCeubTZn8Yo7wuQsLNtUzSu2SlKzXlgRliQLYnmWg7KV8g9xFM0RrVGe9Cv94EjM_68SNsQYCdLao34o7g1H8NTnjerftDn9_rtn_w8lvInNpmh7h07wJ8dAeEHMI6TQ7gJIq9lpAOG4KQs8bPur7ptmuIEzaGI4GLLz_kYBfGTSBYwHSBroGUV_A">
+<span class="text-xs font-semibold text-slate-500 pl-3">210 RSVP'd</span>
+</div>
+<button class="px-space-lg py-2.5 rounded-full btn-gradient-primary font-label-lg text-label-lg whitespace-nowrap" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.4) 0px 6px 16px -3px !important; font-weight: 700 !important;">
+              RSVP Spot
+            </button>
+</div>
+</div>
+<!-- Event 2: Autumn Tech Sprint -->
+<div class="group bg-[#FAF9FE] hover:bg-indigo-50/40 rounded-3xl p-space-md md:p-space-lg border border-border-subtle hover:border-indigo-200 transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-start md:items-center gap-space-md">
+<!-- Calendar Date Box -->
+<div class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-white text-indigo-950 border border-indigo-100 shadow-sm shrink-0">
+<span class="font-label-sm text-label-sm uppercase font-bold tracking-wider text-slate-400">NOV</span>
+<span class="font-headline-sm text-headline-sm font-extrabold leading-none text-indigo-600">24</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-cyan-100/60 text-cyan-800 font-label-sm text-label-sm font-semibold">
+                  Hackathon
+                </span>
+<span class="text-xs text-slate-500">• 09:30 AM BST</span>
+<span class="text-xs text-slate-500 hidden sm:inline">• Hosted by Dept of CSE</span>
+</div>
+<h3 class="font-title-lg text-title-lg font-bold text-[#0F172A] group-hover:text-indigo-600 transition-colors">
+                Autumn Tech Sprint &amp; 12-Hour Hack Day
+              </h3>
+<p class="font-body-sm text-body-sm text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-400">terminal</span>
+                Computer Lab 4, 3rd Floor, Department of Computer Science
+              </p>
+</div>
+</div>
+<!-- Right Action & Face-pile -->
+<div class="flex items-center justify-between lg:justify-end gap-space-lg pt-space-sm lg:pt-0 border-t lg:border-t-0 border-slate-200">
+<div class="flex items-center -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Developer student portrait avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9aFtzcgrDLs0f-snh9uc1o6YRb3eYEWOCmpyTEgvJVHaLolOVpiAe1MupdOv-yTNNhnHI_hyZfg5xaaAnuxa6oJSV9HTDVX4hkdZUpSYt4JZ21-eOAI9kUaaWIv-ejxPyX3wwTNpyPqWR0JPiLIUrHKNvyaWXKJ04Hu5QpAu14w8GAnhAZMI4RE1FGzgZPmuh4KnAfOWcM1R9kzNfPT1XtaxbxwJ4m_tWqvhoSFPTdgn-GQvkPEFoIg">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Student programmer in casual clothes avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGzZcOF-HI9a5Uc8NAvet2qDgAapucO9uxGXXekXcLji5pf38AcxSL83osKJju39z97VC5NsqPdxiRbDuu9s84SBHkXISG1T2sN3QYXeNS8buRQQmWKNak5Z3Qe_DKJSdSaWLX-ChVlBtPnlbLGarhDRrujis9SBzjvaiBhZKSrrDCOQHhWRLNn9l_sjwpqltqqW7qPt91e5-HtxcPMQStCLJMrsjY7hbJmyxv-u-P0fObXOfarhZdpQ">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Woman engineer face avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQNFaupsbp-VPjDQ6aZL4_-ATv8MZIlWRcfKAhH2egd_x2_1PSQV7w4TzDVFACkG89clPOX5Krz81GL06_Tu9_fNk_4hmliJiUC_k1zAHIc1Mq7ew0nktAe2Qdm0pk-b-PwBCdn-OSWnzCr0BhI0NFiumH2Gy1Xc1oKabnGSblhlnbtwriOHTpM39QXmtqK5Vi5ivGYlThHjQ1_NOER1hAHy_y7JjxTcDM8fAAEqpxGWIGiAqel5m-Lw">
+<span class="text-xs font-semibold text-slate-500 pl-3">88 Teams</span>
+</div>
+<button class="px-space-lg py-2.5 rounded-full btn-gradient-primary font-label-lg text-label-lg whitespace-nowrap" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.4) 0px 6px 16px -3px !important; font-weight: 700 !important;">
+              RSVP Spot
+            </button>
+</div>
+</div>
+<!-- Event 3: Traditional Folk & Drama Evening -->
+<div class="group bg-[#FAF9FE] hover:bg-indigo-50/40 rounded-3xl p-space-md md:p-space-lg border border-border-subtle hover:border-indigo-200 transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-start md:items-center gap-space-md">
+<!-- Calendar Date Box -->
+<div class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-white text-indigo-950 border border-indigo-100 shadow-sm shrink-0">
+<span class="font-label-sm text-label-sm uppercase font-bold tracking-wider text-slate-400">DEC</span>
+<span class="font-headline-sm text-headline-sm font-extrabold leading-none text-indigo-600">02</span>
+</div>
+<div class="space-y-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-rose-100/60 text-rose-800 font-label-sm text-label-sm font-semibold">
+                  Performance
+                </span>
+<span class="text-xs text-slate-500">• 05:30 PM BST</span>
+<span class="text-xs text-slate-500 hidden sm:inline">• Presented by JnU Theater Troupe</span>
+</div>
+<h3 class="font-title-lg text-title-lg font-bold text-[#0F172A] group-hover:text-indigo-600 transition-colors">
+                Traditional Folk &amp; Bengali Drama Evening
+              </h3>
+<p class="font-body-sm text-body-sm text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-400">theater_comedy</span>
+                Open Air Stage (Muktomoncho), Jagannath University
+              </p>
+</div>
+</div>
+<!-- Right Action & Face-pile -->
+<div class="flex items-center justify-between lg:justify-end gap-space-lg pt-space-sm lg:pt-0 border-t lg:border-t-0 border-slate-200">
+<div class="flex items-center -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Drama student smiling avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj0nO2s1syeMc53exZTyU8EZ9k4rD5XHEX61oIV61Ltnd8i-Do3accZhIiK6OpFaI142BSL1m-FWJm5wW8vzAMC0w6hDbFVlZeQwdK8-oIu7ou0v7oJWWKFxVO4jKUX2m5OXtpGfKmQCQceF3IRmNBpmWvf4adRetDzyeSWf13xWoAkUDEzXWQhiN0I8pIykrZeHS9qU7LZ7gjoHq9qKDT2KEzEU61rlJgxyv7RNyJ2Bs2O3i1IezhJg">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Poetry club student portrait avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd1UUGqi--_kn2PuU_tWTW3Fqe9XzEtTX_O4QMaU85GTc8HkOcQcRnSXaujR50Gr7so0dSvQo7PN7TZ8YYt_vmCEcMcKwytmO_MH7gVbyYAgckCSeNHrfQJCyl_BjWPFifk_SvSPO9kE93r330O2p27GaGvF2i2dlOQ1rguyOpLGLYnfgA0qV0H_EXYR6H5USuUDbqTlraMoUyjlvaleP6u-Aehhh-YdnOyeshXjHvq384h7XevE2Z9Q">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Bengali campus member portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo4vgRVjmwbQiX3ddvayp7puuAFKyS8w3iaBjhGK_COPE9Isx3ijTVIiaWslt-Xmw4-7fhpK_80xetKkdMW5F2KhHeLu40cnLf8hA-yAcwZ96tKADVJb00s9QckrTd_wihAZqqi76dyaF_7OeJ7qo6ExYFDWOfbsWPHHikEb0v5Ddo0Yiuj-jtIfMmdcY_gXotKPFMiIlfXLjHwLfiAZFNKVX7DxSjb7sfHSpVBibK0HDqIZ-JWOYXGA">
+<span class="text-xs font-semibold text-slate-500 pl-3">450 Going</span>
+</div>
+<button class="px-space-lg py-2.5 rounded-full btn-gradient-primary font-label-lg text-label-lg whitespace-nowrap" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.4) 0px 6px 16px -3px !important; font-weight: 700 !important;">
+              RSVP Spot
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. HOW JNUVERSE WORKS (3-STEP ELEGANT TIMELINE) -->
+<section class="w-full py-space-2xl lg:py-space-3xl bg-[#FAF9FE]">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop"><div class="text-center max-w-2xl mx-auto mb-space-2xl"><span class="text-[12px] tracking-wider uppercase text-indigo-600 font-bold block mb-2">SEAMLESS ONBOARDING</span><h2 class="text-[36px] font-bold text-[#0F172A] tracking-tight leading-[1.2] mb-2">How JnUVerse Connects You</h2><p class="text-[16px] text-slate-600 max-w-xl mx-auto">Simple three-stage pathway designed around authentic university verification.</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-gutter lg:gap-gutter-desktop relative"><div class="relative bg-white rounded-3xl p-space-xl border border-border-subtle shadow-sm flex flex-col justify-between hover:border-indigo-200 hover:shadow-md transition-all"><div><div class="flex items-center justify-between mb-space-lg"><span class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-700 font-headline-sm font-extrabold flex items-center justify-center">01</span><span class="material-symbols-outlined text-indigo-600 text-[24px]">badge</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2.5">Claim Your Student Identity</h3><p class="text-[15px] text-slate-600 leading-[1.6]">Sign up securely using your university-issued student email or roll ID to verify your batch, department, and academic credentials instantly.</p></div><div class="mt-space-lg pt-space-md border-t border-slate-100"><span class="text-[12px] text-slate-400 font-medium">Instant verification token</span></div></div><div class="relative bg-white rounded-3xl p-space-xl border border-border-subtle shadow-sm flex flex-col justify-between hover:border-indigo-200 hover:shadow-md transition-all"><div><div class="flex items-center justify-between mb-space-lg"><span class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-700 font-headline-sm font-extrabold flex items-center justify-center">02</span><span class="material-symbols-outlined text-indigo-600 text-[24px]">explore</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2.5">Discover &amp; Connect</h3><p class="text-[15px] text-slate-600 leading-[1.6]">Browse approved club rosters, read past publication archives, explore photo galas, and subscribe to notifications from your favorite university wings.</p></div><div class="mt-space-lg pt-space-md border-t border-slate-100"><span class="text-[12px] text-slate-400 font-medium">Customized interests feed</span></div></div><div class="relative bg-white rounded-3xl p-space-xl border border-border-subtle shadow-sm flex flex-col justify-between hover:border-indigo-200 hover:shadow-md transition-all"><div><div class="flex items-center justify-between mb-space-lg"><span class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-700 font-headline-sm font-extrabold flex items-center justify-center">03</span><span class="material-symbols-outlined text-indigo-600 text-[24px]">rocket_launch</span></div><h3 class="text-[18px] font-bold text-[#0F172A] mb-2.5">Participate &amp; Lead</h3><p class="text-[15px] text-slate-600 leading-[1.6]">Attend closed member workshops, lock your RSVP for inter-university tournaments, or propose and launch your own departmental initiative.</p></div><div class="mt-space-lg pt-space-md border-t border-slate-100"><span class="text-[12px] text-slate-400 font-medium">Verified leadership certifications</span></div></div></div></div>
+</section>
+<!-- 8. FINAL CALL TO ACTION (Luminous Light & Airy Design) -->
+<section class="w-full py-space-2xl lg:py-space-3xl bg-white border-t border-border-subtle">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop">
+<div class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white via-[#F4F2FF] to-[#E9E5FF] p-space-xl md:p-space-3xl border border-indigo-100 shadow-[0_16px_40px_-10px_rgba(141,145,245,0.18)]" style="background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(232, 237, 255) 50%, rgb(216, 226, 255) 100%); border-color: rgb(186, 199, 255); box-shadow: rgba(43, 52, 185, 0.22) 0px 20px 48px -12px;">
+<!-- Decorative subtle glowing rings inside banner -->
+<div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-gradient-to-br from-cyan-100/50 to-indigo-100/40 blur-2xl pointer-events-none"></div>
+<div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-purple-100/50 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 max-w-3xl"><div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 shadow-sm text-[12px] text-indigo-800 font-semibold mb-space-lg border border-indigo-100"><span class="material-symbols-outlined text-[16px] text-indigo-600">school</span>Built for JnU Students • 2025-2026 Academic Term</div><h2 class="text-[36px] md:text-[38px] font-extrabold text-[#0F172A] tracking-tight leading-[1.2] mb-4 max-w-2xl">Step into the heartbeat of Jagannath University.</h2><p class="text-[17px] text-slate-600 max-w-xl mb-8 leading-relaxed font-normal">Connect with peers, find your creative passion, and build memories that outlast your graduation. Your community is waiting.</p><div class="flex flex-wrap items-center gap-space-md mb-space-lg"><a class="inline-flex items-center justify-center gap-2 px-space-xl py-3.5 rounded-full btn-aurora-primary text-[16px] font-semibold shadow-md hover:-translate-y-0.5 transition-all" data-path="register" href="#" style="background: linear-gradient(135deg, rgb(43, 52, 185) 0%, rgb(67, 56, 202) 100%) !important; color: rgb(255, 255, 255) !important; box-shadow: rgba(43, 52, 185, 0.5) 0px 10px 26px -4px !important; font-weight: 700 !important;"><span class="">Join JnUVerse Today</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span></a><a class="inline-flex items-center justify-center px-space-xl py-3.5 rounded-full bg-white text-slate-800 border border-indigo-100 shadow-sm text-[15px] font-medium hover:bg-indigo-50/60 transition-all" data-path="explore-clubs" href="#" style="border-color: rgb(148, 163, 184); color: rgb(15, 23, 42); background-color: rgb(255, 255, 255); font-weight: 600; box-shadow: rgba(15, 23, 42, 0.08) 0px 2px 6px;">Explore as Guest</a></div><div class="flex flex-wrap items-center gap-x-6 gap-y-2 pt-space-md border-t border-indigo-100/80 text-[13px] text-slate-500 font-medium"><div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-indigo-600">check_circle</span><span class="">Free for all Jagannath University students</span></div><div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-indigo-600">verified_user</span><span class="">Verified campus credentials required</span></div><div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-indigo-600">security</span><span class="">Student privacy protected</span></div></div></div>
+</div>
+</div>
+</section>
+</div></main>
+<!-- FOOTER -->
+<footer class="w-full bg-slate-50 border-t border-border-subtle text-slate-600">
+<div class="max-w-[1360px] mx-auto px-margin md:px-margin-tablet xl:px-margin-desktop py-space-2xl">
+<div class="flex flex-col md:flex-row items-center justify-between gap-space-lg">
+<nav class="flex flex-wrap items-center justify-center gap-x-space-lg gap-y-space-xs" data-active-classes="text-indigo-600 font-semibold">
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-indigo-600 transition-colors" data-path="explore-clubs" href="#">Explore</a>
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-indigo-600 transition-colors" data-path="campus-guidelines" href="#">Campus Guidelines</a>
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-indigo-600 transition-colors" data-path="student-council" href="#">Student Council</a>
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-indigo-600 transition-colors" data-path="privacy-policy" href="#">Privacy</a>
+<a class="font-label-lg text-label-lg text-slate-600 hover:text-indigo-600 transition-colors" data-path="contact" href="#">Contact</a>
+</nav>
+<p class="font-body-sm text-body-sm text-slate-400 text-center md:text-right">© JnUVerse • Jagannath University Student Network</p>
+</div>
+</div>
+</footer>
+<!-- INTERACTIVE HERO FLOATING TILES PARALLAX JAVASCRIPT -->
+<script>
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const hero = document.getElementById('heroAurora');
+    const items = document.querySelectorAll('.parallax-item');
+    if (!hero || !items.length) return;
+
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let isTracking = false;
+
+    // Track mouse movement relative to hero center
+    hero.addEventListener('mousemove', function (e) {
+      const rect = hero.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      targetX = e.clientX - centerX;
+      targetY = e.clientY - centerY;
+
+      if (!isTracking) {
+        isTracking = true;
+        requestAnimationFrame(renderParallax);
+      }
+    }, { passive: true });
+
+    hero.addEventListener('mouseleave', function () {
+      targetX = 0;
+      targetY = 0;
+    });
+
+    function renderParallax() {
+      // Smooth lerp
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+
+      items.forEach(function (el) {
+        const depth = parseFloat(el.getAttribute('data-depth')) || 0.03;
+        const baseRot = parseFloat(el.getAttribute('data-rot')) || 0;
+        const moveX = (currentX * depth).toFixed(2);
+        const moveY = (currentY * depth).toFixed(2);
+        const dynamicRot = (baseRot + currentX * 0.003).toFixed(2);
+
+        el.style.transform = `translate3d(${moveX}px, ${moveY}px, 0) rotate(${dynamicRot}deg)`;
+      });
+
+      if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
+        requestAnimationFrame(renderParallax);
+      } else {
+        isTracking = false;
+      }
+    }
+  })();
+</script>
+
+
+
+
+</body></html>
