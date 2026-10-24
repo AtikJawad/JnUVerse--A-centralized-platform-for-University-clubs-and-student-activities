@@ -209,4 +209,98 @@ Integrated visible, accessible navigation pathways to the Club Operator Registra
   - Student Registration Desktop (1440x900) & Mobile (390x1200): "Register as a Club Operator" link displayed cleanly below "Already have an account? Log in".
 - **Browser Subagent Limitation Note:** Headless browser subagent hit CDP environment limitation (`Browser.setDownloadBehavior: Browser context management is not supported`), resolved via headless CLI Chrome screenshot verification.
 
+---
+
+## 11. Task 12: Header Navigation Cleanup & Testing Policy Update
+
+### Objective & Deliverable
+1. **Clean Top Navigation Headers:** Cleaned up the top navigation headers across all three public authentication and onboarding pages ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx), [`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx), [`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx)).
+2. **Updated Verification Policy:** Formally adopted a streamlined, token-efficient testing policy focusing on static contract inspection and npm lint/build validation while discontinuing automatic browser launching and screenshot automation.
+
+### Header Cleanup Details
+- **Items Removed:**
+  - `Community Gateway` badge removed from all three page headers.
+  - `Back to Portal` link/button removed from all three page headers.
+  - Unused `Badge` imports safely purged to maintain strict ESLint compliance.
+- **Brand Preservation:** The primary `JnUVerse` brand logo link (with hub mark) is cleanly retained as the sole header element in each view.
+- **Visual & Layout Continuity:** Form positions, cards, input styling, responsive stacking, orbital banners, floating club animations, and cross-registration footer links remain completely untouched.
+
+### Testing & Verification Policy Established
+- **Default Strategy:**
+  1. Inspect source code and contract consistency.
+  2. Run `npm run lint` and `npm run build` from the `frontend/` directory.
+  3. Skip automatic Chrome launches, headless screenshot captures, and browser subagent executions by default.
+  4. Perform visual/browser testing only upon explicit user request (or ask beforehand if critical).
+
+### Files Modified
+- [`frontend/src/pages/Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)
+- [`frontend/src/pages/Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)
+- [`frontend/src/pages/RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx)
+- [`frontend/FRONTEND_README.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/FRONTEND_README.md)
+- [`frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md)
+
+### Verification Results
+- **`npm run lint`:** PASSED (0 errors, 0 warnings).
+- **`npm run build`:** PASSED (Vite production bundle built cleanly in 2.07s).
+- **Code Audit:** Verified that `"Community Gateway"` and `"Back to Portal"` have 0 occurrences across `frontend/src/`.
+
+---
+
+## 12. Task 13: Prepare Frontend for Vercel Deployment
+
+### Objective & Deliverable
+Prepare the existing React + Vite frontend for deployment to Vercel so teammates can publicly access the application and interact with the deployed Django REST Framework backend on Render (`https://jnuverse-a-centralized-platform-for.onrender.com`).
+
+### 1. SPA Routing Configuration (`frontend/vercel.json`)
+- React Router relies on client-side routing using the HTML5 History API. Direct requests or page reloads on subroutes such as `/login`, `/register`, and `/register/club` will cause static file hosts like Vercel to return a 404 error if not routed to `index.html`.
+- Created [`frontend/vercel.json`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/vercel.json) with SPA rewrite rules:
+  ```json
+  {
+    "rewrites": [
+      {
+        "source": "/(.*)",
+        "destination": "/index.html"
+      }
+    ]
+  }
+  ```
+
+### 2. API Base URL Handling (`frontend/src/services/api.js`)
+- **Public Backend Base URL:** `https://jnuverse-a-centralized-platform-for.onrender.com`
+- **Normalization:** In [`frontend/src/services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js), the base URL assignment was defensively enhanced with `.replace(/\/+$/, "")` to eliminate potential trailing slashes before Axios prepends path endpoints.
+- **Local Dev Fallback Preserved:** When `VITE_API_BASE_URL` is omitted, the API client defaults to `http://127.0.0.1:8000`.
+- **Environment Template (`.env.example`):** Added a commented production example pointing to the Render backend service while leaving the local development URL active by default.
+- **Secret Isolation:** Confirmed no backend credentials, DB connection strings, or sensitive API keys are exposed to Vite client environment variables.
+
+### 3. Vercel Project Configuration
+When importing the repository into the Vercel Dashboard, apply the following project settings:
+| Setting | Recommended Value | Note |
+|:---|:---|:---|
+| **Root Directory** | `frontend` | Points Vercel to Vite source and `package.json` |
+| **Framework Preset** | `Vite` | Auto-detected |
+| **Build Command** | `npm run build` | Default Vite build |
+| **Output Directory** | `dist` | Default Vite build artifact folder |
+| **Environment Variable** | `VITE_API_BASE_URL` | Set to `https://jnuverse-a-centralized-platform-for.onrender.com` |
+
+### 4. Render Backend CORS Configuration Requirements
+The Django backend on Render enforces `CORS_ALLOWED_ORIGINS` (via `django-cors-headers`).
+Once Vercel finishes the initial deployment and assigns the public domain:
+- **Render Dashboard:** Navigate to the JnUVerse Web Service -> **Environment**.
+- **Update Variable:** `CORS_ALLOWED_ORIGINS`
+- **Value:** `http://localhost:5173,https://<assigned-vercel-domain>.vercel.app` (comma-separated, without trailing slashes).
+
+### Files Created & Modified
+- **Created:** [`frontend/vercel.json`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/vercel.json)
+- **Modified:**
+  - [`frontend/src/services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)
+  - [`frontend/.env.example`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/.env.example)
+  - [`frontend/FRONTEND_README.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/FRONTEND_README.md)
+  - [`frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md)
+
+### Verification Results
+- **`npm run lint`:** PASSED (0 errors, 0 warnings).
+- **`npm run build`:** PASSED (Vite production bundle built cleanly).
+
+
+
 

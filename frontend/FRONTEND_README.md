@@ -80,6 +80,7 @@ frontend/
 ├── package.json                     # Frontend dependencies and npm scripts
 ├── postcss.config.js                # PostCSS configuration
 ├── tailwind.config.js               # Centralized Stitch design tokens and theme extensions
+├── vercel.json                      # Vercel SPA routing rewrite rules (directs all paths to index.html)
 └── vite.config.js                   # Vite bundler configuration
 ```
 
@@ -111,6 +112,56 @@ npm run lint
 # 7. Preview production build locally
 npm run preview
 ```
+
+### Vercel Deployment Configuration
+
+The frontend is prepared for deployment to Vercel to allow teammates to access the web application publicly against the deployed Render backend:
+
+- **Public Backend Service (Render):** `https://jnuverse-a-centralized-platform-for.onrender.com`
+- **Backend Health Check:** `GET https://jnuverse-a-centralized-platform-for.onrender.com/api/health/` -> `{"status":"ok","project":"JnUVerse backend"}`
+- **Backend Swagger Docs:** `https://jnuverse-a-centralized-platform-for.onrender.com/api/docs/`
+
+#### Vercel Project Settings (Vercel Dashboard)
+When importing the repository into Vercel, configure the following project build and deployment settings:
+
+| Setting | Value | Description |
+|:---|:---|:---|
+| **Root Directory** | `frontend` | Informs Vercel that `package.json` and Vite config reside in `frontend/` |
+| **Framework Preset** | `Vite` | Automatically detected by Vercel |
+| **Build Command** | `npm run build` | Produces production-optimized assets |
+| **Output Directory** | `dist` | Default output directory of Vite |
+| **Environment Variable Name** | `VITE_API_BASE_URL` | Injected at build time by Vite |
+| **Environment Variable Value** | `https://jnuverse-a-centralized-platform-for.onrender.com` | Verified Render public backend URL |
+
+#### Client-Side SPA Routing ([`vercel.json`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/vercel.json))
+Because the application uses React Router with HTML5 browser history navigation (`/login`, `/register`, `/register/club`, etc.), direct URL access or page refreshes on non-root paths must be redirected to `index.html`. This is handled by `frontend/vercel.json`:
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+#### Render Backend CORS Requirement
+When the frontend is deployed to Vercel, Vercel will assign a production domain (e.g. `https://<project-name>.vercel.app`).
+The Django REST Framework backend on Render uses `django-cors-headers` reading from the `CORS_ALLOWED_ORIGINS` environment variable.
+Once the Vercel domain is known, update the Render backend environment variable:
+- **Variable Name:** `CORS_ALLOWED_ORIGINS`
+- **Required Setting:** Include `http://localhost:5173` (for local dev) and `https://<your-assigned-vercel-domain>.vercel.app` (without trailing slash). Example:
+  ```
+  CORS_ALLOWED_ORIGINS=http://localhost:5173,https://<your-assigned-domain>.vercel.app
+  ```
+
+### Default Testing & Verification Policy
+To optimize development velocity and token efficiency, the project follows this default verification policy:
+1. **Source Code & Contract Inspection:** Verify component logic, props, routes, and API payloads via static inspection.
+2. **Standard Quality Gate:** Run `npm run lint` (ESLint) and `npm run build` (Vite production bundle) on all changes.
+3. **No Automatic Browser/Screenshot Automation:** Automatic headless Chrome runs, Playwright sessions, and screenshot capture are disabled by default.
+4. **On-Demand Visual Testing:** Browser-based testing and screenshot captures are executed only when explicitly requested by the user. If browser testing is critically necessary to diagnose an issue, request confirmation first.
 
 ---
 
@@ -162,6 +213,7 @@ Both registration screens share a unified sibling architecture:
 - **Clean Form Presentations:** Uncluttered form headers (`Create your account.` for students; `Register Club Operator.` for operators) with clear subtitles and zero extraneous badges or banner links.
 - **Club Operator Fields (`POST /api/auth/register/club/`):** `club_name` (req), `email` (req), `description` (opt, max 300 words), `contact_email` (opt), `password` (req), `password_confirm` (req), and authorized executive certification checkbox.
 - **Showcase Content:** "Empower Your Campus Society", static verified metrics (`40+ Registered Societies`, `100% Council Synchronized`), 5 floating club nodes (`JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, `Athletics Wing`), and rotating benefit captions.
+- **Clean Header Layout:** All three authentication screens (`Login.jsx`, `Register.jsx`, `RegisterClub.jsx`) feature a clean top header containing solely the official JnUVerse brand mark, removing non-essential items like "Community Gateway" and "Back to Portal".
 - **Cross-Linking Navigation:** Both [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx) ("Want to manage your club? Register as a Club Operator.") and [`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx) ("Registering a club instead? Register as a Club Operator.") feature clear, accessible `<Link>` elements pointing directly to `/register/club`.
 
 ### 4. Reusable UI Components

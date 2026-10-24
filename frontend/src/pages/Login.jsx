@@ -5,7 +5,6 @@ import { extractErrorMessage } from "../services/api";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import ErrorAlert from "../components/ErrorAlert";
-import Badge from "../components/Badge";
 
 const HIGHLIGHTS = [
   {
@@ -81,27 +80,16 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-canvas-base flex flex-col justify-between selection:bg-surface-variant selection:text-primary">
-      {/* Top Header / Portal Navigation */}
+      {/* Top Header */}
       <header className="w-full bg-surface-white/80 backdrop-blur-xl border-b border-border-subtle sticky top-0 z-50">
-        <div className="max-w-[1360px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-resting group-hover:scale-105 transition-transform">
-                <span className="material-symbols-outlined text-[20px]">hub</span>
-              </div>
-              <span className="text-xl font-bold tracking-tight text-on-surface">
-                JnU<span className="text-primary">Verse</span>
-              </span>
-            </Link>
-            <Badge variant="primary" dot className="hidden sm:inline-flex">
-              Community Gateway
-            </Badge>
-          </div>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-text-muted hover:text-primary hover:bg-surface-lavender transition-all"
-          >
-            <span>Back to Portal</span>
+        <div className="max-w-[1360px] mx-auto px-6 lg:px-12 h-16 flex items-center">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-resting group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[20px]">hub</span>
+            </div>
+            <span className="text-xl font-bold tracking-tight text-on-surface">
+              JnU<span className="text-primary">Verse</span>
+            </span>
           </Link>
         </div>
       </header>
