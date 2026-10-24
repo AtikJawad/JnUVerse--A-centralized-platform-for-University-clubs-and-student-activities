@@ -5,7 +5,7 @@ Jagannath University (JnU), Bangladesh — Software Engineering course project.
 
 > Status: **Week 3 of 10: Clubs and Memberships**  
 > - **Backend:** Completed through Week 3 (accounts, clubs, follow/unfollow, membership workflow).  
-> - **Frontend:** Step 1 completed — Repository audit, Stitch design foundation, token centralization, reusable UI components, authentication flow, and animated orbital club hub verified. Next: Week 3 Club Discovery & Profile screens.  
+> - **Frontend:** Completed through Week 3 — Club directory explorer, search & filtering, detailed club profiles, follow/unfollow toggle, membership application workflow, student portal, operator member management, and Stitch design system verified.  
 > - **Frontend Primary Guide:** [`frontend/FRONTEND_README.md`](frontend/FRONTEND_README.md) | [10-Week Workflow Logs](frontend/docs/workflow/)  
 > - **Backend Integration Handoff:** [`backend/FRONTEND_REQUIREMENTS.md`](backend/FRONTEND_REQUIREMENTS.md) | [Weekly Handoff Docs](backend/docs/frontend-handoff/)  
 

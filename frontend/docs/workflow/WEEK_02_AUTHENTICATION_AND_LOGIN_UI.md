@@ -304,6 +304,53 @@ To allow the live Vercel frontend to communicate with the Render API, update the
 - **HTTP Live Check (`curl -I https://jnuverse.vercel.app`):** `HTTP/2 200` OK.
 - **SPA Rewrite Check (`curl -I https://jnuverse.vercel.app/register/club`):** `HTTP/2 200` OK (serves `index.html` inline).
 
+---
+
+## 13. Stage 1: Production Verification Audit
+
+### Overview
+A comprehensive read-only audit of the JnUVerse production deployments across Vercel (frontend) and Render (backend) was performed in October 2026 following initial deployment.
+
+### 1. Verification of Frontend API Base URL
+- **Production Asset:** The compiled JavaScript bundle served by `https://jnuverse.vercel.app/` (`/assets/index-Cj_65njv.js`) was inspected directly.
+- **Evidence:** `Kp = "https://jnuverse-a-centralized-platform-for.onrender.com".replace(/\/+$/, "");` is statically inlined and passed to `axios.create({ baseURL: Kp })`.
+- **Status:** **CONFIRMED**. The production frontend targets the live Render backend directly.
+
+### 2. CORS Configuration Review
+- **Origin Whitelist:** Render environment variable `CORS_ALLOWED_ORIGINS` was verified via live HTTP OPTIONS and GET preflights.
+- **Evidence:**
+  - `curl -s -i -X OPTIONS https://jnuverse-a-centralized-platform-for.onrender.com/api/auth/departments/ -H "Origin: https://jnuverse.vercel.app"` returned `HTTP/2 200` with `access-control-allow-origin: https://jnuverse.vercel.app`.
+  - Preview origin `https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app` also returned `access-control-allow-origin: https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app`.
+  - POST preflight on `/api/auth/login/` returned `HTTP/2 200` with authorized CORS headers.
+- **Status:** **CONFIRMED & WORKING**. Cross-origin requests from Vercel to Render are active and permitted.
+
+### 3. Review of Authentication, Registration, and Navigation Flows
+| Flow / Subsystem | Status | Audit Findings |
+|:---|:---:|:---|
+| **Department List Retrieval** | **Confirmed Working** | `GET /api/auth/departments/` successfully returns 38 academic departments to populate the student registration dropdown. |
+| **Render Health Check** | **Confirmed Working** | `GET /api/health/` returns `{"status":"ok","project":"JnUVerse backend"}` with HTTP 200. |
+| **Vercel SPA Routing** | **Confirmed Working** | Direct navigation and reloads of `/login`, `/register`, and `/register/club` return HTTP 200 serving `index.html`. |
+| **Student Registration** | **Code-Inspection Verified** | Frontend payload in `Register.jsx` aligns strictly with DRF `StudentRegisterSerializer` (format, batch inference, registrar check). Execution against live database unverified to preserve user data. |
+| **Club Operator Registration** | **Code-Inspection Verified** | Frontend payload in `RegisterClub.jsx` aligns strictly with DRF `ClubRegisterSerializer` (creates club in `is_active=False` pending state). |
+| **Login & JWT Token Handling** | **Code-Inspection Verified** | `AuthContext.jsx` manages access and refresh tokens in `localStorage`. Request interceptor attaches Bearer token; response interceptor queues requests during 401 refresh. |
+| **Protected Routes (RBAC)** | **Code-Inspection Verified** | `ProtectedRoute.jsx` intercepts unauthenticated visits to `/` and `/dashboard`, redirecting to `/login`. Evaluates `user.role` against `allowedRoles`. |
+| **Logout & Session Purge** | **Code-Inspection Verified** | `logout()` clears `localStorage` keys and state. Interceptor broadcasts `auth:logout` on unrecoverable token refresh failure. |
+
+### 4. Configuration Risks & Issues Identified
+- **Issue 1 (Severity: Low / Cosmetic):** Hardcoded fallback error message in `frontend/src/services/api.js` line 128:
+  `"Unable to reach the server. Please verify the backend is running at http://127.0.0.1:8000."`
+  *Risk:* When network interruptions or temporary outages occur in production, users see a message referencing localhost rather than a generic connectivity warning.
+- **Issue 2 (Severity: Informational):** New Club Operator accounts require administrative approval in Django admin (`user.is_active=True`, `club.is_active=True`) before login succeeds (otherwise 403 Forbidden is returned as designed).
+
+### 5. Secrets & Security Audit
+- **Git Repository:** Zero exposed database credentials, secret keys, or JWT signing keys in tracked files.
+- **Vercel CLI Uploads:** `frontend/.vercelignore` safely blocks `.env`, `.env.*`, `.env.local`, and `.vercel` metadata from uploading.
+- **Client Variables:** Only `VITE_API_BASE_URL` is exposed to Vite, which is public configuration.
+
+### 6. Recommended Next Implementation Stage
+- Proceed to **Week 3: Club Discovery & Membership** (or Stage 2: Controlled Authenticated Smoke Testing with a designated test student account).
+
+
 
 
 

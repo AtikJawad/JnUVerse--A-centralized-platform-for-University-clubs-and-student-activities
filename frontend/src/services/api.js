@@ -125,7 +125,7 @@ export function extractErrorMessage(error, defaultMessage = "An error occurred."
   if (!error) return defaultMessage;
   if (!error.response) {
     if (error.request) {
-      return "Unable to reach the server. Please verify the backend is running at http://127.0.0.1:8000.";
+      return `Unable to reach the server. Please verify the backend is reachable at ${API_BASE_URL}.`;
     }
     return error.message || defaultMessage;
   }

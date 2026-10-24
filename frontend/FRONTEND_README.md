@@ -57,14 +57,19 @@ frontend/
 │   │   ├── Input.jsx                # Form input field with icons, labels, and error states
 │   │   ├── JnUHubMark.jsx           # Reusable JnU brand mark and central hub symbol
 │   │   ├── LoadingState.jsx         # Accessible spinner and async state presentation
+│   │   ├── Navbar.jsx               # Reusable responsive navigation header with role-aware links
 │   │   └── ProtectedRoute.jsx       # RBAC route guard supporting 'student' and 'club_operator'
 │   ├── context/
 │   │   └── AuthContext.jsx          # User state, token lifecycle, login, register, logout
 │   ├── hooks/                       # Custom reusable React hooks
 │   ├── layouts/                     # Shared layout wrappers for student & operator views
 │   ├── pages/                       # Route-level screens
+│   │   ├── ClubDetail.jsx           # Club profile, follow/unfollow, membership application & operator edits
 │   │   ├── Dashboard.jsx            # Authenticated student/operator landing dashboard
+│   │   ├── ExploreClubs.jsx         # Club directory explorer with search, category filtering & pagination
 │   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
+│   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
+│   │   ├── OperatorMembers.jsx      # Operator portal: pending request approval/rejection & member list
 │   │   ├── Register.jsx             # Stitch-aligned student registration (orbital left, form right, registrar sync)
 │   │   └── RegisterClub.jsx         # Stitch-aligned Club Operator registration (orbital left, form right, DRF sync)
 │   ├── services/
@@ -226,6 +231,7 @@ Both registration screens share a unified sibling architecture:
 - **Cross-Linking Navigation:** Both [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx) ("Want to manage your club? Register as a Club Operator.") and [`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx) ("Registering a club instead? Register as a Club Operator.") feature clear, accessible `<Link>` elements pointing directly to `/register/club`.
 
 ### 4. Reusable UI Components
+- [`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Navbar.jsx): Sticky responsive navigation bar with brand mark, role pill tags, role-aware navigation links (`Overview`, `Explore Clubs`, `My Clubs`, `Manage Members`), mobile navigation drawer, and session sign in/out.
 - [`Button.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Button.jsx): Full-pill shape (`rounded-full`), supports `primary`, `secondary`, `outline`, `danger`, `ghost`, and `isLoading` spinner state.
 - [`Input.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Input.jsx): Rounded-xl input with 1px `#E2E4F3` border, leading icon prefix, helper text, and accessible error state.
 - [`Card.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Card.jsx): Elevated surface card with resting and hover shadows.
@@ -235,6 +241,29 @@ Both registration screens share a unified sibling architecture:
 - [`LoadingState.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/LoadingState.jsx): Accessible spinner for full-screen and section loading.
 - [`EmptyState.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/EmptyState.jsx): Clean zero-state display for lists and searches.
 
+### 5. Week 3 Club Discovery & Membership UI Views (Stitch Redesign)
+The Week 3 UI was refined directly against the official Google Stitch exports located in `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/`:
+
+- **Shared Responsive Navigation ([`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Navbar.jsx)):**
+  - *Reference:* `jnuverse_explore_clubs/code.html` and user reference screenshot.
+  - *Design Features:* 80px fixed height (`h-20`), white background with subtle blur (`bg-surface-white/90 backdrop-blur-xl border-b border-surface-lavender`), 3-part mathematically centered grid (`lg:grid-cols-[1fr_auto_1fr]`), left brand mark with lavender `STUDENT PORTAL` badge, center rounded lavender container with `Overview`, `Explore Clubs`, `My Clubs`, and `Events` (deep-indigo active pill `#0810A4`), and right-side controls with notification bell (unread indicator), user profile stack (name + batch/department), circular person profile icon, and logout button. Fully responsive with mobile drawer navigation on tablet/mobile.
+- **Club Explorer & Directory ([`ExploreClubs.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreClubs.jsx)):**
+  - *Reference:* `jnuverse_explore_clubs/code.html` and target desktop reference screenshot.
+  - *Design Features:* Atmospheric blurred gradient canvas blobs, balanced two-column hero layout (~60% left context, ~40% right floating community cards constellation matching reference screenshot: IT Society, Debating, Science Club, Rover Scout, Cultural Wing, Film & Drama with trailing dot, standalone Sports and Photography squircle badges, and ambient periwinkle dot with subtle staggered vertical floating animations), bold headline wrapping intentionally after "Follow" ("Find your people. Follow" / "your passion.") with saturated indigo-to-periwinkle gradient and tight tracking, enlarged search & filter container (102px height, 14px padding, 76px search input with soft lavender surface, 52px category chips in exact order), redesigned asymmetrical featured community banner (soft lavender-white gradient, ~40px rounded corners, translucent lavender ambient circle, deep-indigo squircle tile, inline handle, verified metadata, and elevated white statistics card with real API metrics), 3-column card grid, and bottom advisory FAQ banner. Fully responsive from mobile to ultra-wide displays.
+- **Club Profile & Management ([`ClubDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ClubDetail.jsx)):**
+  - *Reference:* `jnuverse_club_profile_management/code.html`.
+  - *Design Features:* Asymmetric 12-column layout (7 cols left, 5 cols right). Left column features the official club insignia squircle, university verification charter status banner ("Verified Student Guild · Active Charter"), and editable profile form for operators (or rich description view for students). Right column features the "Live Public Preview" student viewport mirror card with cover gradient banner, overlapping avatar, category badges, metrics ribbon, and follow/membership action controls.
+- **Student Club Portal ([`MyClubs.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/MyClubs.jsx)):**
+  - *Reference:* `jnuverse_my_clubs/code.html`.
+  - *Design Features:* Editorial header, 3-card linear overview metric ribbon (Approved Memberships, Pending Requests, Following), filter tab pills with counts, search filter input, and 3-column card grid with status badges.
+- **Operator Member Management ([`OperatorMembers.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorMembers.jsx)):**
+  - *Reference:* `jnuverse_member_management_redesigned/code.html`.
+  - *Design Features:* Editorial context header with club identity card, 3-card key stats bar (Total Enrolled Members, Departments Represented, Pending Applications), search input and department filter pills, clean tabular roster rows with student initials avatars, font-mono student IDs, single-click approve/reject actions for pending requests, and revocation confirmation modal dialog.
+  - *Student Privacy Protection:* Strictly adheres to university student data privacy rules: **student email addresses are never exposed or rendered in operator views**.
+- **Living Campus Experience Dashboard ([`Dashboard.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Dashboard.jsx)):**
+  - *Reference:* `jnuverse_student_dashboard_living_campus_experience/code.html`.
+  - *Design Features:* Hero section with ambient glow, floating constellation interest tiles (Tech & Code, Debate & Eloquence, Sports, Photography, Drama), personal greeting pill, quick-action discovery hubs, and roadmap tiles.
+
 ---
 
 ## 6. Implementation Status Matrix
@@ -243,7 +272,7 @@ Both registration screens share a unified sibling architecture:
 |:---|:---:|:---:|:---:|:---|
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
-| **Club Discovery & Memberships** | Week 3 | **Pending Step 2** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
+| **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
 | **Events & RSVP Registration** | Week 4 | Not Started | Models Exist (No Endpoints) | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
