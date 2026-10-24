@@ -146,15 +146,24 @@ Because the application uses React Router with HTML5 browser history navigation 
 }
 ```
 
+#### Live Vercel Deployment Details
+- **Project Name:** `jnuverse`
+- **Team Scope:** `rebel-0c2e`
+- **Live Deployed URL:** [https://jnuverse.vercel.app](https://jnuverse.vercel.app)
+- **Deployment-Specific URL:** `https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app`
+- **Inspection Dashboard:** `https://vercel.com/rebel-0c2e/jnuverse`
+- **Deployment Mode:** Direct local file upload via Vercel CLI (no Git repository connection).
+- **Environment Variable Configured:** `VITE_API_BASE_URL=https://jnuverse-a-centralized-platform-for.onrender.com` (Production & Preview).
+
 #### Render Backend CORS Requirement
-When the frontend is deployed to Vercel, Vercel will assign a production domain (e.g. `https://<project-name>.vercel.app`).
 The Django REST Framework backend on Render uses `django-cors-headers` reading from the `CORS_ALLOWED_ORIGINS` environment variable.
-Once the Vercel domain is known, update the Render backend environment variable:
+Update the Render backend environment variable with the assigned Vercel domains:
 - **Variable Name:** `CORS_ALLOWED_ORIGINS`
-- **Required Setting:** Include `http://localhost:5173` (for local dev) and `https://<your-assigned-vercel-domain>.vercel.app` (without trailing slash). Example:
+- **Exact Setting for Render:**
   ```
-  CORS_ALLOWED_ORIGINS=http://localhost:5173,https://<your-assigned-domain>.vercel.app
+  CORS_ALLOWED_ORIGINS=http://localhost:5173,https://jnuverse.vercel.app,https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app
   ```
+*(Comma-separated, without trailing slashes).*
 
 ### Default Testing & Verification Policy
 To optimize development velocity and token efficiency, the project follows this default verification policy:

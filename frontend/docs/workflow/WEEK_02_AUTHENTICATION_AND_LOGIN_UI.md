@@ -272,25 +272,26 @@ Prepare the existing React + Vite frontend for deployment to Vercel so teammates
 - **Environment Template (`.env.example`):** Added a commented production example pointing to the Render backend service while leaving the local development URL active by default.
 - **Secret Isolation:** Confirmed no backend credentials, DB connection strings, or sensitive API keys are exposed to Vite client environment variables.
 
-### 3. Vercel Project Configuration
-When importing the repository into the Vercel Dashboard, apply the following project settings:
-| Setting | Recommended Value | Note |
-|:---|:---|:---|
-| **Root Directory** | `frontend` | Points Vercel to Vite source and `package.json` |
-| **Framework Preset** | `Vite` | Auto-detected |
-| **Build Command** | `npm run build` | Default Vite build |
-| **Output Directory** | `dist` | Default Vite build artifact folder |
-| **Environment Variable** | `VITE_API_BASE_URL` | Set to `https://jnuverse-a-centralized-platform-for.onrender.com` |
+### 3. Vercel Project Configuration & CLI Deployment
+- **Deployment Method:** Executed direct local file upload via Vercel CLI (`npx -y vercel --yes`) without Git provider connection.
+- **Project Linked:** `rebel-0c2e/jnuverse`
+- **Environment Variable Configured:** `VITE_API_BASE_URL=https://jnuverse-a-centralized-platform-for.onrender.com` (Production & Preview).
+- **Assigned Live Deployment:**
+  - **Live URL:** [https://jnuverse.vercel.app](https://jnuverse.vercel.app)
+  - **Direct Preview URL:** `https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app`
+  - **Inspection Dashboard:** `https://vercel.com/rebel-0c2e/jnuverse/8VU3oJEroDbckBuSBFyeVMWD7YSa`
 
 ### 4. Render Backend CORS Configuration Requirements
 The Django backend on Render enforces `CORS_ALLOWED_ORIGINS` (via `django-cors-headers`).
-Once Vercel finishes the initial deployment and assigns the public domain:
-- **Render Dashboard:** Navigate to the JnUVerse Web Service -> **Environment**.
+To allow the live Vercel frontend to communicate with the Render API, update the Render Web Service environment:
+- **Render Dashboard:** JnUVerse Web Service -> **Environment**.
 - **Update Variable:** `CORS_ALLOWED_ORIGINS`
-- **Value:** `http://localhost:5173,https://<assigned-vercel-domain>.vercel.app` (comma-separated, without trailing slashes).
+- **Value:** `http://localhost:5173,https://jnuverse.vercel.app,https://jnuverse-4idyb8nc2-rebel-0c2e.vercel.app`
 
 ### Files Created & Modified
-- **Created:** [`frontend/vercel.json`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/vercel.json)
+- **Created:**
+  - [`frontend/vercel.json`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/vercel.json) (SPA URL rewrites)
+  - [`frontend/.vercelignore`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/.vercelignore) (Explicit exclusion of `.env`, `.env.*`, `node_modules`, `.vercel`)
 - **Modified:**
   - [`frontend/src/services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)
   - [`frontend/.env.example`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/.env.example)
@@ -299,7 +300,10 @@ Once Vercel finishes the initial deployment and assigns the public domain:
 
 ### Verification Results
 - **`npm run lint`:** PASSED (0 errors, 0 warnings).
-- **`npm run build`:** PASSED (Vite production bundle built cleanly).
+- **`npm run build`:** PASSED (Vite production bundle built cleanly in 724ms).
+- **HTTP Live Check (`curl -I https://jnuverse.vercel.app`):** `HTTP/2 200` OK.
+- **SPA Rewrite Check (`curl -I https://jnuverse.vercel.app/register/club`):** `HTTP/2 200` OK (serves `index.html` inline).
+
 
 
 

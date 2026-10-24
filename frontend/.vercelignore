@@ -1,0 +1,11 @@
+# Vercel Ignore file
+# Prevent sensitive files, node_modules, and local files from being uploaded
+.env
+.env.*
+.env.local
+!.env.example
+node_modules
+dist
+.vercel
+.git
+.DS_Store
