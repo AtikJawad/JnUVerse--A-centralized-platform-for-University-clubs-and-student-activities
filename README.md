@@ -3,15 +3,11 @@
 **A Centralized Platform for University Clubs & Student Activities**
 Jagannath University (JnU), Bangladesh — Software Engineering course project.
 
-> Status: **Week 3 of 10: clubs and memberships (backend complete, frontend pending)** 
-Verified by the team on a real Supabase database:
-The migrations for all 7 apps applied cleanly.
-check reports no issues.
-All 14 database constraints were tested and rolled back.
-Student registration, club registration, login by email or Student ID, token refresh and me all work.
-Swagger loads, and spectacular --validate prints no warnings.
-Built but with no endpoints yet: ClubFollow, ClubMembership, Event, EventRegistration, Notice, Notification, EventRating, CollaborationRequest and ContentReport.
-Not done yet: the Week 2 frontend (Antigravity), and the use-case, class and architecture diagrams.
+> Status: **Week 3 of 10: Clubs and Memberships**  
+> - **Backend:** Completed through Week 3 (accounts, clubs, follow/unfollow, membership workflow).  
+> - **Frontend:** Step 1 completed — Repository audit, Stitch design foundation, token centralization, reusable UI components, authentication flow, and animated orbital club hub verified. Next: Week 3 Club Discovery & Profile screens.  
+> - **Frontend Primary Guide:** [`frontend/FRONTEND_README.md`](frontend/FRONTEND_README.md) | [10-Week Workflow Logs](frontend/docs/workflow/)  
+> - **Backend Integration Handoff:** [`backend/FRONTEND_REQUIREMENTS.md`](backend/FRONTEND_REQUIREMENTS.md) | [Weekly Handoff Docs](backend/docs/frontend-handoff/)  
 
 ---
 

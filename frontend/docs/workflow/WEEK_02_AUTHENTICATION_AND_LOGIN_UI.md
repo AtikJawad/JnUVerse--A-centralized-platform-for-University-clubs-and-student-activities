@@ -1,0 +1,212 @@
+# Week 02 — Authentication, Registration & Login UI
+
+**Focus:** Student/Operator authentication, JWT lifecycle, token refresh queue, registration with registrar verification, Stitch login screen with animated orbital club icons  
+**Status:** **Completed**  
+**Assigned:** Anik Khondokar (Frontend MVP Coder)  
+**Last Verified / Updated:** October 2026 (Orbital Floating Animation Added)  
+
+---
+
+## 1. Objectives
+- Implement dual-identifier login supporting either JnU Student ID (e.g. `B220305043`) or student email.
+- Implement student registration validating against pre-populated university registrar records.
+- Implement robust JWT state management with Axios request interceptors and automatic 401 refresh retries.
+- Build the Stitch-aligned Login page featuring the 7 floating orbital campus club nodes around the central JnU hub.
+- Ensure full accessibility and `@media (prefers-reduced-motion: reduce)` support.
+
+## 2. Scope & Exclusions
+- **In Scope:** `Login.jsx`, `Register.jsx`, `AuthContext.jsx`, `api.js`, `ProtectedRoute.jsx`, orbital CSS keyframes, password visibility toggle, DRF error banner.
+- **Exclusions:** No mock accounts, no alterations to Django auth serializers or User models, no manual bypass of registrar validation.
+
+## 3. Tasks & Dated Progress
+1. [x] **Auth Context & Interceptor Setup:** Built `AuthContext.jsx` with session restore (`GET /api/auth/me/`) and automatic token refresh queue in `services/api.js`.
+2. [x] **Student Registration (`Register.jsx`):** Dynamically populated department choice field from `GET /api/auth/departments/`; added client-side regex extraction of batch from student ID (`B22...` -> 22); integrated inline DRF validation handling.
+3. [x] **Login Screen Layout (`Login.jsx`):** Implemented dual-column layout with left form card and right Stitch presentation panel.
+4. [x] **Orbital Club Icon Animation (Dated Update: October 2026):**
+   - Configured 7 continuous floating keyframes (`orbit-float-1` to `orbit-float-7`) with independent durations (5.6s to 7.2s) and negative animation delays.
+   - Preserved orbital positions: Node 1 (IT Club, top), Node 2 (Debating Society, top-left), Node 3 (Photographic Society, top-right), Node 4 (Tech Guild, far-right), Node 5 (Cultural Council, far-left), Node 6 (Science Society, bottom-left), Node 7 (Career Club, bottom-right).
+   - Added restrained hover interaction: child icon scales (`hover:scale-110`, `hover:shadow-elevated`) without interfering with parent float keyframe.
+   - Added full `@media (prefers-reduced-motion: reduce)` accessibility suppression.
+5. [x] **Favicon Consistency & Multi-Format Fallback (`frontend/public/`):**
+   - Designed standalone SVG favicon matching the exact rounded-squircle primary blue (`#2B34B9`) with centered white Material Symbols `hub` vector glyph and explicit `width="32" height="32"`.
+   - Generated multi-resolution `favicon.ico` (16x16, 32x32, 48x48) via PIL containing the exact primary blue squircle and white hub geometry.
+   - Linked `<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />` and `<link rel="alternate icon" href="/favicon.ico?v=2" />` in `frontend/index.html` to bust aggressive browser caches.
+6. [x] **Reusable Brand Hub Mark (`frontend/src/components/JnUHubMark.jsx`):**
+   - Created shared `JnUHubMark` component supporting `header` and `orbital` variants for strict brand visual consistency between Login and Registration without modifying the existing Login page.
+7. [x] **Student Registration Page Redesign (`frontend/src/pages/Register.jsx`):**
+   - Implemented responsive Google Stitch two-column desktop architecture: JnUVerse orbital showcase illustration on the left and complete student registration form on the right.
+   - Stacks vertically on mobile viewports with form displayed first (`order-1 lg:order-2`).
+   - Recreated orbital showcase with soft gradient card, 3 concentric rings, central `JnUHubMark` planet, 5 floating club nodes (`JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, `Athletics Wing`), `"Connect, Learn & Belong"` headline, and statistics badges (`4,200+ Enrolled Students`, `40+ Campus Guilds`).
+   - Preserved 100% of live backend integration: `GET /api/auth/departments/` dynamic options, student ID batch inference (`B22...` -> 22), password toggle controls, DRF field error binding, and account creation via `POST /api/auth/register/student/`.
+8. [x] **Registration UI Corrections (Dated Update: October 2026):**
+   - **Removed Unwanted Header:** Stripped out `Academic Intake 2024–2025`, `Sign In Instead`, and associated `arrow_forward` icon.
+   - **Fixed Two-Column Vertical Alignment:** Changed grid alignment to `items-start`, ensuring the left orbital illustration card and right registration form begin at the exact same vertical position.
+   - **Balanced Desktop & Laptop Layout:** Tuned padding and column widths so the layout remains side-by-side with balanced heights and no overflow at desktop (~1440px) and laptop (~1024px) widths.
+9. [x] **Login Page UI Refinement (Dated Update: October 2026):**
+   - **Matched Floating Club Icon Labels with Registration:** Updated the orbiting nodes around the central JnUVerse hub to match the exact 5 club names, colors, and icons from `Register.jsx`: `JnU IT Club` (terminal, `#2B34B9`), `Debating Society` (record_voice_over, `#4285F4`), `Photo Club` (photo_camera, `#EA4335`), `Cultural Cell` (theater_comedy, `#9333EA`), and `Athletics Wing` (sports_soccer, `#D97706`), each with an accessible white pill badge label without colliding with the central JnU hub or neighboring icons.
+   - **Reduced Login Card Width:** Tightened the form container from `max-w-md` (448px) to `max-w-[420px]`, centered inside its `lg:col-span-5` column, keeping balanced input spacing, readable typography, and complete responsive integrity on mobile (390px), laptop (1024px), and desktop (1440px).
+
+## 4. Relevant Frontend Files
+- [`frontend/public/favicon.svg`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/public/favicon.svg)
+- [`frontend/public/favicon.ico`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/public/favicon.ico)
+- [`frontend/index.html`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/index.html)
+- [`frontend/src/pages/Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)
+- [`frontend/src/pages/Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)
+- [`frontend/src/components/JnUHubMark.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/JnUHubMark.jsx)
+- [`frontend/src/context/AuthContext.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/context/AuthContext.jsx)
+- [`frontend/src/services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)
+- [`frontend/src/components/ProtectedRoute.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/ProtectedRoute.jsx)
+- [`frontend/src/index.css`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/index.css)
+
+## 5. Backend Dependencies & Endpoints
+- `POST /api/auth/login/` (Identifier + password; returns access, refresh, user)
+- `POST /api/auth/register/student/` (Student ID, email, department, batch, password)
+- `POST /api/auth/refresh/` (SimpleJWT refresh token)
+- `GET /api/auth/me/` (Current authenticated user profile)
+- `GET /api/auth/departments/` (38 official academic departments)
+
+## 6. Acceptance Criteria
+- [x] Browser tab displays SVG and ICO favicons matching JnUVerse primary blue rounded squircle hub icon.
+- [x] Unwanted registration header (`Academic Intake 2024–2025` and `Sign In Instead`) completely removed.
+- [x] Registration page renders responsive two-column layout on desktop (1440px) and laptop (1024px) with illustration left, form right.
+- [x] Both columns start at the exact same vertical position (`items-start`).
+- [x] Registration page stacks gracefully on mobile (390px) with form prioritized on top.
+- [x] Floating club icons on Login match Registration names: `JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, and `Athletics Wing`.
+- [x] Each floating club node has a readable badge pill label with zero overlap onto central hub or neighbors.
+- [x] Central JnU hub logo, orbital rings, icon design, colors, and floating animations preserved on Login.
+- [x] Login card width reduced from `max-w-md` (448px) to balanced `max-w-[420px]` centered in its column.
+- [x] Login succeeds with valid email or student ID.
+- [x] Expired access token triggers seamless 401 refresh without logging the user out.
+- [x] Real backend integration (departments, student ID batch inference, password visibility, DRF error handling) preserved intact.
+- [x] Motion respects user reduced-motion OS preference.
+- [x] `npm run lint` and `npm run build` pass with 0 errors.
+
+## 7. Verification Commands & Results
+```bash
+# 1. Frontend Quality Checks
+npm run lint    # PASSED (0 errors, 0 warnings)
+npm run build   # PASSED (vite v5.4.21 bundle built in 1.25s)
+
+# 2. Live API & Auth Verification (Against running backend on http://127.0.0.1:8000)
+curl -s -X POST http://127.0.0.1:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "atikjawad@gmail.com", "password": "Str0ng-Pass-123"}'
+# Result: HTTP 200 OK (returned access, refresh, and user profile)
+
+curl -s -X POST http://127.0.0.1:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "B220305043", "password": "Str0ng-Pass-123"}'
+# Result: HTTP 200 OK (dual-identifier login verified)
+
+# 3. Favicon HTTP verification
+curl -s -i "http://localhost:5173/favicon.svg?v=2"
+# Result: HTTP 200 OK, Content-Type: image/svg+xml
+
+curl -s -i "http://localhost:5173/favicon.ico?v=2"
+# Result: HTTP 200 OK, Content-Type: image/x-icon
+```
+
+## 8. Decisions & Outstanding Questions
+- **Decision:** Nested floating animation wrapper inside absolute-positioned coordinates to cleanly decouple orbital layout from the transform float keyframe and child hover scaling.
+- **Decision:** Negative animation delays (`-1.2s` to `-4.1s`) guarantee icons appear mid-flight at varied positions on initial render.
+- **Decision:** Grid container uses `items-start` rather than `items-center` so the showcase card and registration form begin at the exact same vertical coordinate.
+- **Decision:** Provided both `favicon.svg` and `favicon.ico` with `?v=2` cache-busting to ensure cross-browser compatibility and bypass stale cached browser favicons.
+- **Decision:** Mobile layout displays registration form first (`order-1 lg:order-2`), ensuring immediate keyboard focus and form access on smaller screens without scrolling through the illustration.
+- **Decision:** Department list is dynamically loaded from `GET /api/auth/departments/` rather than hardcoded, maintaining strict synchronization with Django's 38 official university departments.
+
+---
+
+## 9. Task 10: Club Operator Registration Page Implementation
+
+### Objective & Deliverable
+Implemented the dedicated Club Operator Registration page ([`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx)) as a direct sibling of the Student Registration page ([`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)), sharing its clean typography, spacing, color tokens, orbital showcase, and responsive behavior.
+
+### Routes Configured ([`App.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/App.jsx))
+- Primary route: `/register/club` -> `<RegisterClub />`
+- Alias redirects:
+  - `/register-club` -> `<Navigate to="/register/club" replace />`
+  - `/register/operator` -> `<Navigate to="/register/club" replace />`
+
+### Layout Architecture & Design Decisions
+1. **Desktop Grid (1440px & 1024px):**
+   - Balanced 12-column grid (`lg:grid-cols-12`, left column `lg:col-span-6 xl:col-span-7`, right column `lg:col-span-6 xl:col-span-5`).
+   - Strict top alignment (`items-start`) ensuring both the showcase card and registration form begin at the exact same vertical coordinate without vertical centering drift.
+2. **Mobile Stacking (390px):**
+   - Form renders first via `order-1 lg:order-2` for immediate user action and input focus without scrolling.
+   - Orbital showcase renders second via `order-2 lg:order-1` below the form.
+3. **Clean Form Presentation:**
+   - Excluded unwanted Stitch artifacts (e.g., "Club Administration Portal • DRF API v1" badge, "Sign In Instead" arrow link above header).
+   - Starts cleanly with `<h1>Register Club Operator<span className="text-primary">.</span></h1>` and a muted explanatory subtitle.
+   - Primary submit button: `Register Club Operator` (full pill, 48px height, bold, arrow icon).
+   - Centered footer switcher below the form: functional links to `/login` ("Already registered? Log in") and `/register` ("Looking to join as a student? Student Registration").
+4. **Left Showcase Banner:**
+   - Heading: `Empower Your Campus Society`
+   - Verified static badges: `40+ Registered Societies` and `100% Council Synchronized`
+   - Central `JnU` hub logo rendered via shared [`JnUHubMark`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/JnUHubMark.jsx) (`variant="orbital"`).
+   - Five floating club nodes with labels: `JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, and `Athletics Wing`.
+   - Dynamic 3-slide caption carousel highlighting event broadcasting, member management, and council synchronization with dot indicators.
+
+### Backend Contract & Form Fields Preserved
+Aligned directly with backend serializer `ClubRegistrationSerializer` (`POST /api/auth/register/club/`):
+- `club_name`: Required text input, validated case-insensitively for uniqueness by backend.
+- `email`: Required operator email input, validated for user account uniqueness.
+- `description`: Optional textarea with 3-row height and "Max 300 words" helper note.
+- `contact_email`: Optional email input for public club inquiries.
+- `password`: Required password input with min 8 characters and visibility toggle.
+- `password_confirm`: Required confirm password input with client-side mismatch check and visibility toggle.
+- `agreedToTerms`: Required checkbox certifying executive authorization and agreement to Campus Society Guidelines.
+- **Error Handling:** Granular field-level errors mapped directly from DRF response keys; general/non-field errors displayed in accessible [`ErrorAlert`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/ErrorAlert.jsx).
+- **Success State:** Displays registered club name, slug, and navigation button to sign in.
+
+### Files Modified / Created
+- `frontend/src/pages/RegisterClub.jsx` (New component)
+- `frontend/src/App.jsx` (Registered `/register/club` and alias redirects)
+- `frontend/FRONTEND_README.md` (Updated component inventory and routing table)
+- `frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md` (Updated workflow documentation)
+
+### Verification Results
+- **`npm run lint`:** PASSED (0 errors, 0 warnings).
+- **`npm run build`:** PASSED (production bundle built in 1.28s).
+- **Visual Browser Verification:**
+  - Desktop (1440x900): Aligned tops, two-column layout, orbital banner on left, form on right.
+  - Laptop (1024x768): Balanced two-column grid, no cramped fields or clipping.
+  - Mobile (390x844): Single-column stacked layout, form first, showcase second, zero horizontal overflow.
+
+---
+
+## 10. Task 11: Cross-Linking Club Operator Registration from Login & Student Registration
+
+### Objective & Deliverable
+Integrated visible, accessible navigation pathways to the Club Operator Registration page (`/register/club`) from both the Login page ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)) and Student Registration page ([`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)).
+
+### Navigation Additions
+1. **Login Page ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)):**
+   - Replaced static muted text with an interactive React Router `<Link>`:
+     - Text: `"Want to manage your club? Register as a Club Operator."`
+     - Destination: `/register/club`
+     - Style: `text-xs sm:text-sm text-text-muted`, link styled with `font-bold text-primary hover:underline underline-offset-4 ml-1`.
+   - Preserves orbital animation, form controls, and the existing `"Register as Student"` link.
+2. **Student Registration Page ([`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)):**
+   - Added a clear secondary link in the footer switcher:
+     - Text: `"Registering a club instead? Register as a Club Operator."`
+     - Destination: `/register/club`
+     - Style: `text-xs text-text-muted`, link styled with `font-bold text-primary hover:underline ml-1`.
+   - Preserves the primary `"Already have an account? Log in"` navigation and academic registrar validation workflows.
+3. **Route Reuse ([`App.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/App.jsx)):**
+   - Confirmed `/register/club` was already registered in Task 10; reused directly with zero duplicate routes.
+
+### Files Modified
+- [`frontend/src/pages/Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)
+- [`frontend/src/pages/Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)
+- [`frontend/FRONTEND_README.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/FRONTEND_README.md)
+- [`frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md)
+
+### Verification Results
+- **`npm run lint`:** PASSED (0 errors, 0 warnings).
+- **`npm run build`:** PASSED (Vite production bundle built in 1.39s).
+- **Visual Screenshots:**
+  - Login Desktop (1440x900) & Mobile (390x950): Both links rendered cleanly with balanced typography.
+  - Student Registration Desktop (1440x900) & Mobile (390x1200): "Register as a Club Operator" link displayed cleanly below "Already have an account? Log in".
+- **Browser Subagent Limitation Note:** Headless browser subagent hit CDP environment limitation (`Browser.setDownloadBehavior: Browser context management is not supported`), resolved via headless CLI Chrome screenshot verification.
+
+

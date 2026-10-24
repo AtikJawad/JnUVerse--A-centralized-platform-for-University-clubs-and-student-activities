@@ -1,3 +1,176 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, sans-serif;
+    background-color: #f8f8ff;
+    color: #131526;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessible focus defaults */
+  :focus-visible {
+    outline: 2px solid #2b34b9;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Stitch soft scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #ebecf9;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #aeacf9;
+    border-radius: 9999px;
+  }
+
+  /* ==========================================================================
+     Stitch Orbital Floating Animations for Login Presentation Card
+     Subtle, organic floating movement for the 7 university club nodes
+     ========================================================================== */
+  .animate-orbit-float-1 {
+    animation: orbit-float-1 6.5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-2 {
+    animation: orbit-float-2 5.8s ease-in-out infinite -1.2s;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-3 {
+    animation: orbit-float-3 6.8s ease-in-out infinite -2.5s;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-4 {
+    animation: orbit-float-4 7.2s ease-in-out infinite -0.8s;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-5 {
+    animation: orbit-float-5 6.2s ease-in-out infinite -3.4s;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-6 {
+    animation: orbit-float-6 5.6s ease-in-out infinite -1.8s;
+    will-change: transform;
+  }
+
+  .animate-orbit-float-7 {
+    animation: orbit-float-7 6.6s ease-in-out infinite -4.1s;
+    will-change: transform;
+  }
+}
+
+@keyframes orbit-float-1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  33% {
+    transform: translate3d(2px, -6px, 0);
+  }
+  66% {
+    transform: translate3d(-3px, -2px, 0);
+  }
+}
+
+@keyframes orbit-float-2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  30% {
+    transform: translate3d(-4px, -5px, 0);
+  }
+  70% {
+    transform: translate3d(3px, 3px, 0);
+  }
+}
+
+@keyframes orbit-float-3 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40% {
+    transform: translate3d(4px, -4px, 0);
+  }
+  75% {
+    transform: translate3d(-2px, 3px, 0);
+  }
+}
+
+@keyframes orbit-float-4 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  35% {
+    transform: translate3d(5px, 3px, 0);
+  }
+  65% {
+    transform: translate3d(-2px, -4px, 0);
+  }
+}
+
+@keyframes orbit-float-5 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  30% {
+    transform: translate3d(-5px, 2px, 0);
+  }
+  70% {
+    transform: translate3d(2px, -4px, 0);
+  }
+}
+
+@keyframes orbit-float-6 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  45% {
+    transform: translate3d(-3px, 5px, 0);
+  }
+  80% {
+    transform: translate3d(3px, -2px, 0);
+  }
+}
+
+@keyframes orbit-float-7 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  35% {
+    transform: translate3d(3px, 5px, 0);
+  }
+  70% {
+    transform: translate3d(-3px, -3px, 0);
+  }
+}
+
+/* Reduced motion accessibility support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-orbit-float-1,
+  .animate-orbit-float-2,
+  .animate-orbit-float-3,
+  .animate-orbit-float-4,
+  .animate-orbit-float-5,
+  .animate-orbit-float-6,
+  .animate-orbit-float-7 {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+

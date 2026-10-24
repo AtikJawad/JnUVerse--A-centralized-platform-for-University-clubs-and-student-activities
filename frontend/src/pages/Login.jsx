@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { extractErrorMessage } from "../services/api";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import ErrorAlert from "../components/ErrorAlert";
+import Badge from "../components/Badge";
 
-const SLIDES = [
+const HIGHLIGHTS = [
   {
     title: "JnU Club Ecosystem",
     description:
@@ -38,11 +42,11 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || "/";
 
-  // Auto-advance left carousel slides gently
+  // Auto-advance visual presentation highlights
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 5000);
+      setActiveSlide((prev) => (prev + 1) % HIGHLIGHTS.length);
+    }, 6000);
     return () => clearInterval(timer);
   }, []);
 
@@ -51,7 +55,7 @@ export default function Login() {
     setErrorMessage("");
 
     if (!identifier.trim()) {
-      setErrorMessage("Please enter your Username, Email or Student ID.");
+      setErrorMessage("Please enter your Email or Student ID.");
       return;
     }
     if (!password) {
@@ -76,334 +80,315 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3FAF5] flex items-center justify-center p-4 sm:p-6 md:p-10 font-sans text-slate-800">
-      {/* Outer Card Container */}
-      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-100/60 overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[620px]">
-        {/* Left Side: Soft Pastel Green Feature Showcase */}
-        <div className="bg-[#EAF6EE] p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle decorative background circle */}
-          <div className="absolute -top-16 -left-16 w-64 h-64 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Top Badge */}
-          <div className="relative z-10 flex items-center justify-between">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100/80 text-emerald-800 border border-emerald-200/70">
-              Jagannath University
-            </span>
-            <span className="text-xs font-medium text-emerald-700/80">
-              {SLIDES[activeSlide].tag}
-            </span>
-          </div>
-
-          {/* Center Graphic Illustration */}
-          <div className="relative z-10 my-auto py-8 flex flex-col items-center text-center">
-            <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
-              {/* Soft green circle backdrop */}
-              <div className="absolute inset-4 bg-emerald-200/40 rounded-full animate-pulse" />
-
-              {/* Handcrafted campus / student vector graphic */}
-              <svg
-                viewBox="0 0 240 240"
-                className="w-full h-full relative z-10"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Desk */}
-                <rect x="75" y="145" width="90" height="6" rx="3" fill="#1E293B" />
-                <rect x="85" y="151" width="6" height="50" rx="2" fill="#334155" />
-                <rect x="149" y="151" width="6" height="50" rx="2" fill="#334155" />
-
-                {/* Chair */}
-                <rect x="110" y="155" width="22" height="4" rx="2" fill="#10B981" />
-                <rect x="112" y="130" width="18" height="25" rx="3" fill="#D1FAE5" stroke="#10B981" strokeWidth="2" />
-                <rect x="118" y="159" width="6" height="42" fill="#047857" />
-
-                {/* Student Figure */}
-                {/* Torso & Shirt */}
-                <path
-                  d="M105 130 C105 118, 135 118, 135 130 L138 160 C138 165, 102 165, 102 160 Z"
-                  fill="#A7F3D0"
-                  stroke="#047857"
-                  strokeWidth="2"
-                />
-                {/* Arms writing on desk */}
-                <path
-                  d="M106 130 Q92 142 98 148 Q110 148 116 145"
-                  stroke="#047857"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                <path
-                  d="M134 130 Q145 142 138 147 Q126 148 122 145"
-                  stroke="#047857"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                {/* Head & Hair */}
-                <circle cx="120" cy="105" r="13" fill="#FDE68A" stroke="#B45309" strokeWidth="1.5" />
-                <path
-                  d="M107 104 C107 92, 133 92, 133 104 C128 98, 112 98, 107 104 Z"
-                  fill="#1E293B"
-                />
-
-                {/* Exam / Activity Sheets */}
-                <rect x="70" y="112" width="28" height="34" rx="2" fill="white" stroke="#64748B" strokeWidth="1.5" transform="rotate(-6 70 112)" />
-                <line x1="74" y1="120" x2="92" y2="118" stroke="#94A3B8" strokeWidth="1.5" />
-                <line x1="74" y1="125" x2="90" y2="123" stroke="#94A3B8" strokeWidth="1.5" />
-                <line x1="74" y1="130" x2="88" y2="128" stroke="#94A3B8" strokeWidth="1.5" />
-
-                <rect x="80" y="116" width="30" height="36" rx="2" fill="white" stroke="#334155" strokeWidth="1.5" />
-                <line x1="86" y1="124" x2="104" y2="124" stroke="#10B981" strokeWidth="2" />
-                <line x1="86" y1="130" x2="102" y2="130" stroke="#64748B" strokeWidth="1.5" />
-                <line x1="86" y1="136" x2="98" y2="136" stroke="#64748B" strokeWidth="1.5" />
-                <line x1="86" y1="142" x2="103" y2="142" stroke="#64748B" strokeWidth="1.5" />
-
-                {/* Backpack on floor */}
-                <path
-                  d="M152 165 C152 155, 172 155, 172 165 L173 195 C173 198, 151 198, 151 195 Z"
-                  fill="#059669"
-                  stroke="#064E3B"
-                  strokeWidth="2"
-                />
-                <path d="M158 155 Q162 147 166 155" stroke="#064E3B" strokeWidth="2" fill="none" />
-                <rect x="156" y="172" width="12" height="10" rx="2" fill="#34D399" />
-
-                {/* Potted Plant */}
-                <path d="M48 185 L52 201 H64 L68 185 Z" fill="#334155" />
-                <path d="M58 185 Q58 172 50 170 Q56 177 58 185" fill="#10B981" />
-                <path d="M58 180 Q66 174 64 165 Q60 174 58 180" fill="#059669" />
-                <path d="M58 183 Q52 162 58 155 Q62 165 58 183" fill="#34D399" />
-
-                {/* Floating academic & club icons */}
-                <circle cx="56" cy="68" r="14" fill="white" stroke="#6EE7B7" strokeWidth="1.5" />
-                <path d="M56 60 L56 68 L62 68" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" />
-
-                {/* Light bulb / gear icon */}
-                <rect x="154" y="60" width="26" height="26" rx="6" fill="white" stroke="#6EE7B7" strokeWidth="1.5" />
-                <path d="M167 66 L167 80 M160 73 L174 73" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
-
-                {/* Math & Club formulas */}
-                <text x="35" y="105" fill="#047857" fontSize="10" fontFamily="monospace">x - y</text>
-                <text x="148" y="112" fill="#047857" fontSize="10" fontFamily="monospace">x²</text>
-                <text x="160" y="52" fill="#047857" fontSize="12" fontFamily="serif">√x</text>
-                <text x="190" y="80" fill="#047857" fontSize="12" fontFamily="serif">π</text>
-                <text x="175" y="100" fill="#047857" fontSize="9" fontFamily="monospace">(x, y)</text>
-              </svg>
-            </div>
-
-            {/* Slide Text Content */}
-            <h2 className="mt-4 text-xl sm:text-2xl font-bold text-[#1E293B]">
-              {SLIDES[activeSlide].title}
-            </h2>
-            <p className="mt-2 text-xs sm:text-sm text-[#475569] max-w-sm leading-relaxed">
-              {SLIDES[activeSlide].description}
-            </p>
-          </div>
-
-          {/* Carousel Dots */}
-          <div className="relative z-10 flex items-center justify-center space-x-2 pt-2">
-            {SLIDES.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setActiveSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  activeSlide === index
-                    ? "w-7 bg-emerald-600"
-                    : "w-2 bg-emerald-200 hover:bg-emerald-300"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Right Side: Clean White Login Form */}
-        <div className="p-8 sm:p-12 md:p-14 flex flex-col justify-between bg-white">
-          <div className="max-w-sm w-full mx-auto my-auto">
-            {/* Brand Logo Header */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center space-x-2 mb-2">
-                {/* Graduation Cap Icon */}
-                <svg
-                  className="w-7 h-7 text-emerald-800"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
-                <span className="text-xl sm:text-2xl font-serif tracking-widest text-[#1E293B] font-semibold">
-                  JNU<span className="text-emerald-700 ml-1 font-sans font-bold">VERSE</span>
-                </span>
+    <div className="min-h-screen bg-canvas-base flex flex-col justify-between selection:bg-surface-variant selection:text-primary">
+      {/* Top Header / Portal Navigation */}
+      <header className="w-full bg-surface-white/80 backdrop-blur-xl border-b border-border-subtle sticky top-0 z-50">
+        <div className="max-w-[1360px] mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-resting group-hover:scale-105 transition-transform">
+                <span className="material-symbols-outlined text-[20px]">hub</span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">
-                Jagannath University Student &amp; Club Portal
+              <span className="text-xl font-bold tracking-tight text-on-surface">
+                JnU<span className="text-primary">Verse</span>
+              </span>
+            </Link>
+            <Badge variant="primary" dot className="hidden sm:inline-flex">
+              Community Gateway
+            </Badge>
+          </div>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-text-muted hover:text-primary hover:bg-surface-lavender transition-all"
+          >
+            <span>Back to Portal</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex items-center justify-center py-8 lg:py-12 px-4 sm:px-6 lg:px-12">
+        <div className="max-w-[1240px] w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Column: Form Container */}
+          <div className="lg:col-span-5 flex flex-col justify-center max-w-[420px] mx-auto w-full">
+            {/* Header */}
+            <div className="text-center lg:text-left mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-[#4F5BFF] text-white shadow-primary-glow mb-4">
+                <span className="material-symbols-outlined text-[26px]">login</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface">
+                Login to your account!
+              </h1>
+              <p className="text-sm text-text-muted mt-1.5 leading-relaxed">
+                Enter your registered Student ID or email address and password to login.
               </p>
             </div>
 
-            {/* Error Notification Banner */}
-            {errorMessage && (
-              <div
-                role="alert"
-                className="mb-6 p-3.5 rounded-xl bg-red-50 border border-red-200/80 text-red-700 text-xs sm:text-sm flex items-start space-x-2.5 animate-fadeIn"
-              >
-                <svg
-                  className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <div className="flex-1 font-medium leading-snug break-words">
-                  {errorMessage}
-                </div>
-              </div>
-            )}
+            {/* Error Banner */}
+            <ErrorAlert
+              message={errorMessage}
+              onDismiss={() => setErrorMessage("")}
+              className="mb-5"
+            />
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              <div>
-                <label
-                  htmlFor="identifier"
-                  className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
-                >
-                  Username or email
-                </label>
-                <input
-                  id="identifier"
-                  type="text"
-                  autoComplete="username"
-                  disabled={isSubmitting}
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. B220305043 or student@gmail.com"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition text-sm disabled:bg-slate-50"
-                  required
-                />
-              </div>
+              <Input
+                label="Email or Student ID"
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
+                disabled={isSubmitting}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="e.g. B220305043 or student@gmail.com"
+                required
+                icon={<span className="material-symbols-outlined text-[20px]">mail</span>}
+                helperText="Use your Student ID (e.g. B220305043) or verified Email"
+              />
 
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label
-                    htmlFor="password"
-                    className="block text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                  >
-                    Password
-                  </label>
+              <Input
+                label="Password"
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                disabled={isSubmitting}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                required
+                icon={<span className="material-symbols-outlined text-[20px]">lock</span>}
+                rightElement={
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-xs text-slate-400 hover:text-slate-600 focus:outline-none"
-                    tabIndex={-1}
+                    className="p-1 rounded-lg text-text-muted hover:text-on-surface hover:bg-surface-lavender transition"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    {showPassword ? "Hide" : "Show"}
+                    <span className="material-symbols-outlined text-[19px]">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
                   </button>
-                </div>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    disabled={isSubmitting}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition text-sm disabled:bg-slate-50"
-                    required
-                  />
-                </div>
-                <div className="text-right mt-1.5">
-                  <span className="text-xs text-emerald-700/80 hover:text-emerald-800 cursor-pointer font-medium">
-                    Forgot password?
+                }
+              />
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  isLoading={isSubmitting}
+                  className="w-full h-11"
+                >
+                  <span>Sign In</span>
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </Button>
+              </div>
+            </form>
+
+            {/* Footer / Account Creation Navigation */}
+            <div className="pt-6 mt-6 border-t border-border-subtle space-y-2 text-center lg:text-left">
+              <p className="text-sm text-text-muted">
+                Don't have an account?{" "}
+                <Link
+                  to="/register"
+                  className="font-bold text-primary hover:underline underline-offset-4 ml-1"
+                >
+                  Register as Student
+                </Link>
+              </p>
+              <p className="text-xs sm:text-sm text-text-muted">
+                Want to manage your club?{" "}
+                <Link
+                  to="/register/club"
+                  className="font-bold text-primary hover:underline underline-offset-4 ml-1"
+                >
+                  Register as a Club Operator
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column: Stitch Orbital Visual Presentation Card */}
+          <div className="lg:col-span-7 w-full flex justify-center">
+            <div className="w-full max-w-[600px] rounded-3xl lg:rounded-[2.5rem] bg-gradient-to-b from-[#e8f1ff] via-[#edf3ff] to-[#e4edff] border border-white/80 p-8 sm:p-10 shadow-elevated flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[560px]">
+              {/* Inner ambient glows */}
+              <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/70 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+              {/* Title Header */}
+              <div className="relative z-10 space-y-2">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface">
+                  Write &amp; Connect <span className="text-primary">Everywhere</span>
+                </h2>
+                <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 border border-primary/15 text-xs font-semibold text-primary shadow-xs">
+                    <span className="material-symbols-outlined text-[14px]">school</span>
+                    JnU Students
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 border border-primary/15 text-xs font-semibold text-primary shadow-xs">
+                    <span className="material-symbols-outlined text-[14px]">diversity_3</span>
+                    Verified Campus Clubs
                   </span>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full mt-2 py-2.5 px-4 rounded-lg bg-[#1E2837] hover:bg-[#151D28] active:bg-[#0F1722] text-white font-medium text-sm transition duration-150 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <span>Sign in</span>
-                )}
-              </button>
-            </form>
+              {/* Central Orbital Graphic */}
+              <div className="relative z-10 w-full flex items-center justify-center py-6 my-auto">
+                <div className="relative w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] flex items-center justify-center">
+                  {/* Outer Orbital Ring */}
+                  <div className="absolute inset-0 rounded-full border border-primary/15 pointer-events-none" />
+                  {/* Middle Orbital Ring */}
+                  <div className="absolute inset-[44px] sm:inset-[54px] rounded-full border border-primary/20 pointer-events-none" />
+                  {/* Inner Orbital Ring */}
+                  <div className="absolute inset-[88px] sm:inset-[108px] rounded-full border border-primary/25 pointer-events-none" />
 
-            {/* Divider */}
-            <div className="my-6 flex items-center justify-center space-x-3 text-xs text-slate-400">
-              <div className="h-[1px] bg-slate-200 flex-1" />
-              <span>or</span>
-              <div className="h-[1px] bg-slate-200 flex-1" />
-            </div>
+                  {/* Central Planet Hub (Stable Anchor) */}
+                  <div
+                    className="relative z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-[#1423C6] via-primary to-[#4F5BFF] flex flex-col items-center justify-center text-white shadow-primary-glow border-4 border-white/60 transition-transform duration-300 hover:scale-105 cursor-pointer"
+                    title="Jagannath University Core"
+                  >
+                    <span className="material-symbols-outlined text-[32px] sm:text-[38px]">
+                      hub
+                    </span>
+                    <span className="text-[10px] tracking-wider font-bold uppercase -mt-1">
+                      JnU
+                    </span>
+                  </div>
 
-            {/* University Portal Tip / Alternate Action */}
-            <div className="flex items-center justify-center space-x-2 py-2 px-3 border border-slate-200/80 rounded-lg bg-slate-50/50 text-xs text-slate-600">
-              <svg
-                className="w-4 h-4 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-              <span>Verified Jagannath University Identity</span>
-            </div>
+                  {/* Orbit Node 1: Top-Left - JnU IT Club */}
+                  <div className="absolute top-[28px] left-[35px] sm:top-[36px] sm:left-[45px] z-20 pointer-events-auto">
+                    <div className="animate-orbit-float-2">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-surface-white flex items-center justify-center shadow-resting border-2 border-white hover:scale-110 hover:shadow-elevated transition-all duration-200 cursor-pointer"
+                          title="JnU IT Club"
+                        >
+                          <span className="material-symbols-outlined text-[20px] text-[#2b34b9]">
+                            terminal
+                          </span>
+                        </div>
+                        <span className="mt-1 px-2 py-0.5 rounded-md bg-surface-white/95 text-[10px] font-semibold text-on-surface shadow-xs whitespace-nowrap">
+                          JnU IT Club
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Footer */}
-            <div className="mt-8 text-center text-xs text-slate-500">
-              Are you new?{" "}
-              <Link
-                to="/register"
-                className="font-medium text-emerald-800 hover:text-emerald-900 underline underline-offset-2 ml-1"
-              >
-                Create an Account
-              </Link>
+                  {/* Orbit Node 2: Top-Right - Debating Society */}
+                  <div className="absolute top-[32px] right-[40px] sm:top-[42px] sm:right-[50px] z-20 pointer-events-auto">
+                    <div className="animate-orbit-float-3">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-surface-white flex items-center justify-center shadow-resting border-2 border-white hover:scale-110 hover:shadow-elevated transition-all duration-200 cursor-pointer"
+                          title="JnU Debating Society"
+                        >
+                          <span className="material-symbols-outlined text-[20px] text-[#4285F4]">
+                            record_voice_over
+                          </span>
+                        </div>
+                        <span className="mt-1 px-2 py-0.5 rounded-md bg-surface-white/95 text-[10px] font-semibold text-on-surface shadow-xs whitespace-nowrap">
+                          Debating Society
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Orbit Node 3: Middle-Left - Photo Club */}
+                  <div className="absolute top-[135px] left-[6px] sm:top-[160px] sm:left-[12px] z-20 pointer-events-auto">
+                    <div className="animate-orbit-float-5">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-white flex items-center justify-center shadow-resting border-2 border-white hover:scale-110 hover:shadow-elevated transition-all duration-200 cursor-pointer"
+                          title="JnU Photographic Society"
+                        >
+                          <span className="material-symbols-outlined text-[18px] text-[#EA4335]">
+                            photo_camera
+                          </span>
+                        </div>
+                        <span className="mt-1 px-2 py-0.5 rounded-md bg-surface-white/95 text-[9px] font-semibold text-on-surface shadow-xs whitespace-nowrap">
+                          Photo Club
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Orbit Node 4: Middle-Right - Cultural Cell */}
+                  <div className="absolute top-[140px] right-[8px] sm:top-[165px] sm:right-[15px] z-20 pointer-events-auto">
+                    <div className="animate-orbit-float-4">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-white flex items-center justify-center shadow-resting border-2 border-white hover:scale-110 hover:shadow-elevated transition-all duration-200 cursor-pointer"
+                          title="JnU Cultural Council"
+                        >
+                          <span className="material-symbols-outlined text-[18px] text-[#9333ea]">
+                            theater_comedy
+                          </span>
+                        </div>
+                        <span className="mt-1 px-2 py-0.5 rounded-md bg-surface-white/95 text-[9px] font-semibold text-on-surface shadow-xs whitespace-nowrap">
+                          Cultural Cell
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Orbit Node 5: Bottom-Center - Athletics Wing */}
+                  <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
+                    <div className="animate-orbit-float-7">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-surface-white flex items-center justify-center shadow-resting border-2 border-white hover:scale-110 hover:shadow-elevated transition-all duration-200 cursor-pointer"
+                          title="JnU Sports & Athletics Wing"
+                        >
+                          <span className="material-symbols-outlined text-[20px] text-[#d97706]">
+                            sports_soccer
+                          </span>
+                        </div>
+                        <span className="mt-1 px-2 py-0.5 rounded-md bg-surface-white/95 text-[10px] font-semibold text-on-surface shadow-xs whitespace-nowrap">
+                          Athletics Wing
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Highlight Caption & Dots */}
+              <div className="relative z-10 w-full max-w-sm mx-auto space-y-3">
+                <p className="text-xs sm:text-sm font-medium text-text-muted leading-relaxed">
+                  {HIGHLIGHTS[activeSlide].description}
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  {HIGHLIGHTS.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setActiveSlide(i)}
+                      aria-label={`Go to slide ${i + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        activeSlide === i ? "w-6 bg-primary" : "w-2 bg-primary/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full bg-surface-white/60 border-t border-border-subtle py-4">
+        <div className="max-w-[1360px] mx-auto px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
+          <span>&copy; 2026 Jagannath University (JnU). All rights reserved.</span>
+          <div className="flex items-center gap-6">
+            <span>Centralized Student &amp; Club Portal</span>
+            <span>Week 2 Auth Live</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -1,0 +1,218 @@
+# JnUVerse Frontend — Architecture, Development & Documentation Guide
+
+**Platform:** JnUVerse (A Centralized Platform for University Clubs & Student Activities)  
+**Institution:** Jagannath University (JnU), Dhaka, Bangladesh  
+**Course:** Software Engineering Course Project (10-Week Development Cycle)  
+**Author / Frontend MVP Coder:** Anik Khondokar  
+**Last Updated:** October 2026  
+
+---
+
+## 1. Frontend Purpose & Technology Stack
+
+JnUVerse provides an official, modern digital campus gateway for Jagannath University students and club operators. The frontend provides real-time club discovery, registrar-verified student authentication, membership application tracking, event registrations, and campus communications.
+
+### Core Stack
+- **UI Framework:** React 18.3 (`react`, `react-dom`)
+- **Build Tool:** Vite 5.3 (`@vitejs/plugin-react`)
+- **Language:** JavaScript (ES modules, React JSX)
+- **Styling:** Tailwind CSS 3.4 + PostCSS + Autoprefixer
+- **Routing:** React Router 6 (`react-router-dom`)
+- **HTTP Client:** Axios 1.7 (`axios`)
+- **Typography:** Plus Jakarta Sans (Google Fonts: 400, 500, 600, 700, 800)
+- **Icons:** Google Material Symbols Outlined
+- **Code Quality:** ESLint 8.57 (`eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`)
+
+---
+
+## 2. Directory & File Structure
+
+```
+frontend/
+├── FRONTEND_README.md               # Primary authoritative frontend overview (this document)
+├── README.md                        # Compatibility pointer to FRONTEND_README.md
+├── docs/
+│   └── workflow/                    # 10-Week frontend implementation history and planning
+│       ├── WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md
+│       ├── WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md
+│       ├── WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md
+│       ├── WEEK_04_EVENTS_AND_REGISTRATION.md
+│       ├── WEEK_05_NOTICES_AND_NOTIFICATIONS.md
+│       ├── WEEK_06_RATINGS_AND_COLLABORATION.md
+│       ├── WEEK_07_REPORTS_AND_DASHBOARDS.md
+│       ├── WEEK_08_ANALYTICAL_REPORTS.md
+│       ├── WEEK_09_INTEGRATION_AND_TESTING.md
+│       └── WEEK_10_FINALIZATION_AND_DELIVERY.md
+├── public/
+│   ├── favicon.svg                  # Primary-blue squircle favicon with centered Material Symbols hub mark
+│   └── favicon.ico                  # Multi-resolution ICO fallback (16x16, 32x32, 48x48) for browser tab compatibility
+├── src/
+│   ├── assets/                      # Static assets and graphics
+│   ├── components/                  # Reusable Stitch UI design components
+│   │   ├── Badge.jsx                # Category, role, status & department pill tags
+│   │   ├── Button.jsx               # Stitch full-pill buttons with loading states & variants
+│   │   ├── Card.jsx                 # Elevated white surface cards with subtle borders
+│   │   ├── EmptyState.jsx           # Empty list and search state presentation
+│   │   ├── ErrorAlert.jsx           # Accessible error banner for DRF validation feedback
+│   │   ├── Input.jsx                # Form input field with icons, labels, and error states
+│   │   ├── JnUHubMark.jsx           # Reusable JnU brand mark and central hub symbol
+│   │   ├── LoadingState.jsx         # Accessible spinner and async state presentation
+│   │   └── ProtectedRoute.jsx       # RBAC route guard supporting 'student' and 'club_operator'
+│   ├── context/
+│   │   └── AuthContext.jsx          # User state, token lifecycle, login, register, logout
+│   ├── hooks/                       # Custom reusable React hooks
+│   ├── layouts/                     # Shared layout wrappers for student & operator views
+│   ├── pages/                       # Route-level screens
+│   │   ├── Dashboard.jsx            # Authenticated student/operator landing dashboard
+│   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
+│   │   ├── Register.jsx             # Stitch-aligned student registration (orbital left, form right, registrar sync)
+│   │   └── RegisterClub.jsx         # Stitch-aligned Club Operator registration (orbital left, form right, DRF sync)
+│   ├── services/
+│   │   └── api.js                   # Axios client with JWT request & 401 refresh interceptors
+│   ├── utils/                       # Shared utility functions and formatting helpers
+│   ├── App.jsx                      # App root with React Router route declarations
+│   ├── index.css                    # Tailwind directives, base font, and custom keyframe animations
+│   └── main.jsx                     # Application bootstrap mounting into #root
+├── .env                             # Local frontend environment variables (git-ignored)
+├── .env.example                     # Example environment template
+├── .eslintrc.cjs                    # ESLint configuration
+├── index.html                       # HTML entry point with Google Fonts preconnect
+├── package.json                     # Frontend dependencies and npm scripts
+├── postcss.config.js                # PostCSS configuration
+├── tailwind.config.js               # Centralized Stitch design tokens and theme extensions
+└── vite.config.js                   # Vite bundler configuration
+```
+
+---
+
+## 3. Setup and Run Instructions
+
+The frontend runs locally against the Django REST Framework backend (`http://127.0.0.1:8000`).
+
+```bash
+# 1. Navigate to frontend directory
+cd frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Create local environment file if missing
+cp .env.example .env
+
+# 4. Start local development server (Vite runs on http://localhost:5173)
+npm run dev
+
+# 5. Execute production build validation
+npm run build
+
+# 6. Execute ESLint validation
+npm run lint
+
+# 7. Preview production build locally
+npm run preview
+```
+
+---
+
+## 4. Authentication & API Integration Architecture
+
+### Strict DRF API Consumer
+The React frontend connects **only** through standard HTTP/JSON requests with the Django backend at `VITE_API_BASE_URL` (default: `http://127.0.0.1:8000`).
+- **No Direct Database Access:** The frontend never connects directly to Supabase, PostgreSQL, or backend files.
+- **JWT Storage:** Tokens are stored in browser `localStorage` as `access_token` and `refresh_token`.
+- **Bearer Token Interceptor:** [`services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js) automatically attaches `Authorization: Bearer <access_token>` to every authenticated request.
+- **Automatic 401 Refresh Queue:** When an access token expires, Axios intercepts the 401 error, pauses concurrent requests in a queue, calls `POST /api/auth/refresh/`, updates the stored token, and replays all failed requests seamlessly. If refresh fails, it purges authentication tokens and broadcasts an `auth:logout` event.
+- **DRF Error Parsing:** `extractErrorMessage(error)` parses standard DRF responses, field validation arrays (`detail`, `non_field_errors`), and network errors into readable strings.
+
+---
+
+## 5. Design System & Reusable Components
+
+The design system implements the official Google Stitch specifications in `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/`:
+
+### 1. Centralized Tokens ([`tailwind.config.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/tailwind.config.js))
+- **`canvas-base` (`#F8F8FF`):** Atmospheric lavender-tinted background.
+- **`surface-white` (`#FFFFFF`):** Elevated cards, inputs, dialogs.
+- **`surface-lavender` (`#EBECF9`):** Subdued sections and soft pill containers.
+- **`primary` (`#2B34B9`):** JnU brand primary blue; interactive elements and anchors.
+- **`primary-hover` (`#1F2792`):** Darker interactive hover state.
+- **`secondary` (`#AEACF9`):** Accent badges and indicator rings.
+- **`tertiary` (`#B2C7F7`):** Powder blue pill tags and secondary accents.
+- **`on-surface` (`#131526`):** Primary headings and body typography.
+- **`text-muted` (`#686B7D`):** Helper text, timestamps, and secondary captions.
+- **`border-subtle` (`#E2E4F3`):** 1px hairline borders.
+
+### 2. Orbital Club Showcase & Login Page Refinements ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx), [`index.css`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/index.css))
+On the login screen, five official campus club nodes orbit the stable central JnU planet hub, matching the exact club identities and icon mapping used on Registration:
+- **Consistent Club Identities:**
+  - `JnU IT Club` (`terminal`, `#2B34B9`, `animate-orbit-float-2`)
+  - `Debating Society` (`record_voice_over`, `#4285F4`, `animate-orbit-float-3`)
+  - `Photo Club` (`photo_camera`, `#EA4335`, `animate-orbit-float-5`)
+  - `Cultural Cell` (`theater_comedy`, `#9333EA`, `animate-orbit-float-4`)
+  - `Athletics Wing` (`sports_soccer`, `#D97706`, `animate-orbit-float-7`)
+- **Readability & Badges:** Each orbiting node displays an accessible pill badge beneath the icon without overlapping the central JnU hub or neighboring nodes.
+- **Continuous Organic Floating:** Gentle 2px–6px displacements on separate cycles (5.6s–7.2s) with negative animation delays. Child nodes scale smoothly on hover (`hover:scale-110`).
+- **Balanced Login Form Width:** The login form card width is refined to `max-w-[420px]` (centered within `lg:col-span-5`), ensuring compact, balanced inputs on desktop, laptop, and mobile without horizontal overflow.
+- **Accessibility:** Fully supports `@media (prefers-reduced-motion: reduce)`, disabling motion completely when requested by user OS settings.
+
+### 3. Student & Club Operator Registration Pages ([`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx), [`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx))
+Both registration screens share a unified sibling architecture:
+- **Two-Column Desktop Alignment:** Left orbital showcase illustration and right registration form aligned at the exact same vertical start position (`items-start`).
+- **Mobile Stacking:** Registration form displays first (`order-1 lg:order-2`) for rapid input access, followed by the showcase below (`order-2 lg:order-1`).
+- **Clean Form Presentations:** Uncluttered form headers (`Create your account.` for students; `Register Club Operator.` for operators) with clear subtitles and zero extraneous badges or banner links.
+- **Club Operator Fields (`POST /api/auth/register/club/`):** `club_name` (req), `email` (req), `description` (opt, max 300 words), `contact_email` (opt), `password` (req), `password_confirm` (req), and authorized executive certification checkbox.
+- **Showcase Content:** "Empower Your Campus Society", static verified metrics (`40+ Registered Societies`, `100% Council Synchronized`), 5 floating club nodes (`JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, `Athletics Wing`), and rotating benefit captions.
+- **Cross-Linking Navigation:** Both [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx) ("Want to manage your club? Register as a Club Operator.") and [`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx) ("Registering a club instead? Register as a Club Operator.") feature clear, accessible `<Link>` elements pointing directly to `/register/club`.
+
+### 4. Reusable UI Components
+- [`Button.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Button.jsx): Full-pill shape (`rounded-full`), supports `primary`, `secondary`, `outline`, `danger`, `ghost`, and `isLoading` spinner state.
+- [`Input.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Input.jsx): Rounded-xl input with 1px `#E2E4F3` border, leading icon prefix, helper text, and accessible error state.
+- [`Card.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Card.jsx): Elevated surface card with resting and hover shadows.
+- [`Badge.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Badge.jsx): Category and status pill tag with live dot indicator.
+- [`ErrorAlert.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/ErrorAlert.jsx): ARIA `role="alert"` container for clear DRF error feedback.
+- [`JnUHubMark.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/JnUHubMark.jsx): Reusable brand mark supporting header squircle icon and radiant orbital planetary hub.
+- [`LoadingState.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/LoadingState.jsx): Accessible spinner for full-screen and section loading.
+- [`EmptyState.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/EmptyState.jsx): Clean zero-state display for lists and searches.
+
+---
+
+## 6. Implementation Status Matrix
+
+| Module / Feature | Planned Week | Frontend Status | Backend API Status | Reference Documentation |
+|:---|:---:|:---:|:---:|:---|
+| **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
+| **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
+| **Club Discovery & Memberships** | Week 3 | **Pending Step 2** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
+| **Events & RSVP Registration** | Week 4 | Not Started | Models Exist (No Endpoints) | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
+| **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
+| **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+| **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
+| **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
+| **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
+
+---
+
+## 7. Weekly Workflow Documentation Directory
+
+Detailed implementation notes, acceptance criteria, verified test commands, and files changed for each development stage are preserved in:
+
+- [Week 1: Repository Audit & Design Foundation](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md)
+- [Week 2: Authentication, Registration & Login UI](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md)
+- [Week 3: Club Discovery, Profiles & Memberships](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md)
+- [Week 4: Events & Registration](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md)
+- [Week 5: Notices & Notifications](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md)
+- [Week 6: Ratings & Collaboration](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md)
+- [Week 7: Reports & Dashboards](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md)
+- [Week 8: Analytical Reports](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md)
+- [Week 9: Integration & Testing](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md)
+- [Week 10: Finalization & Delivery](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md)
+
+---
+
+## 8. Backend Handoff Reference
+
+The consolidated backend API contract and handoff document is located at:  
+👉 **[`backend/FRONTEND_REQUIREMENTS.md`](../backend/FRONTEND_REQUIREMENTS.md)**  
+And weekly handoff specifications are located in:  
+👉 **[`backend/docs/frontend-handoff/`](../backend/docs/frontend-handoff/)**
