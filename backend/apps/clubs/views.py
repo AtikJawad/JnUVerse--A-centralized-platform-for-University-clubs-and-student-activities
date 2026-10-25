@@ -2,15 +2,16 @@ from django.db.models import BooleanField, CharField, Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db import transaction
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view, inline_serializer
 from rest_framework import filters, generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 
 from apps.accounts.permissions import IsClubOperator, IsStudent
+from apps.accounts.models import User
 
 from .models import Club, ClubFollow, ClubMembership
 from .permissions import IsOwnerOrReadOnly
@@ -40,6 +41,10 @@ class ClubPagination(PageNumberPagination):
     max_page_size = 50
 
 
+@extend_schema_view(get=extend_schema(parameters=[
+    OpenApiParameter("joined", bool, description="Students only: clubs the student is an approved member of"),
+    OpenApiParameter("following", bool, description="Students only: clubs the student follows"),
+]))
 class ClubListView(generics.ListAPIView):
     serializer_class = ClubPublicSerializer
     pagination_class = ClubPagination
@@ -48,8 +53,23 @@ class ClubListView(generics.ListAPIView):
     search_fields = ["name"]
 
     def get_queryset(self):
-        return club_queryset(self.request.user)
-
+        if getattr(self, "swagger_fake_view", False):
+            return club_queryset()
+        user = self.request.user
+        qs = club_queryset(user)
+        params = self.request.query_params
+        joined = params.get("joined", "").lower() in ("1", "true")
+        following = params.get("following", "").lower() in ("1", "true")
+        if joined or following:
+            if not user.is_authenticated:
+                raise NotAuthenticated()
+            if user.role != User.Role.STUDENT:
+                raise PermissionDenied("Only students have joined or followed clubs.")
+            if joined:
+                qs = qs.filter(my_membership=ClubMembership.Status.APPROVED)
+            if following:
+                qs = qs.filter(is_following=True)
+        return qs
 
 class ClubDetailView(generics.RetrieveUpdateAPIView):
     lookup_field = "slug"

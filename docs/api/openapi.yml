@@ -141,6 +141,16 @@ paths:
     get:
       operationId: api_clubs_list
       parameters:
+      - in: query
+        name: following
+        schema:
+          type: boolean
+        description: 'Students only: clubs the student follows'
+      - in: query
+        name: joined
+        schema:
+          type: boolean
+        description: 'Students only: clubs the student is an approved member of'
       - name: page
         required: false
         in: query
@@ -457,6 +467,263 @@ paths:
               schema:
                 $ref: '#/components/schemas/Membership'
           description: ''
+  /api/events/:
+    get:
+      operationId: api_events_list
+      parameters:
+      - in: query
+        name: club
+        schema:
+          type: string
+        description: Club slug
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: 'Club operators only: own club''s events incl. drafts'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: registered
+        schema:
+          type: boolean
+        description: 'Students only: events the student is registered for'
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: upcoming
+        schema:
+          type: boolean
+        description: 'true: not yet ended (soonest first); false: past (latest first)'
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventList'
+          description: ''
+    post:
+      operationId: api_events_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventWrite'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/:
+    get:
+      operationId: api_events_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+    patch:
+      operationId: api_events_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEventWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEventWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEventWrite'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/cancel/:
+    post:
+      operationId: api_events_cancel_create
+      description: Publish / cancel. Visibility first (404 for others' drafts), then
+        ownership (403).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/publish/:
+    post:
+      operationId: api_events_publish_create
+      description: Publish / cancel. Visibility first (404 for others' drafts), then
+        ownership (403).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/register/:
+    post:
+      operationId: api_events_register_create
+      description: 'A student''s own registration: register (POST) / cancel (DELETE).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+    delete:
+      operationId: api_events_register_destroy
+      description: 'A student''s own registration: register (POST) / cancel (DELETE).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/events/{id}/registrations/:
+    get:
+      operationId: api_events_registrations_list
+      description: 'Operator of the owning club: students currently registered (no
+        emails).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRegistrationList'
+          description: ''
 components:
   schemas:
     Club:
@@ -489,6 +756,23 @@ components:
       required:
       - id
       - is_verified
+      - name
+    ClubMini:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 170
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
       - name
     ClubPublic:
       type: object
@@ -683,6 +967,104 @@ components:
             type: string
       required:
       - departments
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        club:
+          allOf:
+          - $ref: '#/components/schemas/ClubMini'
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        venue:
+          type: string
+          maxLength: 200
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        registered_count:
+          type: integer
+          readOnly: true
+        remaining_capacity:
+          type: integer
+          nullable: true
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/EventStatusEnum'
+        is_completed:
+          type: boolean
+          readOnly: true
+        is_registered:
+          type: boolean
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - club
+      - created_at
+      - ends_at
+      - id
+      - is_completed
+      - is_registered
+      - registered_count
+      - remaining_capacity
+      - starts_at
+      - title
+      - venue
+    EventStatusEnum:
+      enum:
+      - draft
+      - published
+      - cancelled
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `published` - Published
+        * `cancelled` - Cancelled
+    EventWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        venue:
+          type: string
+          maxLength: 200
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        capacity:
+          type: integer
+          minimum: 1
+          nullable: true
+      required:
+      - ends_at
+      - starts_at
+      - title
+      - venue
     FollowState:
       type: object
       properties:
@@ -769,7 +1151,7 @@ components:
           type: integer
           readOnly: true
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/MembershipStatusEnum'
         requested_at:
           type: string
           format: date-time
@@ -818,6 +1200,20 @@ components:
       required:
       - requested_at
       - status
+    MembershipStatusEnum:
+      enum:
+      - pending
+      - approved
+      - rejected
+      - left
+      - removed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `rejected` - Rejected
+        * `left` - Left
+        * `removed` - Removed
     PaginatedClubPublicList:
       type: object
       required:
@@ -841,6 +1237,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ClubPublic'
+    PaginatedEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
     PaginatedMembershipList:
       type: object
       required:
@@ -864,6 +1283,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Membership'
+    PaginatedRegistrationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Registration'
     PatchedClubUpdate:
       type: object
       properties:
@@ -877,6 +1319,65 @@ components:
           type: string
           format: email
           maxLength: 254
+    PatchedEventWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        venue:
+          type: string
+          maxLength: 200
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        capacity:
+          type: integer
+          minimum: 1
+          nullable: true
+    Registration:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        student_id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        department:
+          type: string
+          readOnly: true
+        batch:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/RegistrationStatusEnum'
+        registered_at:
+          type: string
+          format: date-time
+      required:
+      - batch
+      - department
+      - id
+      - name
+      - student_id
+    RegistrationStatusEnum:
+      enum:
+      - registered
+      - cancelled
+      type: string
+      description: |-
+        * `registered` - Registered
+        * `cancelled` - Cancelled
     RoleEnum:
       enum:
       - student
@@ -885,20 +1386,6 @@ components:
       description: |-
         * `student` - Student
         * `club_operator` - Club Operator
-    StatusEnum:
-      enum:
-      - pending
-      - approved
-      - rejected
-      - left
-      - removed
-      type: string
-      description: |-
-        * `pending` - Pending
-        * `approved` - Approved
-        * `rejected` - Rejected
-        * `left` - Left
-        * `removed` - Removed
     StudentRegistration:
       type: object
       properties:

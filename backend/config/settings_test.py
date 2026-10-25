@@ -19,3 +19,5 @@ DATABASES = {
 }
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # faster tests
+
+MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]
