@@ -160,7 +160,7 @@ Following user review, the **Explore Clubs** section was specifically refined ag
 
 3. **Search Bar & Category Chips Row (102px Outer Container, 76px Input, 52px Chips):**
    - Increased outer white container height to ~102px (`2xl:min-h-[102px]`) with ~14px internal padding (`2xl:p-[14px]`), large rounded corners (`2xl:rounded-[26px]`), and soft indigo shadow.
-   - Scaled search input field to ~74-76px height (`2xl:h-[74px]`) with soft lavender background (`bg-canvas-base`), leading search icon (`2xl:text-[28px]`), comfortable padding, and text placeholder `"Search clubs by name, niche, or department..."`.
+   - Scaled search input field to ~74-76px height (`2xl:h-[74px]`) with soft lavender background (`bg-canvas-base`), leading search icon (`2xl:text-[28px]`), comfortable padding, text placeholder `"Search clubs by name, niche, or department..."`, and an embedded dedicated **Search** button (`#club-search-submit-btn`, `bg-primary hover:bg-primary-hover text-white font-bold`) positioned on the right of the input for immediate search execution.
    - Preserved single horizontal desktop row layout with search on left and category pills on right.
    - Scaled category pills to ~52px height (`2xl:h-[52px] 2xl:px-7`) with `All Clubs` in active deep-indigo (`bg-primary text-white font-bold`) and inactive pills in pale lavender (`bg-surface-lavender text-on-surface-variant`).
    - Preserved exact category order: `All Clubs`, `Academic`, `Cultural`, `Sports`, `Social & Volunteering`, `Technology`.
@@ -198,7 +198,7 @@ Following user instruction, [`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/S
 - **Header Dimensions & Styling:** 80px fixed height (`h-20`), white background with subtle blur (`bg-surface-white/90 backdrop-blur-xl border-b border-surface-lavender`), and subtle shadow `shadow-[0_1px_8px_rgba(43,52,185,0.04)]`.
 - **Mathematical Horizontal Centering:** Configured desktop layout with CSS Grid (`lg:grid lg:grid-cols-[1fr_auto_1fr] items-center`), ensuring the center pill navigation is placed at the exact 50% midpoint regardless of differing left brand or right user control widths.
 - **Left Brand Section:** JnUVerse circular hub logo (`w-9 h-9 rounded-full bg-surface-lavender text-primary`), bold wordmark (`JnUVerse` with indigo `Verse`), and rounded lavender badge (`STUDENT PORTAL` / `OPERATOR PORTAL`).
-- **Center Navigation Section:** Rounded lavender pill container (`p-1 rounded-full bg-surface-lavender`) with `Overview`, `Explore Clubs`, `My Clubs` (or `Manage Members` for operator), and `Events`. Active route renders as a solid deep-indigo pill (`bg-primary text-white font-semibold text-xs shadow-sm`); inactive routes render with dark text (`text-on-surface-variant hover:text-on-surface`).
+- **Center Navigation Section:** Rounded lavender pill container with balanced all-sides padding (`p-1.5 gap-1 rounded-full bg-surface-lavender`) housing `Overview`, `Explore Clubs`, `My Clubs` (or `Manage Members` for operator), and `Events`. Active route renders as a solid deep-indigo pill (`px-5 sm:px-6 py-2 rounded-full bg-primary text-white font-bold text-xs sm:text-sm shadow-sm`); inactive routes render with dark text (`px-4 sm:px-5 py-2 text-on-surface-variant hover:text-on-surface`).
 - **Right User Controls Section:**
   - Notification bell with unread indicator dot (`w-10 h-10` with primary dot), opening an interactive status popover.
   - User details stack with real profile data: Primary name (`user.name` or email) and secondary batch/department line using department short forms (e.g. `Batch 22 CSE` for Computer Science and Engineering, or `Official Club Executive` for operators).
@@ -254,5 +254,18 @@ Following the user's reference photograph, the right-side hero illustration in [
 ### Motion & Accessibility
 - Gentle vertical breathing/floating animations (`animate-orbit-float-1` through `animate-orbit-float-5`) with slow 5.8s–7.2s cycles.
 - Automatically disabled under `prefers-reduced-motion: reduce`.
+
+---
+
+## 13. Navbar Navigation Link Padding & Discovery Search Enhancements
+
+### 1. Navigation Pill Track & Button Padding Architecture ([`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Navbar.jsx))
+- **Track Container Padding (`p-2`):** Enhanced the center pill `<nav>` container with generous 8px outer padding from all sides (`p-2 rounded-full bg-surface-lavender gap-1 sm:gap-1.5`). This ensures the active pill button (`Explore Clubs`) and adjacent nav items sit recessed inside the lavender capsule with uniform visual breathing room on all 4 sides.
+- **Crisp Button Text Geometry:** Rather than bloating text padding inside individual buttons (`py-2 px-5/px-6`), reverted and refined link internal text padding to crisp, compact dimensions (`px-3.5 sm:px-4 py-1.5 text-xs font-semibold` for inactive items, `px-4 sm:px-4.5 py-1.5 text-xs font-bold bg-primary text-white shadow-sm` for active items).
+- **Department Short Form Inference:** Maintained student badge formatting in the navbar user stack (e.g., `Batch 22 CSE` via `getDepartmentShortForm`).
+
+### 2. Dedicated Club Search Action ([`ExploreClubs.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreClubs.jsx))
+- Integrated dedicated `#club-search-submit-btn` within the hero search input container with primary blue fill, search icon, and responsive sizing.
+
 
 

@@ -146,14 +146,14 @@ export default function Navbar() {
         {/* CENTER SECTION: Perfectly Centered Pill Navigation          */}
         {/* ============================================================ */}
         <nav
-          className="hidden lg:flex items-center p-1 rounded-full bg-surface-lavender justify-self-center shadow-xs"
+          className="hidden lg:flex items-center p-2 rounded-full bg-surface-lavender justify-self-center shadow-xs gap-1 sm:gap-1.5"
           aria-label="Main Navigation"
         >
           <Link
             to="/"
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               isActive("/")
-                ? "bg-primary text-white shadow-sm"
+                ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
             }`}
           >
@@ -161,9 +161,9 @@ export default function Navbar() {
           </Link>
           <Link
             to="/clubs"
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-4 sm:px-4.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               isActive("/clubs")
-                ? "bg-primary text-white shadow-sm"
+                ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
             }`}
           >
@@ -172,9 +172,9 @@ export default function Navbar() {
           {user?.role === "club_operator" ? (
             <Link
               to="/operator/members"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 isActive("/operator/members")
-                  ? "bg-primary text-white shadow-sm"
+                  ? "bg-primary text-white font-bold shadow-sm"
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
@@ -183,9 +183,9 @@ export default function Navbar() {
           ) : (
             <Link
               to="/my-clubs"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 isActive("/my-clubs")
-                  ? "bg-primary text-white shadow-sm"
+                  ? "bg-primary text-white font-bold shadow-sm"
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
@@ -194,9 +194,9 @@ export default function Navbar() {
           )}
           <Link
             to="/events"
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               isActive("/events")
-                ? "bg-primary text-white shadow-sm"
+                ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
             }`}
           >

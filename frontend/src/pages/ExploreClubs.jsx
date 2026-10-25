@@ -510,8 +510,8 @@ export default function ExploreClubs() {
 
             {/* Integrated Search & Category Filters (Scaled to 102px Target Height on 2K Desktop) */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 2xl:gap-6 p-2.5 sm:p-3 2xl:p-[14px] 2xl:min-h-[102px] rounded-2xl 2xl:rounded-[26px] bg-surface-white shadow-[0_4px_24px_-4px_rgba(43,52,185,0.06)]">
-              {/* Search Input (Approx 74-76px Tall on 2K Desktop) */}
-              <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-[280px] 2xl:min-w-[440px]">
+              {/* Search Input with Dedicated Search Button */}
+              <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-[280px] 2xl:min-w-[440px] flex items-center">
                 <span className="material-symbols-outlined absolute left-4 2xl:left-6 top-1/2 -translate-y-1/2 text-text-muted text-[22px] 2xl:text-[28px] pointer-events-none select-none">
                   search
                 </span>
@@ -524,8 +524,17 @@ export default function ExploreClubs() {
                     setPage(1);
                   }}
                   placeholder="Search clubs by name, niche, or department..."
-                  className="w-full h-12 sm:h-14 2xl:h-[74px] pl-12 2xl:pl-16 pr-4 2xl:pr-6 rounded-xl 2xl:rounded-2xl bg-canvas-base text-on-surface placeholder:text-text-muted text-sm 2xl:text-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  className="w-full h-12 sm:h-14 2xl:h-[74px] pl-12 2xl:pl-16 pr-28 sm:pr-32 2xl:pr-40 rounded-xl 2xl:rounded-2xl bg-canvas-base text-on-surface placeholder:text-text-muted text-sm 2xl:text-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
+                <button
+                  type="submit"
+                  id="club-search-submit-btn"
+                  aria-label="Search Clubs"
+                  className="absolute right-2 sm:right-2.5 2xl:right-3.5 top-1/2 -translate-y-1/2 h-8 sm:h-10 2xl:h-[50px] px-3.5 sm:px-5 2xl:px-7 rounded-lg sm:rounded-xl 2xl:rounded-2xl bg-primary hover:bg-primary-hover active:scale-95 text-white font-bold text-xs sm:text-sm 2xl:text-base flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[16px] sm:text-[18px] 2xl:text-[22px]">search</span>
+                  <span>Search</span>
+                </button>
               </form>
 
               {/* Category Filter Chips Carousel (Approx 52px Tall on 2K Desktop) */}
