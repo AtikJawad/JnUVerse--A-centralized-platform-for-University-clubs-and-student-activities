@@ -71,6 +71,7 @@ frontend/
 │   │   ├── ExploreEvents.jsx        # Campus events discovery, filters, search, featured spotlight & pagination
 │   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
 │   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
+│   │   ├── OperatorEventForm.jsx    # Club operator event creation & editing with live preview & Dhaka timezone
 │   │   ├── OperatorMembers.jsx      # Operator portal: pending request approval/rejection & member list
 │   │   ├── Register.jsx             # Stitch-aligned student registration (orbital left, form right, registrar sync)
 │   │   └── RegisterClub.jsx         # Stitch-aligned Club Operator registration (orbital left, form right, DRF sync)
@@ -283,22 +284,38 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 - **Event Details & Student RSVP ([`EventDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/EventDetail.jsx)):**
   - *Reference:* `jnuverse_events/code.html` and `jnuverse_student_event_feedback/code.html`.
   - *Route:* `/events/:id` (public browsing, authenticated student RSVP).
-  - *Design Features:* Asymmetric 12-column layout (7 cols left, 5 cols right), breadcrumb navigation back to discovery, organizing club banner, branded visual backdrop plate, full description with preserved formatting, host club spotlight card, and sticky logistics & RSVP sidebar.
+  - *Design Features:* Asymmetric 12-column layout (7 cols left, 5 cols right), breadcrumb navigation back to discovery, neutral organizing club attribution ("Organized by <club>"), branded visual backdrop plate, full description with preserved formatting, host club spotlight card, and sticky logistics & RSVP sidebar.
   - *Student RSVP Registration (`POST /api/events/:id/register/`):*
     - Interactive confirmation modal before reservation.
     - Idempotent handling (201 Created or 200 OK).
-    - Real-time event state synchronization with updated `registered_count`, `remaining_capacity`, and `is_registered: true`.
-    - Confirmed attendance badge with student entrance verification notice.
+    - Authoritative event state refresh via `eventsAPI.getById(id)` updating `registered_count`, `remaining_capacity`, and `is_registered: true`, with graceful fallback for network disruptions.
+    - Confirmed attendance badge displaying: *"Your registration has been confirmed. We look forward to seeing you!"*.
   - *RSVP Cancellation (`DELETE /api/events/:id/register/`):*
     - Confirmation modal preventing accidental cancellations.
     - Idempotent 204 No Content response handling.
-    - Seat release and event refresh.
+    - Authoritative event state refresh via `eventsAPI.getById(id)` and seat release.
     - Blocked after start time (`starts_at <= now`).
   - *Authentication & Role Handling:*
     - Anonymous visitors receive clear "Log in to register" prompt preserving target event destination.
     - Club operators receive clear non-student executive notice.
     - Students have full access to registration/cancellation when open.
   - *HTTP 409 Conflict Handling:* Renders exact backend conflict `detail` messages for full capacity ("This event is full."), closed registration ("Registration is closed because the event has started."), and post-start cancellation attempts.
+
+- **Club Operator Event Creation & Editing ([`OperatorEventForm.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEventForm.jsx)):**
+  - *Reference:* `jnuverse_club_profile_management/code.html` and `jnuverse_events/code.html`.
+  - *Routes:* `/operator/events/new` (create mode) and `/operator/events/:id/edit` (edit mode).
+  - *Access Control:* Protected by `ProtectedRoute` restricted to `club_operator` role accounts.
+  - *Design Features:* Asymmetric 12-column layout (7 cols form left, 5 cols real-time "Live Public Preview" mirror card right), breadcrumb trail, Plus Jakarta Sans typography, and responsive controls.
+  - *Create Mode:* Calls `eventsAPI.create(payload)`; backend automatically initializes event as `draft` assigned to the operator's own club.
+  - *Edit Mode:* Calls `eventsAPI.getById(id)` to prefill existing fields; calls `eventsAPI.update(id, payload)` on save. Enforces backend restrictions (cancelled or ended events are read-only with a descriptive alert banner).
+  - *Field Specifications & Exact Names:*
+    - `title`: Required text (max 200 characters with character counter).
+    - `description`: Optional rich textarea with character counter.
+    - `venue`: Required text (max 200 characters).
+    - `starts_at` & `ends_at`: Required HTML `datetime-local` inputs evaluated strictly in `Asia/Dhaka` (+06:00 BST).
+    - `capacity`: Numeric input with "Unlimited Capacity" checkbox sending `null`. On edit, validated against `registered_count`.
+  - *Timezone Handling:* Conversion helpers (`isoToDhakaInput` and `dhakaInputToIso`) evaluate wall-clock values strictly in `Asia/Dhaka` using `Intl.DateTimeFormat` and submit explicit `+06:00` ISO 8601 strings.
+  - *Validation & Error Mapping:* Comprehensive client-side validation with real-time field error clearance and automatic mapping of backend `400` validation errors and `409` conflict details.
 
 ---
 
@@ -309,7 +326,7 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 4 Completed: Event Details & Student RSVP Workflow Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 5 Completed: Club Operator Event Creation & Editing Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |

@@ -1,7 +1,7 @@
 # Week 04 — Events & Registration
 
 **Focus:** Campus events discovery, event details, student RSVP/registration workflow, operator event creation/lifecycle, and attendee rosters  
-**Status:** **In Progress** (Stage 4 Completed: Event Details & Student RSVP Workflow Implemented & Verified)  
+**Status:** **In Progress** (Stage 5 Completed: Club Operator Event Creation & Editing Implemented & Verified)  
 **Assigned:** Anik Khondokar (Frontend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_04_BACKEND_HANDOFF.md`, 86 backend tests passing)  
 **Target:** October 2026  
@@ -49,11 +49,16 @@
    - Built `EventDetail.jsx` consuming `GET /api/events/:id/`, `POST /api/events/:id/register/`, and `DELETE /api/events/:id/register/`.
    - Registered public route `/events/:id` in `App.jsx`.
    - Integrated navigation in `ExploreEvents.jsx` (featured "View Event" and card "View Details" linking directly to `/events/:id`, quick-view modal retired).
-   - Designed 12-column editorial layout with host club insignia, verified charter indicator, schedule, venue, capacity tracking, and status badges.
+   - Designed 12-column editorial layout with host club insignia, neutral "Organized by" attribution without unsupported verification claims, schedule, venue, capacity tracking, and status badges.
    - Handled all RSVP states: anonymous prompt with login redirection, student registration with confirmation modal, registered confirmation card with cancel modal, and club operator advisory.
-   - Handled 204 No Content for cancellation, 409 Conflict messages (full capacity, event started, cancellation prohibited), and standardized "Unlimited Capacity" display.
-5. [ ] **Stage 5: Club Operator Event Creation & Editing**
-   - Build operator event form consuming `POST /api/events/` and `PATCH /api/events/:id/`.
+   - Authoritative state refresh via `eventsAPI.getById(id)` following registration and cancellation with graceful fallback, standardized confirmation notice ("Your registration has been confirmed. We look forward to seeing you!"), and 409 Conflict messages (full capacity, event started, cancellation prohibited).
+5. [x] **Stage 5: Club Operator Event Creation & Editing**
+   - Built `OperatorEventForm.jsx` supporting both create (`POST /api/events/`) and edit (`PATCH /api/events/:id/`) modes.
+   - Registered protected routes `/operator/events/new` and `/operator/events/:id/edit` restricted to `club_operator` role.
+   - Implemented strict Asia/Dhaka (+06:00 BST) wall-clock conversion helpers (`isoToDhakaInput` and `dhakaInputToIso`).
+   - Implemented 12-column Stitch layout with real-time "Live Public Preview" mirror card in the right column.
+   - Handled client-side validation for required fields, future start time, end-after-start constraints, positive capacity integer, and registered attendee minimum.
+   - Mapped backend `400` field validation errors, `409` conflict notices (cancelled or ended events read-only), and `403` permissions.
 6. [ ] **Stage 6: Operator Event Management & Attendee Roster**
    - Build operator event dashboard (`?mine=true`), publish/cancel actions, and attendee list (`GET /api/events/:id/registrations/`).
 7. [ ] **Stage 7: Integration Review, Quality Gates & Documentation**
@@ -66,12 +71,14 @@
 ### Created Files
 - [`frontend/src/pages/ExploreEvents.jsx`](../../src/pages/ExploreEvents.jsx): Campus events discovery and listing page implementing Stitch `jnuverse_events` specifications.
 - [`frontend/src/pages/EventDetail.jsx`](../../src/pages/EventDetail.jsx): Public event detail view with schedule, venue, live capacity metrics, and student RSVP registration/cancellation workflow.
+- [`frontend/src/pages/OperatorEventForm.jsx`](../../src/pages/OperatorEventForm.jsx): Unified club operator event creation and editing workspace with real-time public preview and Asia/Dhaka timezone handling.
 
 ### Modified Files
-- [`frontend/src/App.jsx`](../../src/App.jsx): Registered public routes `/events` and `/events/:id`.
-- [`frontend/src/pages/ExploreEvents.jsx`](../../src/pages/ExploreEvents.jsx): Updated featured spotlight and card actions to navigate directly to `/events/:id`; retired duplicate quick-view modal.
+- [`frontend/src/App.jsx`](../../src/App.jsx): Registered protected routes `/operator/events/new` and `/operator/events/:id/edit` for `club_operator`.
+- [`frontend/src/pages/ExploreEvents.jsx`](../../src/pages/ExploreEvents.jsx): Added operator "Create Event" CTA button in header section.
+- [`frontend/src/pages/EventDetail.jsx`](../../src/pages/EventDetail.jsx): Added "Edit Event Details" button for club operators when event is editable.
 - [`frontend/src/services/api.js`](../../src/services/api.js): Added and exported `eventsAPI` encapsulating all backend-verified event operations.
-- [`frontend/FRONTEND_README.md`](../../FRONTEND_README.md): Documented `eventsAPI`, `ExploreEvents.jsx`, `EventDetail.jsx`, design features, and updated status matrix.
+- [`frontend/FRONTEND_README.md`](../../FRONTEND_README.md): Documented `eventsAPI`, `ExploreEvents.jsx`, `EventDetail.jsx`, `OperatorEventForm.jsx`, design features, and updated status matrix.
 - [`frontend/docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md`](WEEK_04_EVENTS_AND_REGISTRATION.md): Maintained workflow tracking document.
 
 ---
@@ -145,5 +152,17 @@ npm run lint
 npm run build
 # Output: Exit code 0 (114 modules transformed, built in ~878ms)
 ```
+
+### Stage 5 Verification (Club Operator Event Creation & Editing)
+```bash
+# 1. ESLint Static Analysis
+npm run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm run build
+# Output: Exit code 0 (116 modules transformed, built in ~868ms)
+```
+
 
 

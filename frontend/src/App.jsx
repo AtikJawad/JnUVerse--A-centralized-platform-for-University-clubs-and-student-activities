@@ -11,6 +11,7 @@ import MyClubs from "./pages/MyClubs";
 import OperatorMembers from "./pages/OperatorMembers";
 import ExploreEvents from "./pages/ExploreEvents";
 import EventDetail from "./pages/EventDetail";
+import OperatorEventForm from "./pages/OperatorEventForm";
 
 function App() {
   return (
@@ -56,6 +57,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["club_operator"]}>
                 <OperatorMembers />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Club Operator Event Management Routes */}
+          <Route
+            path="/operator/events/new"
+            element={
+              <ProtectedRoute allowedRoles={["club_operator"]}>
+                <OperatorEventForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/operator/events/:id/edit"
+            element={
+              <ProtectedRoute allowedRoles={["club_operator"]}>
+                <OperatorEventForm />
               </ProtectedRoute>
             }
           />

@@ -191,16 +191,44 @@ export default function EventDetail() {
     }
 
     if (user?.role !== "student") {
-      setActionError("Only verified university students can register for campus events.");
+      setActionError("Only university students can register for campus events.");
       return;
     }
 
     setActionLoading(true);
     try {
       const res = await eventsAPI.register(id);
-      // Backend returns updated Event object (201 Created or 200 OK)
-      setEvent(res.data);
-      setActionSuccess("You are successfully registered for this event! Your seat is reserved.");
+      // The backend returns 201 Created or 200 OK.
+      // Retrieve authoritative event state from backend.
+      try {
+        const freshRes = await eventsAPI.getById(id);
+        if (freshRes?.data) {
+          setEvent(freshRes.data);
+        } else if (res?.data && typeof res.data === "object" && "id" in res.data) {
+          setEvent(res.data);
+        }
+      } catch (refreshErr) {
+        // Refresh failed (e.g. transient network glitch), but registration itself succeeded
+        console.warn("Event state refresh failed after registration:", refreshErr);
+        if (res?.data && typeof res.data === "object" && "id" in res.data) {
+          setEvent(res.data);
+        } else {
+          setEvent((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  is_registered: true,
+                  registered_count: (prev.registered_count || 0) + 1,
+                  remaining_capacity:
+                    prev.capacity !== null
+                      ? Math.max((prev.remaining_capacity ?? prev.capacity) - 1, 0)
+                      : null,
+                }
+              : prev
+          );
+        }
+      }
+      setActionSuccess("Your registration has been confirmed. We look forward to seeing you!");
       setShowRegisterModal(false);
     } catch (err) {
       if (err.response?.status === 409) {
@@ -228,8 +256,27 @@ export default function EventDetail() {
       // Backend returns 204 No Content
       await eventsAPI.unregister(id);
       // Refresh event details to update registration count and capacity
-      const freshRes = await eventsAPI.getById(id);
-      setEvent(freshRes.data);
+      try {
+        const freshRes = await eventsAPI.getById(id);
+        if (freshRes?.data) {
+          setEvent(freshRes.data);
+        }
+      } catch (refreshErr) {
+        console.warn("Event state refresh failed after cancellation:", refreshErr);
+        setEvent((prev) =>
+          prev
+            ? {
+                ...prev,
+                is_registered: false,
+                registered_count: Math.max((prev.registered_count || 1) - 1, 0),
+                remaining_capacity:
+                  prev.capacity !== null
+                    ? (prev.remaining_capacity ?? 0) + 1
+                    : null,
+              }
+            : prev
+        );
+      }
       setActionSuccess("Your event registration has been cancelled. Your reserved seat has been released.");
       setShowCancelModal(false);
     } catch (err) {
@@ -389,27 +436,26 @@ export default function EventDetail() {
               <div className="lg:col-span-7 space-y-8">
                 {/* Header Information Plate */}
                 <section className="space-y-4">
-                  {/* Organizing Society Ribbon & Status Badge */}
+                  {/* Organizing Club Ribbon & Status Badge */}
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <Link
-                      to={`/clubs/${event.club?.slug}`}
-                      className="inline-flex items-center gap-2 text-xs font-semibold text-text-muted hover:text-primary transition-colors group"
-                    >
-                      <div className="w-7 h-7 rounded-xl bg-surface-lavender flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-xs">
-                        <span className="material-symbols-outlined text-[16px]">
-                          {getClubIcon(event.club)}
-                        </span>
-                      </div>
-                      <span className="font-bold text-on-surface group-hover:text-primary transition-colors">
-                        {event.club?.name}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-text-muted">
+                        Organized by
                       </span>
-                      <span
-                        className="material-symbols-outlined text-[16px] text-primary"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      <Link
+                        to={`/clubs/${event.club?.slug}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface hover:text-primary transition-colors group"
                       >
-                        verified
-                      </span>
-                    </Link>
+                        <div className="w-6 h-6 rounded-lg bg-surface-lavender flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-xs">
+                          <span className="material-symbols-outlined text-[14px]">
+                            {getClubIcon(event.club)}
+                          </span>
+                        </div>
+                        <span className="group-hover:text-primary transition-colors">
+                          {event.club?.name}
+                        </span>
+                      </Link>
+                    </div>
 
                     {status && (
                       <span
@@ -536,14 +582,11 @@ export default function EventDetail() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-[10px] uppercase tracking-wider font-bold text-text-muted block">
-                        Organizing Student Guild
+                        Organized by
                       </span>
                       <h3 className="text-base sm:text-lg font-bold text-on-surface">
                         {event.club?.name}
                       </h3>
-                      <p className="text-xs text-text-muted">
-                        Official Jagannath University chartered club
-                      </p>
                     </div>
                   </div>
 
@@ -694,16 +737,37 @@ export default function EventDetail() {
 
                     {/* State 2: Club Operator Account */}
                     {isAuthenticated && user?.role === "club_operator" && (
-                      <div className="p-4 rounded-2xl bg-surface-lavender border border-border-subtle space-y-2 text-xs">
-                        <div className="flex items-center gap-2 font-bold text-primary">
-                          <span className="material-symbols-outlined text-[18px]">badge</span>
-                          <span>Club Operator Mode</span>
+                      <div className="p-4 rounded-2xl bg-surface-lavender border border-border-subtle space-y-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 font-bold text-primary">
+                            <span className="material-symbols-outlined text-[18px]">badge</span>
+                            <span>Club Operator Workspace</span>
+                          </div>
+                          {event.status === "draft" && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                              Draft
+                            </span>
+                          )}
                         </div>
                         <p className="text-text-muted leading-relaxed">
                           You are logged in as a Club Operator. Student event registrations are
-                          reserved for student accounts. Operator event editing will be available
-                          in Stage 5.
+                          reserved for student accounts.
                         </p>
+                        {event.status !== "cancelled" &&
+                        !event.is_completed &&
+                        new Date(event.ends_at) > new Date() ? (
+                          <Link
+                            to={`/operator/events/${event.id}/edit`}
+                            className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white font-semibold transition-colors shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">edit</span>
+                            <span>Edit Event Details</span>
+                          </Link>
+                        ) : (
+                          <p className="text-[11px] text-text-muted italic">
+                            This event has ended or been cancelled and can no longer be edited.
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -722,8 +786,7 @@ export default function EventDetail() {
                                   Registration Confirmed
                                 </span>
                                 <p className="text-emerald-800 leading-relaxed">
-                                  Your seat is reserved for this event. Present your student ID
-                                  card at the venue entrance.
+                                  Your registration has been confirmed. We look forward to seeing you!
                                 </p>
                               </div>
                             </div>
@@ -845,7 +908,7 @@ export default function EventDetail() {
                             </button>
 
                             <p className="text-[11px] text-text-muted text-center font-medium">
-                              Free student registration • Admission with verified ID
+                              Free student registration
                             </p>
                           </div>
                         )}

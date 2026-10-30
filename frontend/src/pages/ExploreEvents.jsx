@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { eventsAPI, extractErrorMessage } from "../services/api";
 
@@ -151,6 +152,7 @@ async function fetchAllActiveEvents(query = "") {
 }
 
 export default function ExploreEvents() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -303,25 +305,37 @@ export default function ExploreEvents() {
             {/* ============================================================ */}
             {/* 1. Page Introduction / Header Section                        */}
             {/* ============================================================ */}
-            <section className="flex flex-col items-start gap-3 max-w-3xl">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-surface-lavender text-primary shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-[11px] uppercase tracking-wider font-bold">
-                  CAMPUS LIFE, HAPPENING NOW
-                </span>
+            <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="flex flex-col items-start gap-3 max-w-3xl">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-surface-lavender text-primary shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[11px] uppercase tracking-wider font-bold">
+                    CAMPUS LIFE, HAPPENING NOW
+                  </span>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl text-on-surface tracking-tight font-extrabold leading-tight">
+                  Discover{" "}
+                  <span className="bg-gradient-to-r from-primary via-primary-container to-secondary bg-clip-text text-transparent">
+                    what’s happening.
+                  </span>
+                </h1>
+
+                <p className="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl">
+                  Find campus events, meet new people, and make your university experience
+                  unforgettable at Jagannath University.
+                </p>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl text-on-surface tracking-tight font-extrabold leading-tight">
-                Discover{" "}
-                <span className="bg-gradient-to-r from-primary via-primary-container to-secondary bg-clip-text text-transparent">
-                  what’s happening.
-                </span>
-              </h1>
-
-              <p className="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl">
-                Find campus events, meet new people, and make your university experience
-                unforgettable at Jagannath University.
-              </p>
+              {user?.role === "club_operator" && (
+                <Link
+                  to="/operator/events/new"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-resting hover:shadow-primary-glow transition-all shrink-0 self-start sm:self-auto"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add</span>
+                  <span>Create Event</span>
+                </Link>
+              )}
             </section>
 
             {/* ============================================================ */}
