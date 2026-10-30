@@ -328,19 +328,21 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 - **Operator Event Management Workspace ([`OperatorEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEvents.jsx)):**
   - *Route:* `/operator/events` (protected for `club_operator` role).
   - *Design Features:* Editorial header with context description, "Create New Event" primary action (`/operator/events/new`), 5-card metric ribbon (Total Events, Live Published, Drafts, Completed, Total Attendees), search input (title/venue/description), lifecycle status filters (`All Events`, `Draft`, `Published`, `Completed`, `Cancelled`), responsive event management rows with status badges, capacity/fill gauges, and quick action ribbon.
+  - *Complete Dataset Retrieval & Pagination:* Paginates across all pages of `GET /api/events/?mine=true` using the backend-supported maximum `page_size: 50`, removes duplicate IDs, and calculates metrics from the full dataset. Search, status tabs, and local page slicing operate on the complete deduplicated array. Publish, cancellation, manual refresh, and error retry trigger fresh multi-page API requests.
+  - *Summary Metrics & Status Consistency:* The Completed summary metric, Completed filter tab, and status badges strictly use `status === "published" && (is_completed || ends_at <= now)`. Cancelled and draft events are never counted as completed simply because their scheduled end time has passed.
   - *Event Lifecycle & Management Actions:*
     - **View:** Direct link to public preview page (`/events/:id`).
-    - **Edit:** Direct link to unified event editor (`/operator/events/:id/edit`). Locked for cancelled or completed events.
+    - **Edit:** Direct link to unified event editor (`/operator/events/:id/edit`). Locked for cancelled or completed events. Drafts with passed times remain editable so operators can update dates.
     - **Attendees:** Direct link to attendee roster (`/operator/events/:id/attendees`) with current registration count badge.
     - **Publish Action:** Interactive modal before publishing drafts (`POST /api/events/:id/publish/`). Explains public visibility, includes start-time-in-past warning guard, and triggers authoritative backend refresh.
     - **Cancel Action:** Interactive modal for permanent cancellation (`POST /api/events/:id/cancel/`). Warns of permanent irreversibility, confirms that existing student registrations remain recorded on the roster, and handles backend 409 conflict responses.
-  - *API Data Integrity:* Consumes `eventsAPI.getAll({ mine: "true" })` to strictly fetch the operator's own club events across pagination. Never queries or renders other clubs' drafts.
 
 - **Operator Event Attendee Roster ([`OperatorEventAttendees.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEventAttendees.jsx)):**
   - *Route:* `/operator/events/:id/attendees` (protected for `club_operator` role).
   - *Design Features:* Breadcrumb link back to Manage Events, event metadata header (title, host club, Asia/Dhaka schedule, venue, status badge), quick metric summary (Confirmed RSVPs, Venue Capacity, Remaining Seats), and tabular student roster with initials avatars, monospace student IDs, department, batch, formatted registration timestamps, and status badges.
   - *Pagination:* Supports backend DRF `EventPagination` (`page`, `page_size: 20`) with previous/next controls, page numbers, item range counts, and page loading overlays.
-  - *Student Privacy Compliance:* Prominent compliance banner. Strictly displays only serializer-confirmed fields (`id`, `student_id`, `name`, `department`, `batch`, `status`, `registered_at`). **Student email addresses and contact info are strictly omitted**.
+  - *Student Privacy Compliance:* Features a neutral privacy notice: *"Student email addresses and contact details are not displayed in this roster."* Strictly displays only serializer-confirmed fields (`id`, `student_id`, `name`, `department`, `batch`, `status`, `registered_at`).
+  - *Status Badge Consistency:* Follows the identical lifecycle condition: Draft events remain labeled `Draft`, Cancelled events `Cancelled`, and only Published events with passed end time or `is_completed: true` display as `Completed`.
   - *Authorization Guard:* Catches backend 403 Forbidden responses ("Only this club's operator can do this.") and renders a dedicated access denied state with navigation back to `/operator/events`.
 
 ---

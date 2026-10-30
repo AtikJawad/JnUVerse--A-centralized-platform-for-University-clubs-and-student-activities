@@ -61,14 +61,22 @@
    - Mapped backend `400` field validation errors, `409` conflict notices (cancelled or ended events read-only), and `403` permissions.
 6. [x] **Stage 6: Operator Event Management & Attendee Roster**
    - Built `OperatorEvents.jsx` mounted at `/operator/events` restricted to `club_operator`.
-   - Integrated `eventsAPI.getAll({ mine: "true" })` retrieving the operator's own club events across pagination.
-   - Built summary metric ribbon (Total Events, Live Published, Drafts, Completed, Total Attendees).
-   - Built status filters (`All Events`, `Draft`, `Published`, `Completed`, `Cancelled`) and real-time search.
-   - Implemented event publish workflow (`POST /api/events/:id/publish/`) with confirmation modal, start-time-in-past guard, and authoritative backend refresh.
-   - Implemented permanent cancel workflow (`POST /api/events/:id/cancel/`) with confirmation modal, preservation of recorded attendees, and 409 conflict handling.
+   - **Complete Event Dataset Retrieval & Pagination:**
+     - Fully respects backend DRF `EventPagination` (`page_size_query_param: "page_size"`, `max_page_size: 50`).
+     - Loops across all pages of `GET /api/events/?mine=true` with `page_size: 50` until `!data.next` or all records retrieved.
+     - Deduplicates records by ID using a Set to prevent duplicate event display.
+     - Summary metrics (Total Events, Live Published, Drafts, Completed, Total Attendees) are strictly calculated on the complete dataset.
+     - Search, status filtering, and local pagination slice the complete deduplicated dataset.
+     - Event publish, permanent cancellation, manual refresh, and error retry force a fresh multi-page API retrieval.
+   - **Completed Metric & Status Consistency:**
+     - The Completed summary metric, Completed filter tab, and status badges strictly use `status === "published" && (is_completed || ends_at <= now)`.
+     - Cancelled and draft events are never counted as completed simply because their scheduled end time has passed.
+     - Lifecycle badge evaluation order: `Cancelled` $\rightarrow$ `Draft` $\rightarrow$ `Completed` (published + ended/is_completed) $\rightarrow$ `Published`.
+     - Drafts with passed start times remain editable so operators can update dates prior to publication.
    - Built `OperatorEventAttendees.jsx` mounted at `/operator/events/:id/attendees` restricted to `club_operator`.
    - Consumed `eventsAPI.getById(id)` for event context and `eventsAPI.getRegistrations(id, params)` with DRF pagination (`page`, `page_size: 20`).
-   - Enforced strict student privacy protection: student emails are omitted; displayed verified `student_id`, `name`, `department`, `batch`, `registered_at`, and `status`.
+   - **Neutral Privacy Wording:** Replaced unsupported university regulation claims with neutral wording: *"Student email addresses and contact details are not displayed in this roster."*
+   - Strictly displays only serializer-confirmed fields (`id`, `student_id`, `name`, `department`, `batch`, `registered_at`, `status`).
    - Added global and mobile navigation link "Manage Events" in `Navbar.jsx`.
 7. [ ] **Stage 7: Integration Review, Quality Gates & Documentation**
    - Full end-to-end audit, static linting, and production build verification.
@@ -186,6 +194,13 @@ npm run lint
 npm run build
 # Output: Exit code 0 (118 modules transformed, built in 886ms)
 ```
+
+### Stage 6 Final Corrections Verification
+- **Completed Metric & Filter Condition:** Strictly aligned to `status === "published" && (is_completed || ends_at <= now)`.
+- **Status Badges:** Checked cancelled and draft states first so drafts/cancelled with past end times never show as Completed.
+- **Dataset Retrieval:** Verified multi-page retrieval loop (`page_size: 50`) with deduplication across `GET /api/events/?mine=true`.
+- **Privacy Wording:** Neutralized wording in privacy notice: *"Student email addresses and contact details are not displayed in this roster."*
+- **Action Triggers:** Verified fresh API request triggers on publish, cancel, manual refresh, and connection error retry.
 
 
 

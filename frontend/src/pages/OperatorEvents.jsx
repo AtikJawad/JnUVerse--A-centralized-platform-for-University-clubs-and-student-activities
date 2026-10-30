@@ -67,19 +67,6 @@ function getEventLifecycle(event) {
     };
   }
 
-  const now = new Date();
-  const endsAt = event.ends_at ? new Date(event.ends_at) : null;
-
-  if (event.is_completed || (endsAt && endsAt <= now)) {
-    return {
-      key: "completed",
-      label: "Completed",
-      badge: "neutral",
-      icon: "event_available",
-      description: "Event has concluded",
-    };
-  }
-
   if (event.status === "draft") {
     return {
       key: "draft",
@@ -87,6 +74,19 @@ function getEventLifecycle(event) {
       badge: "warning",
       icon: "edit_document",
       description: "Private draft",
+    };
+  }
+
+  const now = new Date();
+  const endsAt = event.ends_at ? new Date(event.ends_at) : null;
+
+  if (event.status === "published" && (Boolean(event.is_completed) || (endsAt && endsAt <= now))) {
+    return {
+      key: "completed",
+      label: "Completed",
+      badge: "neutral",
+      icon: "event_available",
+      description: "Event has concluded",
     };
   }
 
@@ -244,12 +244,15 @@ export default function OperatorEvents() {
     allEvents.forEach((e) => {
       totalAttendees += e.registered_count || 0;
       const endsAt = e.ends_at ? new Date(e.ends_at) : null;
+      const isCompleted =
+        e.status === "published" &&
+        (Boolean(e.is_completed) || (endsAt && endsAt <= now));
 
       if (e.status === "cancelled") {
         cancelled += 1;
       } else if (e.status === "draft") {
         draft += 1;
-      } else if (e.is_completed || (endsAt && endsAt <= now)) {
+      } else if (isCompleted) {
         completed += 1;
       } else if (e.status === "published") {
         published += 1;
@@ -271,20 +274,22 @@ export default function OperatorEvents() {
     const now = new Date();
 
     return allEvents.filter((event) => {
+      const endsAt = event.ends_at ? new Date(event.ends_at) : null;
+      const isCompleted =
+        event.status === "published" &&
+        (Boolean(event.is_completed) || (endsAt && endsAt <= now));
+
       // 1. Status Tab filter
       if (activeTab === "draft") {
         if (event.status !== "draft") return false;
       } else if (activeTab === "published") {
-        const endsAt = event.ends_at ? new Date(event.ends_at) : null;
-        if (event.status !== "published" || event.is_completed || (endsAt && endsAt <= now)) {
+        if (event.status !== "published" || isCompleted) {
           return false;
         }
       } else if (activeTab === "cancelled") {
         if (event.status !== "cancelled") return false;
       } else if (activeTab === "completed") {
-        const endsAt = event.ends_at ? new Date(event.ends_at) : null;
-        if (event.status !== "published") return false;
-        if (!event.is_completed && (!endsAt || endsAt > now)) return false;
+        if (!isCompleted) return false;
       }
 
       // 2. Search query filter
@@ -389,11 +394,24 @@ export default function OperatorEvents() {
 
             {/* Error Notification */}
             {error && (
-              <ErrorAlert
-                title="Management Notice"
-                message={error}
-                onDismiss={() => setError("")}
-              />
+              <div className="space-y-3">
+                <ErrorAlert
+                  title="Management Notice"
+                  message={error}
+                  onDismiss={() => setError("")}
+                />
+                <div className="flex justify-start">
+                  <button
+                    type="button"
+                    onClick={fetchOperatorEvents}
+                    disabled={loading}
+                    className="px-4 py-2 rounded-full border border-border-subtle bg-surface-white hover:bg-surface-lavender text-xs font-semibold text-primary transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">refresh</span>
+                    <span>Retry Request</span>
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* 4-Card Summary Metrics Ribbon */}
@@ -558,8 +576,9 @@ export default function OperatorEvents() {
                       const isPublished = event.status === "published";
                       const isCancelled = event.status === "cancelled";
                       const isCompleted =
-                        event.is_completed ||
-                        (event.ends_at && new Date(event.ends_at) <= new Date());
+                        event.status === "published" &&
+                        (Boolean(event.is_completed) ||
+                          (event.ends_at && new Date(event.ends_at) <= new Date()));
                       const isEditable = !isCancelled && !isCompleted;
                       const canPublish = isDraft;
                       const canCancel = isPublished && !isCompleted;

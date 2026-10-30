@@ -178,19 +178,19 @@ export default function OperatorEventAttendees() {
         </Badge>
       );
     }
-    const now = new Date();
-    const endsAt = event.ends_at ? new Date(event.ends_at) : null;
-    if (event.is_completed || (endsAt && endsAt <= now)) {
-      return (
-        <Badge variant="neutral" dot>
-          Completed
-        </Badge>
-      );
-    }
     if (event.status === "draft") {
       return (
         <Badge variant="warning" dot>
           Draft
+        </Badge>
+      );
+    }
+    const now = new Date();
+    const endsAt = event.ends_at ? new Date(event.ends_at) : null;
+    if (event.status === "published" && (Boolean(event.is_completed) || (endsAt && endsAt <= now))) {
+      return (
+        <Badge variant="neutral" dot>
+          Completed
         </Badge>
       );
     }
@@ -360,15 +360,13 @@ export default function OperatorEventAttendees() {
                 </div>
               </div>
 
-              {/* Student Privacy & Data Protection Banner */}
+              {/* Student Privacy Banner */}
               <div className="mt-6 pt-5 border-t border-border-subtle/60 flex items-start sm:items-center gap-3 p-3.5 rounded-2xl bg-surface-container-low/70 border border-border-subtle text-xs text-text-muted">
                 <span className="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5 sm:mt-0">
                   privacy_tip
                 </span>
                 <span className="leading-relaxed">
-                  <strong>Student Privacy &amp; Data Protection:</strong> In compliance with
-                  university student data regulations, student email addresses and personal contact
-                  details are strictly omitted from operator event rosters.
+                  <strong>Student Privacy Notice:</strong> Student email addresses and contact details are not displayed in this roster.
                 </span>
               </div>
             </div>
@@ -383,7 +381,7 @@ export default function OperatorEventAttendees() {
                   <div>
                     <h2 className="text-base font-bold text-on-surface">Registered Attendees</h2>
                     <p className="text-[11px] text-text-muted">
-                      Showing official student records verified via Jagannath University credentials.
+                      Showing registered student records for this event.
                     </p>
                   </div>
                 </div>
@@ -418,7 +416,7 @@ export default function OperatorEventAttendees() {
                         ? "This event is currently in Draft mode. Publish the event to open RSVP registrations for students."
                         : event?.status === "cancelled"
                         ? "This event was cancelled. No new student RSVPs are accepted."
-                        : "No students have RSVP'd for this event yet. Once students register, their verified university credentials will appear here."}
+                        : "No students have RSVP'd for this event yet. Once students register, their registration records will appear here."}
                     </p>
 
                     {event && (
@@ -679,7 +677,7 @@ export default function OperatorEventAttendees() {
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-text-muted">
             <p>© 2026 Jagannath University (JnUVerse). All rights reserved.</p>
-            <p>Verified Student Activity &amp; Attendee Management</p>
+            <p>Student Activity &amp; Attendee Management</p>
           </div>
         </div>
       </footer>
