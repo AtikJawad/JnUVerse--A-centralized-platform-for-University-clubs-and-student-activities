@@ -170,16 +170,28 @@ export default function Navbar() {
             Explore Clubs
           </Link>
           {user?.role === "club_operator" ? (
-            <Link
-              to="/operator/members"
-              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isActive("/operator/members")
-                  ? "bg-primary text-white font-bold shadow-sm"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              Manage Members
-            </Link>
+            <>
+              <Link
+                to="/operator/members"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/operator/members")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Manage Members
+              </Link>
+              <Link
+                to="/operator/events"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/operator/events")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Manage Events
+              </Link>
+            </>
           ) : (
             <Link
               to="/my-clubs"
@@ -335,17 +347,30 @@ export default function Navbar() {
             Explore Clubs
           </Link>
           {user?.role === "club_operator" ? (
-            <Link
-              to="/operator/members"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-                isActive("/operator/members")
-                  ? "bg-primary text-white"
-                  : "text-on-surface hover:bg-surface-lavender"
-              }`}
-            >
-              Manage Members
-            </Link>
+            <>
+              <Link
+                to="/operator/members"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/operator/members")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Manage Members
+              </Link>
+              <Link
+                to="/operator/events"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/operator/events")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Manage Events
+              </Link>
+            </>
           ) : (
             <Link
               to="/my-clubs"

@@ -317,6 +317,24 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
   - *Timezone Handling:* Conversion helpers (`isoToDhakaInput` and `dhakaInputToIso`) evaluate wall-clock values strictly in `Asia/Dhaka` using `Intl.DateTimeFormat` and submit explicit `+06:00` ISO 8601 strings.
   - *Validation & Error Mapping:* Comprehensive client-side validation with real-time field error clearance and automatic mapping of backend `400` validation errors and `409` conflict details.
 
+- **Operator Event Management Workspace ([`OperatorEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEvents.jsx)):**
+  - *Route:* `/operator/events` (protected for `club_operator` role).
+  - *Design Features:* Editorial header with context description, "Create New Event" primary action (`/operator/events/new`), 5-card metric ribbon (Total Events, Live Published, Drafts, Completed, Total Attendees), search input (title/venue/description), lifecycle status filters (`All Events`, `Draft`, `Published`, `Completed`, `Cancelled`), responsive event management rows with status badges, capacity/fill gauges, and quick action ribbon.
+  - *Event Lifecycle & Management Actions:*
+    - **View:** Direct link to public preview page (`/events/:id`).
+    - **Edit:** Direct link to unified event editor (`/operator/events/:id/edit`). Locked for cancelled or completed events.
+    - **Attendees:** Direct link to attendee roster (`/operator/events/:id/attendees`) with current registration count badge.
+    - **Publish Action:** Interactive modal before publishing drafts (`POST /api/events/:id/publish/`). Explains public visibility, includes start-time-in-past warning guard, and triggers authoritative backend refresh.
+    - **Cancel Action:** Interactive modal for permanent cancellation (`POST /api/events/:id/cancel/`). Warns of permanent irreversibility, confirms that existing student registrations remain recorded on the roster, and handles backend 409 conflict responses.
+  - *API Data Integrity:* Consumes `eventsAPI.getAll({ mine: "true" })` to strictly fetch the operator's own club events across pagination. Never queries or renders other clubs' drafts.
+
+- **Operator Event Attendee Roster ([`OperatorEventAttendees.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEventAttendees.jsx)):**
+  - *Route:* `/operator/events/:id/attendees` (protected for `club_operator` role).
+  - *Design Features:* Breadcrumb link back to Manage Events, event metadata header (title, host club, Asia/Dhaka schedule, venue, status badge), quick metric summary (Confirmed RSVPs, Venue Capacity, Remaining Seats), and tabular student roster with initials avatars, monospace student IDs, department, batch, formatted registration timestamps, and status badges.
+  - *Pagination:* Supports backend DRF `EventPagination` (`page`, `page_size: 20`) with previous/next controls, page numbers, item range counts, and page loading overlays.
+  - *Student Privacy Compliance:* Prominent compliance banner. Strictly displays only serializer-confirmed fields (`id`, `student_id`, `name`, `department`, `batch`, `status`, `registered_at`). **Student email addresses and contact info are strictly omitted**.
+  - *Authorization Guard:* Catches backend 403 Forbidden responses ("Only this club's operator can do this.") and renders a dedicated access denied state with navigation back to `/operator/events`.
+
 ---
 
 ## 7. Implementation Status Matrix
@@ -326,7 +344,7 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 5 Completed: Club Operator Event Creation & Editing Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 6 Completed: Operator Event Management & Attendee Roster Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
