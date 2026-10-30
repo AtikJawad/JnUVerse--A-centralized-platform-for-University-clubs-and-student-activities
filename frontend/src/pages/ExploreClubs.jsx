@@ -649,7 +649,7 @@ export default function ExploreClubs() {
                         >
                           {featuredClub.is_following ? "check_circle" : "add"}
                         </span>
-                        <span>{featuredClub.is_following ? "Following" : "+ Follow"}</span>
+                        <span>{featuredClub.is_following ? "Following" : "Follow"}</span>
                       </button>
 
                       <Link
@@ -954,7 +954,7 @@ export default function ExploreClubs() {
                                 <span className="material-symbols-outlined text-[16px]">
                                   add
                                 </span>
-                                <span>+ Follow</span>
+                                <span>Follow</span>
                               </button>
                             )}
 
