@@ -188,6 +188,7 @@ The React frontend connects **only** through standard HTTP/JSON requests with th
 - **Bearer Token Interceptor:** [`services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js) automatically attaches `Authorization: Bearer <access_token>` to every authenticated request.
 - **Automatic 401 Refresh Queue:** When an access token expires, Axios intercepts the 401 error, pauses concurrent requests in a queue, calls `POST /api/auth/refresh/`, updates the stored token, and replays all failed requests seamlessly. If refresh fails, it purges authentication tokens and broadcasts an `auth:logout` event.
 - **DRF Error Parsing:** `extractErrorMessage(error)` parses standard DRF responses, field validation arrays (`detail`, `non_field_errors`), and network errors into readable strings.
+- **Events Service (`eventsAPI`):** Dedicated service export in [`services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js) providing 9 backend-verified operations for public event discovery, operator lifecycle control, and student RSVPs.
 
 ---
 
@@ -264,16 +265,24 @@ The Week 3 UI was refined directly against the official Google Stitch exports lo
   - *Reference:* `jnuverse_student_dashboard_living_campus_experience/code.html`.
   - *Design Features:* Hero section with ambient glow, floating constellation interest tiles (Tech & Code, Debate & Eloquence, Sports, Photography, Drama), personal greeting pill, quick-action discovery hubs, and roadmap tiles.
 
+### 6. Week 4 Events & RSVP UI Views
+The Week 4 UI implements the official Google Stitch event designs in `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/jnuverse_events/`:
+
+- **Campus Events Discovery & Explorer ([`ExploreEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreEvents.jsx)):**
+  - *Reference:* `jnuverse_events/code.html` and `jnuverse_art_directed_typography_layout_refinement/code.html`.
+  - *Design Features:* Atmospheric blurred gradient canvas glow, eyebrow badge (`CAMPUS LIFE, HAPPENING NOW`), bold headline (`Discover what’s happening.`), asymmetric featured "UP NEXT" event card with real scheduling and capacity stats, search input, status filter pills (`All Events`, `Upcoming`, `Ongoing`, `Past`), 3-column responsive card grid (`lg:grid-cols-3 md:grid-cols-2`), animated loading skeletons, empty zero-state with filter reset, error retry state, paginated navigation, and interactive event quick view dialog.
+  - *Dhaka Timezone Handling:* All timestamps parsed as ISO 8601 and formatted consistently in `Asia/Dhaka` (+06:00 BST).
+
 ---
 
-## 6. Implementation Status Matrix
+## 7. Implementation Status Matrix
 
 | Module / Feature | Planned Week | Frontend Status | Backend API Status | Reference Documentation |
 |:---|:---:|:---:|:---:|:---|
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | Not Started | Models Exist (No Endpoints) | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 3: `ExploreEvents.jsx` Discovery Page) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |

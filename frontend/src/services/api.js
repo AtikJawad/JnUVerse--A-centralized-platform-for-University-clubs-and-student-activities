@@ -167,4 +167,77 @@ export function extractErrorMessage(error, defaultMessage = "An error occurred."
   return messages.length > 0 ? messages.join(" | ") : defaultMessage;
 }
 
+/**
+ * Events API Service — Week 4 Backend Integration
+ * Encapsulates backend-verified endpoints for event discovery,
+ * operator event lifecycle management, and student RSVP registrations.
+ */
+export const eventsAPI = {
+  /**
+   * List visible events with optional query parameters.
+   * Query params: club, upcoming, mine, registered, search, page, page_size
+   * @param {Object} [params] - Axios query params
+   */
+  getAll: (params) => api.get("/api/events/", { params }),
+
+  /**
+   * Retrieve single event detail by UUID.
+   * @param {string} id - Event UUID
+   */
+  getById: (id) => api.get(`/api/events/${id}/`),
+
+  /**
+   * Create a new draft event (Club Operator only for own club).
+   * @param {Object} payload - { title, description, venue, starts_at, ends_at, capacity }
+   */
+  create: (payload) => api.post("/api/events/", payload),
+
+  /**
+   * Partial update an event (Club Operator only for own club).
+   * Note: Cancelled or ended events cannot be edited (returns 409).
+   * @param {string} id - Event UUID
+   * @param {Object} payload - { title, description, venue, starts_at, ends_at, capacity }
+   */
+  update: (id, payload) => api.patch(`/api/events/${id}/`, payload),
+
+  /**
+   * Publish a draft event (Club Operator only).
+   * Transitions status from draft -> published.
+   * @param {string} id - Event UUID
+   */
+  publish: (id) => api.post(`/api/events/${id}/publish/`),
+
+  /**
+   * Cancel a published event (Club Operator only).
+   * Transitions status to cancelled. Irreversible.
+   * @param {string} id - Event UUID
+   */
+  cancel: (id) => api.post(`/api/events/${id}/cancel/`),
+
+  /**
+   * Register for an event / RSVP (Student only).
+   * Idempotent: 201 Created or 200 OK.
+   * Returns 409 Conflict if full, not published, or after starts_at.
+   * @param {string} id - Event UUID
+   */
+  register: (id) => api.post(`/api/events/${id}/register/`),
+
+  /**
+   * Cancel registration for an event / cancel RSVP (Student only).
+   * Idempotent: 204 No Content.
+   * Returns 409 Conflict if event has already started.
+   * @param {string} id - Event UUID
+   */
+  unregister: (id) => api.delete(`/api/events/${id}/register/`),
+
+  /**
+   * List students currently registered for an event (Club Operator only for own club).
+   * Paginated; student emails are strictly omitted.
+   * @param {string} id - Event UUID
+   * @param {Object} [params] - { page, page_size }
+   */
+  getRegistrations: (id, params) =>
+    api.get(`/api/events/${id}/registrations/`, { params }),
+};
+
 export default api;

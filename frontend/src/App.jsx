@@ -9,6 +9,7 @@ import ExploreClubs from "./pages/ExploreClubs";
 import ClubDetail from "./pages/ClubDetail";
 import MyClubs from "./pages/MyClubs";
 import OperatorMembers from "./pages/OperatorMembers";
+import ExploreEvents from "./pages/ExploreEvents";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/explore" element={<Navigate to="/clubs" replace />} />
           <Route path="/explore-clubs" element={<Navigate to="/clubs" replace />} />
           <Route path="/clubs/:slug" element={<ClubDetail />} />
+          <Route path="/events" element={<ExploreEvents />} />
 
           {/* Student Membership Routes */}
           <Route
