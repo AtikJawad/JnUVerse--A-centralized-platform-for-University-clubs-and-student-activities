@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import { eventsAPI, extractErrorMessage } from "../services/api";
 
@@ -102,6 +102,38 @@ function getEventStatus(event) {
   };
 }
 
+/**
+ * Fetches all events where ends_at > now from the backend.
+ * Uses the backend's page_size=50 (DRF max) and paginates if needed
+ * to guarantee that the full active dataset is retrieved for ongoing/upcoming filters.
+ */
+async function fetchAllActiveEvents(query = "") {
+  const params = { upcoming: "true", page_size: 50 };
+  if (query.trim()) {
+    params.search = query.trim();
+  }
+
+  let allResults = [];
+  let currentPage = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const res = await eventsAPI.getAll({ ...params, page: currentPage });
+    const data = res.data;
+    const results = Array.isArray(data) ? data : data.results || [];
+    allResults = allResults.concat(results);
+
+    const totalCount = data.count ?? allResults.length;
+    if (!data.next || allResults.length >= totalCount || results.length === 0) {
+      hasMore = false;
+    } else {
+      currentPage += 1;
+    }
+  }
+
+  return allResults;
+}
+
 export default function ExploreEvents() {
   const [events, setEvents] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -115,6 +147,36 @@ export default function ExploreEvents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [featuredEvent, setFeaturedEvent] = useState(null);
+
+  // Updates the featured "UP NEXT" card:
+  // Must ONLY select an event whose starts_at is in the future AND whose status is published.
+  // An already-started event must NEVER be labelled "UP NEXT".
+  // If no future event exists, it is set to null and the section is omitted gracefully.
+  const updateFeaturedEvent = useCallback(async (query = "") => {
+    try {
+      const params = { upcoming: "true", page_size: 20 };
+      if (query.trim()) params.search = query.trim();
+
+      const res = await eventsAPI.getAll(params);
+      const data = res.data;
+      const items = Array.isArray(data) ? data : data.results || [];
+      const now = new Date();
+
+      // Find earliest event where status is published and starts_at is in the future
+      const upNext = items.find(
+        (e) => e.status === "published" && new Date(e.starts_at) > now
+      );
+
+      setFeaturedEvent(upNext || null);
+    } catch {
+      setFeaturedEvent(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateFeaturedEvent(searchQuery);
+  }, [updateFeaturedEvent, searchQuery]);
 
   // Fetch events from DRF backend
   const fetchEvents = useCallback(
@@ -123,49 +185,65 @@ export default function ExploreEvents() {
       setError("");
 
       try {
-        const params = {
-          page: currentPage,
-          page_size: pageSize,
-        };
-
-        if (query.trim()) {
-          params.search = query.trim();
-        }
-
-        // Map filter selection to confirmed backend query parameters
         if (currentFilter === "upcoming" || currentFilter === "ongoing") {
-          params.upcoming = "true";
-        } else if (currentFilter === "past") {
-          params.upcoming = "false";
-        }
-
-        const res = await eventsAPI.getAll(params);
-        const data = res.data;
-
-        let results = [];
-        let count = 0;
-
-        if (Array.isArray(data)) {
-          results = data;
-          count = data.length;
-        } else if (data?.results) {
-          results = data.results;
-          count = data.count ?? data.results.length;
-        }
-
-        // If the user specifically selected 'ongoing', refine in memory
-        if (currentFilter === "ongoing") {
+          // Retrieve complete active events dataset to guarantee accurate filtering and pagination
+          const allActive = await fetchAllActiveEvents(query);
           const now = new Date();
-          results = results.filter((e) => {
-            const starts = new Date(e.starts_at);
-            const ends = new Date(e.ends_at);
-            return starts <= now && now < ends && e.status === "published";
-          });
-          count = results.length;
-        }
 
-        setEvents(results);
-        setTotalCount(count);
+          let filtered = [];
+          if (currentFilter === "upcoming") {
+            // Strictly published and starts_at in the future (ongoing events excluded)
+            filtered = allActive.filter(
+              (e) => e.status === "published" && new Date(e.starts_at) > now
+            );
+          } else {
+            // Ongoing: strictly published, starts_at <= now, and ends_at > now
+            filtered = allActive.filter(
+              (e) =>
+                e.status === "published" &&
+                new Date(e.starts_at) <= now &&
+                new Date(e.ends_at) > now
+            );
+          }
+
+          const total = filtered.length;
+          const startIndex = (currentPage - 1) * pageSize;
+          const paginatedSlice = filtered.slice(startIndex, startIndex + pageSize);
+
+          setEvents(paginatedSlice);
+          setTotalCount(total);
+        } else {
+          // "all" or "past": preserve native backend DRF server pagination
+          const params = {
+            page: currentPage,
+            page_size: pageSize,
+          };
+
+          if (query.trim()) {
+            params.search = query.trim();
+          }
+
+          if (currentFilter === "past") {
+            params.upcoming = "false";
+          }
+
+          const res = await eventsAPI.getAll(params);
+          const data = res.data;
+
+          let results = [];
+          let count = 0;
+
+          if (Array.isArray(data)) {
+            results = data;
+            count = data.length;
+          } else if (data?.results) {
+            results = data.results;
+            count = data.count ?? data.results.length;
+          }
+
+          setEvents(results);
+          setTotalCount(count);
+        }
       } catch (err) {
         setError(extractErrorMessage(err, "Failed to load campus events."));
       } finally {
@@ -196,17 +274,6 @@ export default function ExploreEvents() {
     setActiveFilter("all");
     setPage(1);
   };
-
-  // Derive nearest highlight event for the featured banner
-  const featuredEvent = useMemo(() => {
-    if (!events || events.length === 0) return null;
-    const now = new Date();
-    // Prefer nearest upcoming published event
-    const upcoming = events.find(
-      (e) => e.status === "published" && new Date(e.ends_at) > now
-    );
-    return upcoming || events[0];
-  }, [events]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -364,7 +431,7 @@ export default function ExploreEvents() {
                             ? `${featuredEvent.remaining_capacity ?? 0} seats left (${
                                 featuredEvent.registered_count || 0
                               } registered)`
-                            : "Open to all registered JnU students"}
+                            : "Unlimited Capacity"}
                         </span>
                       </div>
                     </div>
@@ -642,7 +709,7 @@ export default function ExploreEvents() {
                                     ? `${event.remaining_capacity ?? 0} seats left (${
                                         event.registered_count || 0
                                       }/${event.capacity})`
-                                    : "Open capacity"}
+                                    : "Unlimited Capacity"}
                                 </span>
                               </div>
                             </div>
@@ -773,7 +840,7 @@ export default function ExploreEvents() {
                     ? `${selectedEvent.registered_count || 0} registered • ${
                         selectedEvent.remaining_capacity ?? 0
                       } seats remaining`
-                    : "Open Capacity (unlimited registrations)"}
+                    : "Unlimited Capacity"}
                 </p>
               </div>
 

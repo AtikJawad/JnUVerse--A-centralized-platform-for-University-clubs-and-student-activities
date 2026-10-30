@@ -271,6 +271,11 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 - **Campus Events Discovery & Explorer ([`ExploreEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreEvents.jsx)):**
   - *Reference:* `jnuverse_events/code.html` and `jnuverse_art_directed_typography_layout_refinement/code.html`.
   - *Design Features:* Atmospheric blurred gradient canvas glow, eyebrow badge (`CAMPUS LIFE, HAPPENING NOW`), bold headline (`Discover what’s happening.`), asymmetric featured "UP NEXT" event card with real scheduling and capacity stats, search input, status filter pills (`All Events`, `Upcoming`, `Ongoing`, `Past`), 3-column responsive card grid (`lg:grid-cols-3 md:grid-cols-2`), animated loading skeletons, empty zero-state with filter reset, error retry state, paginated navigation, and interactive event quick view dialog.
+  - *Event Filter Accuracy & Pagination:*
+    - **Upcoming Filter:** Fetches active events and strictly filters `status === "published" && starts_at > now`. Ongoing events are strictly excluded.
+    - **Ongoing Filter:** Fetches the complete active dataset (`upcoming=true` across pages if necessary) and filters `status === "published" && starts_at <= now && ends_at > now`. Accurately paginates and avoids false total counts or partial page claims.
+    - **Featured "UP NEXT" Spotlight:** Strictly selects the earliest published event with `starts_at > now`. Already-started events are never labeled "UP NEXT". If no future event exists, the section is gracefully omitted.
+    - **Capacity Wording:** Displays standardized "Unlimited Capacity" whenever `capacity` is null.
   - *Dhaka Timezone Handling:* All timestamps parsed as ISO 8601 and formatted consistently in `Asia/Dhaka` (+06:00 BST).
 
 ---

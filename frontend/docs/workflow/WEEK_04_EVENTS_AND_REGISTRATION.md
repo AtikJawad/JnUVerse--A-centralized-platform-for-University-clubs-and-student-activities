@@ -38,7 +38,11 @@
    - Built `ExploreEvents.jsx` matching the official Stitch `jnuverse_events` design reference.
    - Integrated public route `/events` in `App.jsx` linked directly from the global navigation bar (`Navbar.jsx`).
    - Integrated with `eventsAPI.getAll()` consuming verified DRF query parameters (`search`, `upcoming=true|false`, `page`, `page_size`).
-   - Rendered asymmetric "UP NEXT" featured event layout without inventing fake backend featured flags.
+   - **Filter Accuracy & Pagination:**
+     - Upcoming tab strictly shows published events where `starts_at > now` (ongoing events excluded).
+     - Ongoing tab retrieves the complete active dataset (`upcoming=true` across pages) and strictly filters published events where `starts_at <= now && ends_at > now`, accurately paginating without partial page count claims.
+     - Featured "UP NEXT" spotlight strictly selects the earliest published event where `starts_at > now`. Already-started events are never labeled "UP NEXT". Gracefully omitted if no future event exists.
+     - Standardized capacity wording to `"Unlimited Capacity"` when `capacity` is null.
    - Implemented `Intl.DateTimeFormat` with `Asia/Dhaka` (+06:00 BST) timezone handling for schedules and dates.
    - Handled responsive 3-column event grid, loading skeletons, empty zero-state with reset, API error retry, and pagination.
 4. [ ] **Stage 4: Event Details & Student RSVP Workflow**
@@ -113,7 +117,7 @@ npm run build
 # Output: Exit code 0 (built in 854ms)
 ```
 
-### Stage 3 Verification
+### Stage 3 Verification & Filter Accuracy Correction
 ```bash
 # 1. ESLint Static Analysis
 npm run lint
@@ -121,6 +125,6 @@ npm run lint
 
 # 2. Vite Production Build
 npm run build
-# Output: Exit code 0 (built in 857ms, 113 modules transformed)
+# Output: Exit code 0 (built in 841ms, 113 modules transformed)
 ```
 
