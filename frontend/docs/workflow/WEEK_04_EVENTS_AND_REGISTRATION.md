@@ -1,7 +1,7 @@
 # Week 04 — Events & Registration
 
 **Focus:** Campus events discovery, event details, student RSVP/registration workflow, operator event creation/lifecycle, and attendee rosters  
-**Status:** **In Progress** (Stage 3 Completed: Events Discovery & Listing Page Implemented & Verified)  
+**Status:** **In Progress** (Stage 4 Completed: Event Details & Student RSVP Workflow Implemented & Verified)  
 **Assigned:** Anik Khondokar (Frontend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_04_BACKEND_HANDOFF.md`, 86 backend tests passing)  
 **Target:** October 2026  
@@ -45,8 +45,13 @@
      - Standardized capacity wording to `"Unlimited Capacity"` when `capacity` is null.
    - Implemented `Intl.DateTimeFormat` with `Asia/Dhaka` (+06:00 BST) timezone handling for schedules and dates.
    - Handled responsive 3-column event grid, loading skeletons, empty zero-state with reset, API error retry, and pagination.
-4. [ ] **Stage 4: Event Details & Student RSVP Workflow**
-   - Build `EventDetail.jsx` consuming `GET /api/events/:id/` and `POST/DELETE /api/events/:id/register/`.
+4. [x] **Stage 4: Event Details & Student RSVP Workflow**
+   - Built `EventDetail.jsx` consuming `GET /api/events/:id/`, `POST /api/events/:id/register/`, and `DELETE /api/events/:id/register/`.
+   - Registered public route `/events/:id` in `App.jsx`.
+   - Integrated navigation in `ExploreEvents.jsx` (featured "View Event" and card "View Details" linking directly to `/events/:id`, quick-view modal retired).
+   - Designed 12-column editorial layout with host club insignia, verified charter indicator, schedule, venue, capacity tracking, and status badges.
+   - Handled all RSVP states: anonymous prompt with login redirection, student registration with confirmation modal, registered confirmation card with cancel modal, and club operator advisory.
+   - Handled 204 No Content for cancellation, 409 Conflict messages (full capacity, event started, cancellation prohibited), and standardized "Unlimited Capacity" display.
 5. [ ] **Stage 5: Club Operator Event Creation & Editing**
    - Build operator event form consuming `POST /api/events/` and `PATCH /api/events/:id/`.
 6. [ ] **Stage 6: Operator Event Management & Attendee Roster**
@@ -60,11 +65,13 @@
 
 ### Created Files
 - [`frontend/src/pages/ExploreEvents.jsx`](../../src/pages/ExploreEvents.jsx): Campus events discovery and listing page implementing Stitch `jnuverse_events` specifications.
+- [`frontend/src/pages/EventDetail.jsx`](../../src/pages/EventDetail.jsx): Public event detail view with schedule, venue, live capacity metrics, and student RSVP registration/cancellation workflow.
 
 ### Modified Files
-- [`frontend/src/App.jsx`](../../src/App.jsx): Registered public route `/events` pointing to `ExploreEvents.jsx`.
+- [`frontend/src/App.jsx`](../../src/App.jsx): Registered public routes `/events` and `/events/:id`.
+- [`frontend/src/pages/ExploreEvents.jsx`](../../src/pages/ExploreEvents.jsx): Updated featured spotlight and card actions to navigate directly to `/events/:id`; retired duplicate quick-view modal.
 - [`frontend/src/services/api.js`](../../src/services/api.js): Added and exported `eventsAPI` encapsulating all backend-verified event operations.
-- [`frontend/FRONTEND_README.md`](../../FRONTEND_README.md): Documented `eventsAPI`, `ExploreEvents.jsx`, design features, and updated status matrix.
+- [`frontend/FRONTEND_README.md`](../../FRONTEND_README.md): Documented `eventsAPI`, `ExploreEvents.jsx`, `EventDetail.jsx`, design features, and updated status matrix.
 - [`frontend/docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md`](WEEK_04_EVENTS_AND_REGISTRATION.md): Maintained workflow tracking document.
 
 ---
@@ -117,7 +124,7 @@ npm run build
 # Output: Exit code 0 (built in 854ms)
 ```
 
-### Stage 3 Verification & Filter Accuracy Correction
+### Stage 3 Final Verification & Accuracy Correction
 ```bash
 # 1. ESLint Static Analysis
 npm run lint
@@ -125,6 +132,18 @@ npm run lint
 
 # 2. Vite Production Build
 npm run build
-# Output: Exit code 0 (built in 841ms, 113 modules transformed)
+# Output: Exit code 0 (built in 799ms, 113 modules transformed)
 ```
+
+### Stage 4 Verification (Event Details & Student RSVP)
+```bash
+# 1. ESLint Static Analysis
+npm run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm run build
+# Output: Exit code 0 (114 modules transformed, built in ~878ms)
+```
+
 

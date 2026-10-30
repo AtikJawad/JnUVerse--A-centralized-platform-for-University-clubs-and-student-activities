@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { eventsAPI, extractErrorMessage } from "../services/api";
 
@@ -103,9 +104,24 @@ function getEventStatus(event) {
 }
 
 /**
+ * Deduplicates an array of event objects by their primary ID.
+ */
+function deduplicateEvents(items) {
+  const seen = new Set();
+  const deduped = [];
+  for (const item of items) {
+    if (item && item.id && !seen.has(item.id)) {
+      seen.add(item.id);
+      deduped.push(item);
+    }
+  }
+  return deduped;
+}
+
+/**
  * Fetches all events where ends_at > now from the backend.
- * Uses the backend's page_size=50 (DRF max) and paginates if needed
- * to guarantee that the full active dataset is retrieved for ongoing/upcoming filters.
+ * Uses the backend's page_size=50 (the backend DRF EventPagination maximum limit)
+ * and paginates if needed to guarantee that the full active dataset is retrieved.
  */
 async function fetchAllActiveEvents(query = "") {
   const params = { upcoming: "true", page_size: 50 };
@@ -131,7 +147,7 @@ async function fetchAllActiveEvents(query = "") {
     }
   }
 
-  return allResults;
+  return deduplicateEvents(allResults);
 }
 
 export default function ExploreEvents() {
@@ -146,50 +162,46 @@ export default function ExploreEvents() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [featuredEvent, setFeaturedEvent] = useState(null);
 
-  // Updates the featured "UP NEXT" card:
-  // Must ONLY select an event whose starts_at is in the future AND whose status is published.
-  // An already-started event must NEVER be labelled "UP NEXT".
-  // If no future event exists, it is set to null and the section is omitted gracefully.
-  const updateFeaturedEvent = useCallback(async (query = "") => {
-    try {
-      const params = { upcoming: "true", page_size: 20 };
-      if (query.trim()) params.search = query.trim();
+  // In-memory cache for the complete active events dataset keyed by search query
+  const activeEventsCacheRef = useRef({ query: null, data: null });
 
-      const res = await eventsAPI.getAll(params);
-      const data = res.data;
-      const items = Array.isArray(data) ? data : data.results || [];
-      const now = new Date();
-
-      // Find earliest event where status is published and starts_at is in the future
-      const upNext = items.find(
-        (e) => e.status === "published" && new Date(e.starts_at) > now
-      );
-
-      setFeaturedEvent(upNext || null);
-    } catch {
-      setFeaturedEvent(null);
+  // Retrieves active events for query, using cache to prevent unnecessary repeated requests
+  const getActiveEvents = useCallback(async (query = "", forceRefresh = false) => {
+    if (
+      !forceRefresh &&
+      activeEventsCacheRef.current.query === query &&
+      activeEventsCacheRef.current.data !== null
+    ) {
+      return activeEventsCacheRef.current.data;
     }
+    const data = await fetchAllActiveEvents(query);
+    activeEventsCacheRef.current = { query, data };
+    return data;
   }, []);
 
-  useEffect(() => {
-    updateFeaturedEvent(searchQuery);
-  }, [updateFeaturedEvent, searchQuery]);
-
-  // Fetch events from DRF backend
+  // Fetch events from DRF backend and synchronize featured spotlight
   const fetchEvents = useCallback(
-    async (currentPage = 1, currentFilter = "all", query = "") => {
+    async (currentPage = 1, currentFilter = "all", query = "", forceRefresh = false) => {
       setLoading(true);
       setError("");
 
       try {
-        if (currentFilter === "upcoming" || currentFilter === "ongoing") {
-          // Retrieve complete active events dataset to guarantee accurate filtering and pagination
-          const allActive = await fetchAllActiveEvents(query);
-          const now = new Date();
+        // Step 1: Ensure complete active dataset is loaded to select the featured event
+        const allActive = await getActiveEvents(query, forceRefresh);
+        const now = new Date();
 
+        // Featured event selection: must be from the COMPLETE set of published future events,
+        // with the earliest future starts_at. Omitted gracefully if none exist.
+        const futurePublished = allActive
+          .filter((e) => e.status === "published" && new Date(e.starts_at) > now)
+          .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+
+        setFeaturedEvent(futurePublished.length > 0 ? futurePublished[0] : null);
+
+        // Step 2: Handle active tab filtering and pagination
+        if (currentFilter === "upcoming" || currentFilter === "ongoing") {
           let filtered = [];
           if (currentFilter === "upcoming") {
             // Strictly published and starts_at in the future (ongoing events excluded)
@@ -250,7 +262,7 @@ export default function ExploreEvents() {
         setLoading(false);
       }
     },
-    [pageSize]
+    [getActiveEvents, pageSize]
   );
 
   useEffect(() => {
@@ -269,6 +281,7 @@ export default function ExploreEvents() {
   };
 
   const handleResetFilters = () => {
+    activeEventsCacheRef.current = { query: null, data: null };
     setSearchInput("");
     setSearchQuery("");
     setActiveFilter("all");
@@ -412,16 +425,15 @@ export default function ExploreEvents() {
 
                       {/* Action & Capacity */}
                       <div className="pt-6 flex items-center justify-between flex-wrap gap-4 border-t border-border-subtle/50 mt-4">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedEvent(featuredEvent)}
-                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-all"
+                        <Link
+                          to={`/events/${featuredEvent.id}`}
+                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-all hover:shadow-md"
                         >
-                          <span>View Event Details</span>
+                          <span>View Event</span>
                           <span className="material-symbols-outlined text-[18px]">
                             arrow_forward
                           </span>
-                        </button>
+                        </Link>
 
                         <span className="text-xs text-text-muted flex items-center gap-1.5 font-medium">
                           <span className="material-symbols-outlined text-[16px] text-primary">
@@ -592,7 +604,7 @@ export default function ExploreEvents() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => fetchEvents(page, activeFilter, searchQuery)}
+                    onClick={() => fetchEvents(page, activeFilter, searchQuery, true)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-xs transition-colors"
                   >
                     <span className="material-symbols-outlined text-[18px]">refresh</span>
@@ -718,16 +730,15 @@ export default function ExploreEvents() {
 
                         {/* Card Action Link */}
                         <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedEvent(event)}
+                          <Link
+                            to={`/events/${event.id}`}
                             className="w-full py-2.5 rounded-full bg-surface-lavender hover:bg-primary hover:text-white text-primary text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                           >
                             <span>View Details</span>
                             <span className="material-symbols-outlined text-[16px]">
                               arrow_outward
                             </span>
-                          </button>
+                          </Link>
                         </div>
                       </article>
                     );
@@ -767,128 +778,7 @@ export default function ExploreEvents() {
       </main>
 
       {/* ============================================================ */}
-      {/* 5. Event Details Quick View Modal                            */}
-      {/* ============================================================ */}
-      {selectedEvent && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-xs"
-          onClick={() => setSelectedEvent(null)}
-        >
-          <div
-            className="w-full max-w-xl bg-surface-white rounded-3xl p-6 sm:p-8 shadow-xl border border-border-subtle space-y-6 animate-in fade-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-border-subtle">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-primary">
-                    {selectedEvent.club?.name}
-                  </span>
-                  {(() => {
-                    const status = getEventStatus(selectedEvent);
-                    return (
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${status.color}`}
-                      >
-                        {status.label}
-                      </span>
-                    );
-                  })()}
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-on-surface leading-tight">
-                  {selectedEvent.title}
-                </h3>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedEvent(null)}
-                aria-label="Close dialog"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:bg-surface-lavender hover:text-on-surface transition-colors shrink-0"
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            {/* Modal Logistics Metadata */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-3.5 rounded-2xl bg-surface-container-low space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold block">
-                  Date &amp; Time (Dhaka BST)
-                </span>
-                <p className="font-semibold text-on-surface">
-                  {formatDhakaSchedule(selectedEvent.starts_at, selectedEvent.ends_at)}
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-surface-container-low space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold block">
-                  Venue Location
-                </span>
-                <p className="font-semibold text-on-surface">{selectedEvent.venue}</p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-surface-container-low space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold block">
-                  Registration Capacity
-                </span>
-                <p className="font-semibold text-on-surface">
-                  {selectedEvent.capacity !== null
-                    ? `${selectedEvent.registered_count || 0} registered • ${
-                        selectedEvent.remaining_capacity ?? 0
-                      } seats remaining`
-                    : "Unlimited Capacity"}
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-surface-container-low space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-text-muted font-bold block">
-                  Organizing Guild
-                </span>
-                <p className="font-semibold text-on-surface">{selectedEvent.club?.name}</p>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1.5">
-              <h4 className="text-xs uppercase tracking-wider text-text-muted font-bold">
-                About this Event
-              </h4>
-              <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed max-h-48 overflow-y-auto pr-2">
-                {selectedEvent.description ||
-                  "No additional description was provided for this event."}
-              </p>
-            </div>
-
-            {/* Stage 4 Note Notice */}
-            <div className="p-3.5 rounded-2xl bg-surface-lavender/60 border border-border-subtle flex items-start gap-2.5 text-xs text-on-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">
-                info
-              </span>
-              <span>
-                Student RSVP and ticket reservation actions will be available in Stage 4.
-              </span>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end pt-2 border-t border-border-subtle">
-              <button
-                type="button"
-                onClick={() => setSelectedEvent(null)}
-                className="px-6 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================ */}
-      {/* 6. Footer                                                    */}
+      {/* 5. Footer                                                    */}
       {/* ============================================================ */}
       <footer className="w-full bg-surface-container-low border-t border-border-subtle mt-16">
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -66,7 +66,9 @@ frontend/
 │   ├── pages/                       # Route-level screens
 │   │   ├── ClubDetail.jsx           # Club profile, follow/unfollow, membership application & operator edits
 │   │   ├── Dashboard.jsx            # Authenticated student/operator landing dashboard
+│   │   ├── EventDetail.jsx          # Event profile, schedule, venue, capacity tracking & student RSVP actions
 │   │   ├── ExploreClubs.jsx         # Club directory explorer with search, category filtering & pagination
+│   │   ├── ExploreEvents.jsx        # Campus events discovery, filters, search, featured spotlight & pagination
 │   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
 │   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
 │   │   ├── OperatorMembers.jsx      # Operator portal: pending request approval/rejection & member list
@@ -270,13 +272,33 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 
 - **Campus Events Discovery & Explorer ([`ExploreEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreEvents.jsx)):**
   - *Reference:* `jnuverse_events/code.html` and `jnuverse_art_directed_typography_layout_refinement/code.html`.
-  - *Design Features:* Atmospheric blurred gradient canvas glow, eyebrow badge (`CAMPUS LIFE, HAPPENING NOW`), bold headline (`Discover what’s happening.`), asymmetric featured "UP NEXT" event card with real scheduling and capacity stats, search input, status filter pills (`All Events`, `Upcoming`, `Ongoing`, `Past`), 3-column responsive card grid (`lg:grid-cols-3 md:grid-cols-2`), animated loading skeletons, empty zero-state with filter reset, error retry state, paginated navigation, and interactive event quick view dialog.
+  - *Design Features:* Atmospheric blurred gradient canvas glow, eyebrow badge (`CAMPUS LIFE, HAPPENING NOW`), bold headline (`Discover what’s happening.`), asymmetric featured "UP NEXT" event card with real scheduling and capacity stats, search input, status filter pills (`All Events`, `Upcoming`, `Ongoing`, `Past`), 3-column responsive card grid (`lg:grid-cols-3 md:grid-cols-2`), animated loading skeletons, empty zero-state with filter reset, error retry state, paginated navigation, and direct navigation links to `/events/:id`.
   - *Event Filter Accuracy & Pagination:*
     - **Upcoming Filter:** Fetches active events and strictly filters `status === "published" && starts_at > now`. Ongoing events are strictly excluded.
     - **Ongoing Filter:** Fetches the complete active dataset (`upcoming=true` across pages if necessary) and filters `status === "published" && starts_at <= now && ends_at > now`. Accurately paginates and avoids false total counts or partial page claims.
     - **Featured "UP NEXT" Spotlight:** Strictly selects the earliest published event with `starts_at > now`. Already-started events are never labeled "UP NEXT". If no future event exists, the section is gracefully omitted.
     - **Capacity Wording:** Displays standardized "Unlimited Capacity" whenever `capacity` is null.
   - *Dhaka Timezone Handling:* All timestamps parsed as ISO 8601 and formatted consistently in `Asia/Dhaka` (+06:00 BST).
+
+- **Event Details & Student RSVP ([`EventDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/EventDetail.jsx)):**
+  - *Reference:* `jnuverse_events/code.html` and `jnuverse_student_event_feedback/code.html`.
+  - *Route:* `/events/:id` (public browsing, authenticated student RSVP).
+  - *Design Features:* Asymmetric 12-column layout (7 cols left, 5 cols right), breadcrumb navigation back to discovery, organizing club banner, branded visual backdrop plate, full description with preserved formatting, host club spotlight card, and sticky logistics & RSVP sidebar.
+  - *Student RSVP Registration (`POST /api/events/:id/register/`):*
+    - Interactive confirmation modal before reservation.
+    - Idempotent handling (201 Created or 200 OK).
+    - Real-time event state synchronization with updated `registered_count`, `remaining_capacity`, and `is_registered: true`.
+    - Confirmed attendance badge with student entrance verification notice.
+  - *RSVP Cancellation (`DELETE /api/events/:id/register/`):*
+    - Confirmation modal preventing accidental cancellations.
+    - Idempotent 204 No Content response handling.
+    - Seat release and event refresh.
+    - Blocked after start time (`starts_at <= now`).
+  - *Authentication & Role Handling:*
+    - Anonymous visitors receive clear "Log in to register" prompt preserving target event destination.
+    - Club operators receive clear non-student executive notice.
+    - Students have full access to registration/cancellation when open.
+  - *HTTP 409 Conflict Handling:* Renders exact backend conflict `detail` messages for full capacity ("This event is full."), closed registration ("Registration is closed because the event has started."), and post-start cancellation attempts.
 
 ---
 
@@ -287,7 +309,7 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 3: `ExploreEvents.jsx` Discovery Page) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 4 Completed: Event Details & Student RSVP Workflow Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
