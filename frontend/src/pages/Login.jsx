@@ -188,6 +188,15 @@ export default function Login() {
                 </Link>
               </p>
               <p className="text-xs sm:text-sm text-text-muted">
+                Are you a Club Operator?{" "}
+                <Link
+                  to="/operator/login"
+                  className="font-bold text-primary hover:underline underline-offset-4 ml-1"
+                >
+                  Sign in here
+                </Link>
+              </p>
+              <p className="text-xs sm:text-sm text-text-muted">
                 Want to manage your club?{" "}
                 <Link
                   to="/register/club"

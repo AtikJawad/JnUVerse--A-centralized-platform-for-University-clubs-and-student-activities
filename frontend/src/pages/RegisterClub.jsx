@@ -589,10 +589,10 @@ export default function RegisterClub() {
                   <p>
                     Already registered?{" "}
                     <Link
-                      to="/login"
+                      to="/operator/login"
                       className="font-bold text-primary hover:underline ml-1"
                     >
-                      Log in
+                      Operator Log in
                     </Link>
                   </p>
                   <p className="text-xs text-text-muted">

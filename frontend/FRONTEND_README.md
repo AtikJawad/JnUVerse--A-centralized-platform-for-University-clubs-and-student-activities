@@ -211,8 +211,8 @@ The design system implements the official Google Stitch specifications in `docs/
 - **`text-muted` (`#686B7D`):** Helper text, timestamps, and secondary captions.
 - **`border-subtle` (`#E2E4F3`):** 1px hairline borders.
 
-### 2. Orbital Club Showcase & Login Page Refinements ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx), [`index.css`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/index.css))
-On the login screen, five official campus club nodes orbit the stable central JnU planet hub, matching the exact club identities and icon mapping used on Registration:
+### 2. Orbital Club Showcase, Student & Operator Login ([`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx), [`OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx), [`index.css`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/index.css))
+On the authentication screens, five official campus club nodes orbit the stable central JnU planet hub, matching the exact club identities and icon mapping used on Registration:
 - **Consistent Club Identities:**
   - `JnU IT Club` (`terminal`, `#2B34B9`, `animate-orbit-float-2`)
   - `Debating Society` (`record_voice_over`, `#4285F4`, `animate-orbit-float-3`)
@@ -222,6 +222,15 @@ On the login screen, five official campus club nodes orbit the stable central Jn
 - **Readability & Badges:** Each orbiting node displays an accessible pill badge beneath the icon without overlapping the central JnU hub or neighboring nodes.
 - **Continuous Organic Floating:** Gentle 2px–6px displacements on separate cycles (5.6s–7.2s) with negative animation delays. Child nodes scale smoothly on hover (`hover:scale-110`).
 - **Balanced Login Form Width:** The login form card width is refined to `max-w-[420px]` (centered within `lg:col-span-5`), ensuring compact, balanced inputs on desktop, laptop, and mobile without horizontal overflow.
+- **Dedicated Operator Login Gateway ([`OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx)):**
+  - *Route:* `/operator/login` (publicly accessible).
+  - *Headline & Content:* *"Welcome back, Operator."*, *"Sign in to manage your campus club and events."*, primary CTA *"Sign In as Club Operator"*, and supporting text *"Authorized club operators only."*. Excludes all student-specific fields.
+  - *Role Verification & Security:* Strictly checks `user.role === "club_operator"`. If an account with `student` role logs in through `/operator/login`, the session is immediately invalidated via `logout()`, access to the operator workspace is blocked, and an explicit advisory directs the user to Student Login.
+  - *Intended Destination:* Respects valid previous destinations (`location.state.from`) or defaults to the operator workspace (`/operator/events`).
+- **Cross-Linking Navigation:**
+  - On [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx): *"Are you a Club Operator? Sign in here."* (`/operator/login`).
+  - On [`OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx): *"Are you a student? Student Login"* (`/login`) and *"Need an account for your organization? Register your club"* (`/register/club`).
+  - On [`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx): *"Already registered? Operator Log in"* (`/operator/login`).
 - **Accessibility:** Fully supports `@media (prefers-reduced-motion: reduce)`, disabling motion completely when requested by user OS settings.
 
 ### 3. Student & Club Operator Registration Pages ([`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx), [`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx))
@@ -231,8 +240,7 @@ Both registration screens share a unified sibling architecture:
 - **Clean Form Presentations:** Uncluttered form headers (`Create your account.` for students; `Register Club Operator.` for operators) with clear subtitles and zero extraneous badges or banner links.
 - **Club Operator Fields (`POST /api/auth/register/club/`):** `club_name` (req), `email` (req), `description` (opt, max 300 words), `contact_email` (opt), `password` (req), `password_confirm` (req), and authorized executive certification checkbox.
 - **Showcase Content:** "Empower Your Campus Society", static verified metrics (`40+ Registered Societies`, `100% Council Synchronized`), 5 floating club nodes (`JnU IT Club`, `Debating Society`, `Photo Club`, `Cultural Cell`, `Athletics Wing`), and rotating benefit captions.
-- **Clean Header Layout:** All three authentication screens (`Login.jsx`, `Register.jsx`, `RegisterClub.jsx`) feature a clean top header containing solely the official JnUVerse brand mark, removing non-essential items like "Community Gateway" and "Back to Portal".
-- **Cross-Linking Navigation:** Both [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx) ("Want to manage your club? Register as a Club Operator.") and [`Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx) ("Registering a club instead? Register as a Club Operator.") feature clear, accessible `<Link>` elements pointing directly to `/register/club`.
+- **Clean Header Layout:** All four authentication screens (`Login.jsx`, `OperatorLogin.jsx`, `Register.jsx`, `RegisterClub.jsx`) feature a clean top header containing solely the official JnUVerse brand mark, removing non-essential items like "Community Gateway" and "Back to Portal".
 
 ### 4. Reusable UI Components
 - [`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Navbar.jsx): Sticky responsive navigation bar with brand mark, role pill tags, role-aware navigation links (`Overview`, `Explore Clubs`, `My Clubs`, `Manage Members`), mobile navigation drawer, and session sign in/out.

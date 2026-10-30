@@ -45,13 +45,25 @@
 9. [x] **Login Page UI Refinement (Dated Update: October 2026):**
    - **Matched Floating Club Icon Labels with Registration:** Updated the orbiting nodes around the central JnUVerse hub to match the exact 5 club names, colors, and icons from `Register.jsx`: `JnU IT Club` (terminal, `#2B34B9`), `Debating Society` (record_voice_over, `#4285F4`), `Photo Club` (photo_camera, `#EA4335`), `Cultural Cell` (theater_comedy, `#9333EA`), and `Athletics Wing` (sports_soccer, `#D97706`), each with an accessible white pill badge label without colliding with the central JnU hub or neighboring icons.
    - **Reduced Login Card Width:** Tightened the form container from `max-w-md` (448px) to `max-w-[420px]`, centered inside its `lg:col-span-5` column, keeping balanced input spacing, readable typography, and complete responsive integrity on mobile (390px), laptop (1024px), and desktop (1440px).
+10. [x] **Dedicated Club Operator Login Page ([`OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx)):**
+    - **Distinct Authentication Gateway:** Created `/operator/login` tailored specifically for Club Operators while preserving `/login` as the default Student Login.
+    - **Operator-Specific Content:** Heading *"Welcome back, Operator."*, subtitle *"Sign in to manage your campus club and events."*, primary CTA *"Sign In as Club Operator"*, and supporting text *"Authorized club operators only."*. Excludes all student-specific fields (Student ID, department, batch).
+    - **Shared Backend API Contract:** Uses the existing shared `POST /api/auth/login/` endpoint passing `{ identifier: email, password }`.
+    - **Post-Login Role Verification:** Enforces `user.role === "club_operator"`. If an authenticated account has a `student` role, the newly established session is immediately purged via `logout()`, access to operator features is blocked, and an explicit advisory is displayed directing the user to Student Login (`/login`).
+    - **Inactive Account Feedback:** User-friendly presentation for inactive, suspended, or unapproved operator accounts without internal exception leaks.
+    - **Cross-Platform Navigation Links:**
+      - On [`Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx): added *"Are you a Club Operator? Sign in here."* linking to `/operator/login`.
+      - On [`OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx): added *"Are you a student? Student Login"* linking to `/login` and *"Need an account for your organization? Register your club"* linking to `/register/club`.
+      - On [`RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx): updated *"Already registered? Operator Log in"* linking to `/operator/login`.
 
 ## 4. Relevant Frontend Files
 - [`frontend/public/favicon.svg`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/public/favicon.svg)
 - [`frontend/public/favicon.ico`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/public/favicon.ico)
 - [`frontend/index.html`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/index.html)
 - [`frontend/src/pages/Login.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Login.jsx)
+- [`frontend/src/pages/OperatorLogin.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorLogin.jsx)
 - [`frontend/src/pages/Register.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Register.jsx)
+- [`frontend/src/pages/RegisterClub.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/RegisterClub.jsx)
 - [`frontend/src/components/JnUHubMark.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/JnUHubMark.jsx)
 - [`frontend/src/context/AuthContext.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/context/AuthContext.jsx)
 - [`frontend/src/services/api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)

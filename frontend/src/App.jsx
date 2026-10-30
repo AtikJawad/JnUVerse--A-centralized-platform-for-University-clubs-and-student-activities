@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
+import OperatorLogin from "./pages/OperatorLogin";
 import Register from "./pages/Register";
 import RegisterClub from "./pages/RegisterClub";
 import Dashboard from "./pages/Dashboard";
@@ -22,6 +23,8 @@ function App() {
         <Routes>
           {/* Public Authentication Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/operator/login" element={<OperatorLogin />} />
+          <Route path="/operator-login" element={<Navigate to="/operator/login" replace />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register/club" element={<RegisterClub />} />
           <Route path="/register-club" element={<Navigate to="/register/club" replace />} />
