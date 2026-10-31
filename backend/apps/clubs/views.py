@@ -12,6 +12,7 @@ from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 
 from apps.accounts.permissions import IsClubOperator, IsStudent
 from apps.accounts.models import User
+from apps.notifications import services as notify
 
 from .models import Club, ClubFollow, ClubMembership
 from .permissions import IsOwnerOrReadOnly
@@ -158,6 +159,8 @@ class ClubMembershipView(APIView):
                 m.reviewed_at = None
                 m.reviewed_by = None
                 m.save()
+        if code == status.HTTP_201_CREATED:  # new request or re-request
+            notify.notify_membership_request(m)
         return Response(self._state(m), status=code)
 
     @extend_schema(request=None, responses={204: None})
@@ -218,6 +221,7 @@ class MembershipReviewView(APIView):
             m.reviewed_at = timezone.now()
             m.reviewed_by = request.user
             m.save()
+            notify.notify_membership_decision(m, self.verb)
         return Response(MembershipSerializer(m).data)
 
 
@@ -246,4 +250,5 @@ class MembershipRemoveView(APIView):
             m.reviewed_at = timezone.now()
             m.reviewed_by = request.user
             m.save()
+            notify.notify_membership_decision(m, "removed")
         return Response(status=status.HTTP_204_NO_CONTENT)

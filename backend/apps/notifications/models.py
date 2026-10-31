@@ -40,6 +40,7 @@ class Notification(models.Model):
         NOTICE = "notice", "Notice"
         EVENT_PUBLISHED = "event_published", "Event published"
         EVENT_CANCELLED = "event_cancelled", "Event cancelled"
+        EVENT_UPDATED = "event_updated", "Event updated"
         MEMBERSHIP_UPDATE = "membership_update", "Membership update"
         COLLABORATION_UPDATE = "collaboration_update", "Collaboration update"
 

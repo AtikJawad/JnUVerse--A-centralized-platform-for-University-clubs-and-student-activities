@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.accounts.permissions import IsClubOperator, IsStudent
+from apps.notifications import services as notify
 
 from .models import Event, EventRegistration
 from .permissions import IsEventOwnerOrReadOnly
@@ -120,9 +121,13 @@ class EventDetailView(generics.RetrieveUpdateAPIView):
         if event.status == Event.Status.CANCELLED or event.is_completed:
             return Response({"detail": "Cancelled or ended events cannot be edited."},
                             status=status.HTTP_409_CONFLICT)
+        before = (event.starts_at, event.ends_at, event.venue)
         serializer = EventWriteSerializer(event, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        with transaction.atomic():
+            serializer.save()
+            if event.status == Event.Status.PUBLISHED and before != (event.starts_at, event.ends_at, event.venue):
+                notify.notify_event_updated(event)
         return Response(EventSerializer(self.get_queryset().get(pk=event.pk)).data)
 
 
@@ -134,6 +139,9 @@ class EventActionView(APIView):
 
     def check(self, event):
         raise NotImplementedError
+
+    def notify(self, event):
+        pass
 
     @extend_schema(request=None, responses=EventSerializer)
     def post(self, request, pk):
@@ -147,11 +155,15 @@ class EventActionView(APIView):
                 return error
             event.status = self.new_status
             event.save(update_fields=["status", "updated_at"])
+            self.notify(event)
         return Response(EventSerializer(event_queryset(request.user).get(pk=pk)).data)
 
 
 class EventPublishView(EventActionView):
     new_status = Event.Status.PUBLISHED
+
+    def notify(self, event):
+        notify.notify_event_published(event)
 
     def check(self, event):
         if event.status != Event.Status.DRAFT:
@@ -163,6 +175,9 @@ class EventPublishView(EventActionView):
 
 class EventCancelView(EventActionView):
     new_status = Event.Status.CANCELLED
+
+    def notify(self, event):
+        notify.notify_event_cancelled(event)
 
     def check(self, event):
         if event.status != Event.Status.PUBLISHED:

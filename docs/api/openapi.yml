@@ -724,8 +724,236 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRegistrationList'
           description: ''
+  /api/notices/:
+    get:
+      operationId: api_notices_list
+      parameters:
+      - in: query
+        name: club
+        schema:
+          type: string
+        description: Club slug.
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: 'Club operators only: own club''s notices.'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNoticeList'
+          description: ''
+    post:
+      operationId: api_notices_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoticeCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NoticeCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NoticeCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+          description: ''
+  /api/notices/{id}/:
+    get:
+      operationId: api_notices_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+          description: ''
+    patch:
+      operationId: api_notices_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNoticeUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNoticeUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNoticeUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+          description: ''
+    delete:
+      operationId: api_notices_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notifications/:
+    get:
+      operationId: api_notifications_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: unread
+        schema:
+          type: boolean
+        description: true = only unread notifications.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/{id}/read/:
+    post:
+      operationId: api_notifications_read_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/read-all/:
+    post:
+      operationId: api_notifications_read_all_create
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadAllResult'
+          description: ''
+  /api/notifications/unread-count/:
+    get:
+      operationId: api_notifications_unread_count_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
+          description: ''
 components:
   schemas:
+    AudienceEnum:
+      enum:
+      - public
+      - followers
+      - members
+      - department
+      type: string
+      description: |-
+        * `public` - Public
+        * `followers` - Followers
+        * `members` - Members
+        * `department` - Department
+    BlankEnum:
+      enum:
+      - ''
     Club:
       type: object
       properties:
@@ -1214,6 +1442,118 @@ components:
         * `rejected` - Rejected
         * `left` - Left
         * `removed` - Removed
+    Notice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        club:
+          allOf:
+          - $ref: '#/components/schemas/ClubMini'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        audience:
+          allOf:
+          - $ref: '#/components/schemas/AudienceEnum'
+          readOnly: true
+        department:
+          type: string
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - audience
+      - body
+      - club
+      - created_at
+      - department
+      - id
+      - title
+      - updated_at
+    NoticeCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+        audience:
+          $ref: '#/components/schemas/AudienceEnum'
+        department:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/DepartmentEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - audience
+      - body
+      - title
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        notice:
+          type: string
+          format: uuid
+          readOnly: true
+        event:
+          type: string
+          format: uuid
+          readOnly: true
+        is_read:
+          type: boolean
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - event
+      - id
+      - is_read
+      - message
+      - notice
+      - read_at
+      - title
+      - type
+    NullEnum:
+      enum:
+      - null
     PaginatedClubPublicList:
       type: object
       required:
@@ -1283,6 +1623,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Membership'
+    PaginatedNoticeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notice'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
     PaginatedRegistrationList:
       type: object
       required:
@@ -1340,6 +1726,21 @@ components:
           type: integer
           minimum: 1
           nullable: true
+    PatchedNoticeUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+    ReadAllResult:
+      type: object
+      properties:
+        updated:
+          type: integer
+      required:
+      - updated
     Registration:
       type: object
       properties:
@@ -1425,6 +1826,29 @@ components:
       required:
       - access
       - refresh
+    TypeEnum:
+      enum:
+      - notice
+      - event_published
+      - event_cancelled
+      - event_updated
+      - membership_update
+      - collaboration_update
+      type: string
+      description: |-
+        * `notice` - Notice
+        * `event_published` - Event published
+        * `event_cancelled` - Event cancelled
+        * `event_updated` - Event updated
+        * `membership_update` - Membership update
+        * `collaboration_update` - Collaboration update
+    UnreadCount:
+      type: object
+      properties:
+        unread_count:
+          type: integer
+      required:
+      - unread_count
     User:
       type: object
       properties:
