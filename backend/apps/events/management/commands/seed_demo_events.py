@@ -9,6 +9,8 @@ from apps.accounts.constants import DEPARTMENT_CHOICES
 from apps.accounts.models import StudentProfile, User, ValidStudentRecord
 from apps.clubs.models import Club, ClubFollow, ClubMembership
 from apps.events.models import Event, EventRegistration
+from apps.notifications import services as notify
+from apps.notifications.models import Notice, Notification
 
 PREFIX = "[DEMO] "
 DEMO_EMAIL_DOMAIN = "demo.jnuverse.test"
@@ -49,6 +51,7 @@ class Command(BaseCommand):
         n_events = events.count()
         events.delete()
         demo_clubs = Club.objects.filter(name__startswith=PREFIX)
+        Notice.objects.filter(club__in=demo_clubs).delete()  # their notifications cascade
         ClubMembership.objects.filter(club__in=demo_clubs).delete()
         ClubFollow.objects.filter(club__in=demo_clubs).delete()
         n_clubs = demo_clubs.count()
@@ -125,6 +128,7 @@ class Command(BaseCommand):
             defaults={"status": EventRegistration.Status.CANCELLED},
         )
         made_clubs = self.seed_clubs(o, profiles, now)
+        self.seed_notifications(profiles)
         self.stdout.write(self.style.SUCCESS(
             f"Done. New events: {made}. New demo clubs: {made_clubs}. "
             f"Logins: demo1..demo5 and democlub1..democlub5@{DEMO_EMAIL_DOMAIN} (password: {o['password']})."
@@ -166,3 +170,51 @@ class Command(BaseCommand):
                     },
                 )
         return made
+
+    def seed_notifications(self, profiles):
+        club = Club.objects.get(operator__email=f"democlub1@{DEMO_EMAIL_DOMAIN}")
+        debate = Club.objects.get(operator__email=f"democlub2@{DEMO_EMAIL_DOMAIN}")
+        dept = DEPARTMENT_CHOICES[0][0]
+        specs = [
+            ("Welcome to Robotics", "public", ""),
+            ("Followers update: new project", "followers", ""),
+            ("Members only: lab schedule", "members", ""),
+            ("Department workshop", "department", dept),
+        ]
+        for title, audience, target in specs:
+            notice, _ = Notice.objects.get_or_create(
+                club=club, title=PREFIX + title,
+                defaults={
+                    "created_by": club.operator,
+                    "body": "Demo notice for frontend development. " * 3,
+                    "audience": audience,
+                    "target_department": target,
+                },
+            )
+            notify.notify_notice(notice)  # same rules as the real API; duplicates are ignored
+
+        for event in Event.objects.filter(club=club, status=Event.Status.PUBLISHED, title__startswith=PREFIX):
+            notify.notify_event_published(event)
+        for title, send in (
+            ("Cancelled Event Example", notify.notify_event_cancelled),
+            ("Research Workshop", notify.notify_event_updated),
+        ):
+            event = Event.objects.filter(title=PREFIX + title).first()
+            if event:
+                send(event)
+
+        def once(user_id, title, message):
+            Notification.objects.get_or_create(
+                recipient_id=user_id, type=Notification.Type.MEMBERSHIP_UPDATE, title=title, message=message
+            )
+
+        once(profiles[0].user_id, "Membership approved", f"Your request to join {club.name} was approved.")
+        once(profiles[1].user_id, "Membership rejected", f"Your request to join {debate.name} was not approved.")
+        p = profiles[2]
+        once(club.operator_id, "New membership request",
+             f"{p.full_name} ({p.jnu_student_id}) requested to join {club.name}.")
+
+        # leave one already read, so the frontend can show both states
+        Notification.objects.filter(
+            recipient_id=profiles[0].user_id, notice__title=PREFIX + "Welcome to Robotics", read_at__isnull=True
+        ).update(read_at=timezone.now())

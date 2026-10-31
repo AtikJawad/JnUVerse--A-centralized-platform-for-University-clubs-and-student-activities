@@ -99,7 +99,15 @@ Notifications cannot be deleted. Opening a notification should call `read/` for 
 Rules: recipients are fixed at the moment of the action (someone who follows later does not get old notifications, but can still read visible notices in the feed). Editing a notice, editing other event fields (title, description, capacity), and creating drafts send nothing. The posting operator is not notified about their own notice.
 
 ## 6. Demo data
-No notice/notification demo data exists yet (ask the backend developer to extend the seed command if you need it). To produce live data: log in as `club1@example.com` and post a notice, or publish/cancel a demo event, then log in as a demo student (`demo1@demo.jnuverse.test`, password `Demo-Pass-12345`).
+Demo notices and notifications are seeded (the Robotics Club is `democlub1`). All passwords are `Demo-Pass-12345`.
+
+- **Notices:** 4 notices from `[DEMO] Robotics Club`, one per audience (public, followers, members, department).
+- **`demo1@demo.jnuverse.test`:** 9 notifications (8 unread, 1 read): 4 notices, 2 "event published", 1 "event cancelled", 1 "event updated", 1 "membership approved". Follows and is an approved member of the Robotics Club, so this account sees every notice.
+- **`demo2@demo.jnuverse.test`:** approved Robotics member with a "membership rejected" notification from the Debate Society. Gets all 4 notices.
+- **`demo4@demo.jnuverse.test`:** follower only, so it does not see the `members` notice.
+- **`demo5@demo.jnuverse.test`:** only the department notice, which makes it a near-empty inbox for testing.
+- **`democlub1@demo.jnuverse.test`:** operator inbox with one "new membership request".
+- **Live data:** log in as `club1@example.com` (`Str0ng-Pass-123`) to post a notice or publish or cancel an event, then check a demo student's bell.
 
 ## 7. Testing evidence
 - Automated backend tests (pytest, local PostgreSQL): **121 passing** (86 before this week + 21 notice tests + 14 notification tests): audience visibility matrix, create/edit/delete permissions and validation, recipients per audience, publish/cancel/update triggers, one-per-event update rule, membership notifications, inbox isolation, unread count, mark read/all.
