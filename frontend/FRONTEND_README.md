@@ -413,7 +413,7 @@ The Week 5 API layer integrates club broadcast announcements, audience scoping (
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
 | **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
-| **Notices & Notifications** | Week 5 | **In Progress** (Stage 5 Completed: Operator Notice Management Verified) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
+| **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { noticesAPI, authAPI, extractErrorMessage } from "../services/api";
@@ -88,7 +88,6 @@ const BATCH_PAGE_CAP = 10;
  */
 export default function OperatorNotices() {
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   // Notices List State (Complete operator dataset for accurate metrics & full-dataset search/filtering)
   const [allNotices, setAllNotices] = useState([]);
