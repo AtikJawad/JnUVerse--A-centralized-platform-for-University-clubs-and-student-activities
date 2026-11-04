@@ -83,3 +83,26 @@ def notify_membership_request(membership):
         title="New membership request",
         message=f"{s.full_name} ({s.jnu_student_id}) requested to join {membership.club.name}.",
     )
+
+def notify_collaboration_request(req):
+    Notification.objects.create(
+        recipient_id=req.target_club.operator_id, type=T.COLLABORATION_UPDATE,
+        title="New collaboration request",
+        message=f"{req.requesting_club.name} wants to collaborate: {req.title}",
+    )
+
+
+def notify_collaboration_response(req, decision):
+    Notification.objects.create(
+        recipient_id=req.requesting_club.operator_id, type=T.COLLABORATION_UPDATE,
+        title=f"Collaboration request {decision}",
+        message=f"{req.target_club.name} {decision} your request: {req.title}",
+    )
+
+
+def notify_collaboration_cancelled(req):
+    Notification.objects.create(
+        recipient_id=req.target_club.operator_id, type=T.COLLABORATION_UPDATE,
+        title="Collaboration request cancelled",
+        message=f"{req.requesting_club.name} cancelled their request: {req.title}",
+    )

@@ -1,6 +1,8 @@
 from django.urls import path
 
-app_name = "feedback"
+from .views import EventRatingSummaryView, EventRatingView
 
-# URL patterns for the feedback app will be added as its views are implemented.
-urlpatterns = []
+urlpatterns = [
+    path("<uuid:pk>/rating/", EventRatingView.as_view(), name="event-rating"),
+    path("<uuid:pk>/rating-summary/", EventRatingSummaryView.as_view(), name="event-rating-summary"),
+]

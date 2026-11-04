@@ -1,5 +1,8 @@
 from django.db import transaction
-from django.db.models import BooleanField, Count, Exists, OuterRef, Q, Value
+from django.db.models import (
+    Avg, BooleanField, Count, Exists, FloatField, IntegerField, OuterRef, Q, Subquery, Value,
+)
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
@@ -15,6 +18,7 @@ from apps.accounts.permissions import IsClubOperator, IsStudent
 from apps.notifications import services as notify
 
 from .models import Event, EventRegistration
+from apps.feedback.models import EventRating
 from .permissions import IsEventOwnerOrReadOnly
 from .serializers import EventSerializer, EventWriteSerializer, RegistrationSerializer
 
@@ -33,11 +37,20 @@ def event_queryset(user=None):
             event=OuterRef("pk"), student=profile, status=EventRegistration.Status.REGISTERED))
     else:
         registered = Value(None, output_field=BooleanField())
+
+    ratings = EventRating.objects.filter(event=OuterRef("pk")).order_by().values("event")
+    average = Subquery(ratings.annotate(v=Avg("rating")).values("v"), output_field=FloatField())
+    rated = Coalesce(Subquery(ratings.annotate(v=Count("pk")).values("v"), output_field=IntegerField()), 0)
+    if profile is not None:
+        mine = Subquery(EventRating.objects.filter(event=OuterRef("pk"), student=profile).values("rating")[:1],
+                        output_field=IntegerField())
+    else:
+        mine = Value(None, output_field=IntegerField())
     return (Event.objects.select_related("club")
             .annotate(registered_count=Count("registrations", filter=Q(
                 registrations__status=EventRegistration.Status.REGISTERED)))
             .filter(visible)
-            .annotate(is_registered=registered)
+            .annotate(is_registered=registered, average_rating=average, rating_count=rated, my_rating=mine)
             .order_by("-starts_at", "id"))
 
 

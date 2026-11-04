@@ -9,7 +9,7 @@ from tests.helpers import make_club, make_event, make_student
 pytestmark = pytest.mark.django_db
 URL = "/api/events/"
 FIELDS = {"id", "club", "title", "description", "venue", "starts_at", "ends_at", "capacity",
-          "registered_count", "remaining_capacity", "status", "is_completed", "is_registered", "created_at"}
+          "registered_count", "remaining_capacity", "status", "is_completed", "is_registered", "created_at", "average_rating", "rating_count", "my_rating",}
 
 
 def as_user(api, login, ident):

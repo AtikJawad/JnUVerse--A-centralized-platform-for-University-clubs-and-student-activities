@@ -18,17 +18,24 @@ class EventSerializer(serializers.ModelSerializer):
     remaining_capacity = serializers.SerializerMethodField()
     is_completed = serializers.BooleanField(read_only=True)
     is_registered = serializers.BooleanField(read_only=True, allow_null=True)
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.IntegerField(read_only=True)
+    my_rating = serializers.IntegerField(read_only=True, allow_null=True)
 
     class Meta:
         model = Event
         fields = ["id", "club", "title", "description", "venue", "starts_at", "ends_at", "capacity",
                   "registered_count", "remaining_capacity", "status", "is_completed", "is_registered",
+                  "average_rating", "rating_count", "my_rating",
                   "created_at"]
 
     def get_remaining_capacity(self, obj) -> int | None:
         if obj.capacity is None:
             return None
         return max(obj.capacity - obj.registered_count, 0)
+
+    def get_average_rating(self, obj) -> float | None:
+        return None if obj.average_rating is None else round(obj.average_rating, 1)
 
 
 class EventWriteSerializer(serializers.ModelSerializer):
