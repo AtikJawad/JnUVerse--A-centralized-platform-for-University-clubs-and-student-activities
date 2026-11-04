@@ -323,4 +323,15 @@ export const notificationsAPI = {
   markAllRead: () => api.post("/api/notifications/read-all/"),
 };
 
+/**
+ * Auth API Service — Common institutional lookup endpoints
+ */
+export const authAPI = {
+  /**
+   * Retrieve official university departments list from backend.
+   * Endpoint: GET /api/auth/departments/
+   */
+  getDepartments: () => api.get("/api/auth/departments/"),
+};
+
 export default api;

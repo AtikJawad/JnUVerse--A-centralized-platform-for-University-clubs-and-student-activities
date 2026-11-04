@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { notificationsAPI, extractErrorMessage } from "../services/api";
+import { notificationsAPI, noticesAPI, extractErrorMessage } from "../services/api";
 
 /**
  * Format ISO timestamps to relative time strings or localized Dhaka dates.
@@ -84,9 +84,10 @@ function getNotificationVisuals(type) {
 
 /**
  * Route resolution mapping based on backend notification payload and user role.
+ * Resolves club slug via noticesAPI for notice notifications and passes notice UUID in state.
  */
-function resolveNotificationTarget(notif, userRole) {
-  if (!notif) return "/notifications";
+async function resolveNotificationTarget(notif, userRole) {
+  if (!notif) return { pathname: "/notifications" };
 
   const eventId = typeof notif.event === "object" ? notif.event?.id : notif.event;
 
@@ -94,16 +95,34 @@ function resolveNotificationTarget(notif, userRole) {
     case "event_published":
     case "event_cancelled":
     case "event_updated":
-      return eventId ? `/events/${eventId}` : "/events";
+      return { pathname: eventId ? `/events/${eventId}` : "/events" };
 
     case "membership_update":
-      return userRole === "club_operator" ? "/operator/members" : "/my-clubs";
+      return {
+        pathname: userRole === "club_operator" ? "/operator/members" : "/my-clubs",
+      };
 
-    case "notice":
-      return "/clubs";
+    case "notice": {
+      const noticeId = typeof notif.notice === "object" ? notif.notice?.id : notif.notice;
+      if (noticeId) {
+        try {
+          const res = await noticesAPI.getById(noticeId);
+          const slug = res.data?.club?.slug;
+          if (slug) {
+            return {
+              pathname: `/clubs/${slug}`,
+              state: { noticeId },
+            };
+          }
+        } catch {
+          // If notice detail fetch fails or user is restricted, fallback to /clubs
+        }
+      }
+      return { pathname: "/clubs" };
+    }
 
     default:
-      return "/notifications";
+      return { pathname: "/notifications" };
   }
 }
 
@@ -356,13 +375,16 @@ export default function NotificationBell() {
   const handleNotificationClick = async (notif) => {
     const requestGeneration = generationRef.current;
     const requestIdentity = currentIdentity;
-    const target = resolveNotificationTarget(notif, user?.role);
 
-    // If already read, simply navigate and close
+    // If already read, resolve target, navigate and close
     if (notif.is_read) {
+      const target = await resolveNotificationTarget(notif, user?.role);
+      if (!isRequestCurrent(requestGeneration, requestIdentity)) {
+        return;
+      }
       setIsOpen(false);
       setActionError(null);
-      navigate(target);
+      navigate(target.pathname || target, target.state ? { state: target.state } : undefined);
       return;
     }
 
@@ -379,13 +401,19 @@ export default function NotificationBell() {
 
     try {
       await notificationsAPI.markRead(notif.id);
+      if (!isRequestCurrent(requestGeneration, requestIdentity)) {
+        return;
+      }
       window.dispatchEvent(new CustomEvent("notifications:updated"));
+
+      const target = await resolveNotificationTarget(notif, user?.role);
+
       // Verify request is still current before navigation and closing
       if (!isRequestCurrent(requestGeneration, requestIdentity)) {
         return;
       }
       setIsOpen(false);
-      navigate(target);
+      navigate(target.pathname || target, target.state ? { state: target.state } : undefined);
     } catch (err) {
       // Only execute rollback if the request still belongs to the active identity
       if (!isRequestCurrent(requestGeneration, requestIdentity)) {

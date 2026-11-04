@@ -1,7 +1,7 @@
 # Week 05 — Notices & Notifications
 
 **Focus:** Club announcements/notices, audience targeting, in-app personal notifications, unread indicators, and notification interactions  
-**Status:** **In Progress** (Stage 3 Completed: Full Notifications Inbox Verified)  
+**Status:** **In Progress** (Stage 5 Completed: Operator Notice Management Verified)  
 **Assigned:** Anik Khondokar (Frontend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_05_BACKEND_HANDOFF.md`, 121 backend tests passing, OpenAPI validated)  
 **Target:** November 2026  
@@ -58,16 +58,27 @@
    - Strict backend-confirmation-first execution for `markAllRead` (no local state mutation prior to backend 200 OK).
    - Deep navigation mapping for `event_*` (`/events/:id`), `membership_update` (`/my-clubs` or `/operator/members`), `collaboration_update` (`/notifications`), and notice club slug resolution via `noticesAPI.getById(id)` to `/clubs/:slug` (fallback `/clubs`).
    - Comprehensive Stitch design system states: loading skeleton cards, empty states for "All" and "Unread", and action error banners.
-4. [ ] **Stage 4: Club Notice Board Component**
-   - Embed notice board on `ClubDetail.jsx` (`/clubs/:slug`).
-   - Display audience status badges (`Public`, `Followers`, `Members`, `Department`).
-   - Format timestamps in `Asia/Dhaka` (+06:00 BST).
-5. [ ] **Stage 5: Club Operator Notice Management & Publishing**
-   - Build operator notice workspace at `/operator/notices` and notice compose modal.
-   - Audience selector (`public`, `followers`, `members`, `department`) with conditional department dropdown from `authAPI.getDepartments()`.
-   - Warning banner: audience and department are immutable post-creation.
-   - Edit mode (restricting edits to `title` and `body` only).
-   - Delete confirmation with cascading notification cleanup.
+4. [x] **Stage 4: Club Notice Board Component**
+   - Embedded Notice Board within `frontend/src/pages/ClubDetail.jsx` (`/clubs/:slug`) in the primary 7-column content section below the About card.
+   - Header with `campaign` icon, title "Notice Board", live count badge, and subtitle "Stay informed with the latest announcements from this club."
+   - Integrated `noticesAPI.getAll({ club: slug, page, page_size: 5 })` querying `GET /api/notices/?club=<slug>&page=...&page_size=5`.
+   - Client-side audience badge mapping (`public` -> "Public", `followers` -> "Followers", `members` -> "Club Members", `department` -> "Department: [Dept]" or "Department"), strictly respecting backend DRF permissions with zero client bypass.
+   - Timestamps formatted in `Asia/Dhaka` (+06:00 BST) using `Intl.DateTimeFormat`.
+   - Dedicated `NoticeSkeletons` loading state, custom Empty state ("No announcements yet" / "This club hasn't published any notices yet. Check back later for updates."), and localized Error state with Retry button that preserves full functionality of the rest of ClubDetail.
+   - Compact "Load More Announcements" pagination appending deduplicated notice records without duplicate keys, hidden when on a single page.
+   - Integration with Notifications Inbox navigation: detects `location.state?.noticeId` or `?notice=<id>` / `?notice_id=<id>` and smoothly scrolls to and highlights the target notice card with a highlighted badge and ring.
+   - Re-synchronizes notices reactively when follow status (`is_following`) or membership status (`membershipStatus`) toggles or user authenticates.
+   - Read-only implementation: zero notice creation, editing, or deletion UI controls (reserved for Stage 5).
+5. [x] **Stage 5: Club Operator Notice Management & Publishing**
+   - Built `frontend/src/pages/OperatorNotices.jsx` and registered `/operator/notices` route protected by `ProtectedRoute` (`allowedRoles: ["club_operator"]`).
+   - Notice retrieval using backend-verified `mine=true` parameter (`GET /api/notices/?mine=true&page=...&page_size=10`), retrieving only the authenticated operator's own club announcements.
+   - 4-card metric ribbon (Total Notices, Public Notices, Member/Follower Notices, Department Notices), search bar, and audience filter pills.
+   - Notice card presentation with title, formatted Asia/Dhaka timestamps, audience badges (`Public`, `Followers`, `Club Members`, `Department: [Dept]`), preview link to `/clubs/:slug`, and Edit/Delete controls.
+   - Publish Notice Modal: validated title (max 200 chars) and body text, audience selector (`public`, `followers`, `members`, `department`), dynamic department dropdown populated from `authAPI.getDepartments()`, immediate-publication notice banner, and in-flight request locking.
+   - Edit Notice Modal: title and body editing only; audience and department targeting strictly rendered as read-only immutable badges with governance warning banners.
+   - Delete Confirmation Modal: identifying title and publication timestamp, warning of cascading student in-app notification deletion, and executing `DELETE /api/notices/:id/` with backend-confirmation-first list removal.
+   - Integrated "Notice Management" link into `Navbar.jsx` (desktop and mobile) restricted to `club_operator`.
+   - Exported `authAPI.getDepartments()` in `frontend/src/services/api.js`.
 6. [ ] **Stage 6: Final Verification, Quality Gates & Documentation**
    - Full end-to-end audit, static linting, and production build verification.
 
@@ -173,3 +184,117 @@ npm --prefix frontend run build
 - Verified deep navigation mapping: `event_*` to `/events/:id`, `membership_update` to `/my-clubs` or `/operator/members`, `collaboration_update` to `/notifications`, and async resolution of notice club slugs via `noticesAPI.getById(id)` to `/clubs/:slug`.
 - Validated Stitch system loading skeleton, customized empty states ("You're all caught up" / "No unread notifications"), and error retry handling.
 - Calibrated layout vertical spacing on `Notifications.jsx`: added `pt-28 sm:pt-[120px] pb-12 sm:pb-16` on the main container to account for the fixed 80px Navbar (`h-20`), creating exactly 32px (mobile) and 40px (tablet/desktop) of clear vertical breathing room before the heading.
+
+### Stage 4 Verification (`ClubDetail.jsx` Notice Board)
+```bash
+# 1. ESLint Static Analysis
+npm --prefix frontend run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm --prefix frontend run build
+# Output: Exit code 0 (121 modules transformed, built in 1.53s)
+```
+- Embedded read-only Notice Board inside `ClubDetail.jsx` (`/clubs/:slug`).
+- Query verified: `GET /api/notices/?club=<slug>&page=1&page_size=5`.
+- Audience visibility completely preserved by DRF backend; no client-side security bypass or local leakage.
+- Formatted timestamps in `Asia/Dhaka` (`+06:00 BST`).
+- Skeletons, empty state, isolated retryable error state, and deduplicated Load More pagination verified.
+- Seamless deep link highlight support from Notification Inbox via `location.state?.noticeId` or `?notice=<id>`.
+- Verified & hardened notification navigation flow across both `Notifications.jsx` and `NotificationBell.jsx`: asynchronously resolves club slug via `noticesAPI.getById(id)` to `/clubs/:slug` and passes `state: { noticeId }`.
+- In `ClubDetail.jsx`: on initial load with `targetNoticeId`, if the notice is not on page 1, gracefully fetches the single notice via `noticesAPI.getById(targetNoticeId)`. Strictly validates that `notice.club.slug` matches the active route slug, that the request still belongs to the active page generation and authenticated identity, and re-validates club ownership prior to DOM highlight. Missing, inaccessible, or mismatched notices are ignored gracefully without breaking the page.
+- In `NotificationBell.jsx` and `Notifications.jsx`: verified airtight request-generation and authenticated-identity checks immediately following all asynchronous `markRead` and `resolveNotificationTarget`/`resolveDestination` lookups before closing dropdowns or executing navigation.
+- No backend modifications, zero commits or pushes.
+
+### Stage 5 Verification & Final Corrections (`OperatorNotices.jsx` Console)
+```bash
+# 1. ESLint Static Analysis
+npm --prefix frontend run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm --prefix frontend run build
+# Output: Exit code 0 (122 modules transformed, built in 2.19s)
+```
+- Built `frontend/src/pages/OperatorNotices.jsx` and registered `/operator/notices` route in `App.jsx`.
+- Verified role protection: only `club_operator` can access; unauthenticated users redirect to login, students denied access via `ProtectedRoute`.
+- Query verified: `GET /api/notices/?mine=true` strictly retrieves the operator's own club notices, enforcing backend tenant isolation.
+- **Department API Failure Handling & Validation**:
+  - Removed hardcoded `DEFAULT_DEPARTMENTS` fallback.
+  - Department options are loaded dynamically from `authAPI.getDepartments()`.
+  - When the department fetch succeeds, displays the actual returned department strings (matching `DEPARTMENT_CHOICES` from `apps.accounts.constants` required by `NoticeCreateSerializer`).
+  - When the fetch fails, displays an explicit error alert with an interactive "Retry" button.
+  - Department-targeted notice submission is disabled until valid department data has loaded (`disabled={createLoading || (createForm.audience === "department" && (departmentsLoading || departments.length === 0 || !createForm.department))}`).
+  - Switching away from the "department" audience immediately resets `department: ""` to prevent sending stale or unverified department values.
+  - Create payload strictly includes `department` only when `audience === "department"`.
+- **Search & Audience Filter Accuracy Across Full Operator Dataset**:
+  - Inspected backend `NoticeListCreateView` in `backend/apps/notifications/views.py`: confirmed backend supports `club` and `mine` query parameters, but does NOT support `search` or `audience` filtering.
+  - Implemented multi-page fetch loop (`page_size: 50`, `mine: true`) consistent with `OperatorEvents.jsx` to load all operator notices into `allNotices` with ID deduplication and monotonic generation/identity concurrency guards (`isRequestCurrent`).
+  - Filter pills (`All`, `Public`, `Followers`, `Members`, `Department`) and text search (title, body, department) operate across the complete operator notices dataset without dropping records on subsequent pages.
+  - Clean empty state with "Clear Filters" action displayed when no announcements match active search or audience filters.
+- **Summary Metrics Accuracy**:
+  - All 4 summary cards (Total Notices, Public Notices, Member/Follower Notices, Department Targeted Notices) compute exact counts over the complete operator dataset (`allNotices`).
+  - Zero fabricated, estimated, or single-page partial counts.
+  - Local pagination (10 per page) slices the filtered notices with responsive Previous/Next controls and explicit item ranges ("Showing 1–10 of X announcements (filtered from Y total)").
+- **Audience & Edit Governance**:
+  - Edit mode strictly sends only `title` and `body` adhering to `NoticeUpdateSerializer`. Audience and department remain read-only immutable badges with policy notices.
+  - Delete operation waits for backend HTTP 204 confirmation before removing the notice from local state.
+  - Navbar operator navigation link for desktop and mobile remains fully functional.
+  - Zero backend modifications, zero commits or pushes.
+
+### Stage 5 Visual Refinement (`OperatorNotices.jsx` Stitch-Inspired Redesign)
+```bash
+# 1. ESLint Static Analysis
+npm --prefix frontend run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm --prefix frontend run build
+# Output: Exit code 0 (122 modules transformed, built in 993ms)
+```
+- Executed Stitch-inspired visual refinement based on `DESIGN.md`, `jnuverse_member_management_redesigned/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, and `jnuverse_collaboration_requests_management/code.html`.
+- **Page Header**: Editorial uppercase tracking-wider eyebrow (`YOUR CLUB COMMUNITY · OFFICIAL BROADCASTS`), dual-style headline (`Manage your <span class="font-normal italic text-primary">announcements</span>`), dynamic authenticated club context badge (`[Club Name] · Official Dispatch`) with live pulsing blue beacon, and compact pill action buttons (`Refresh` with spinning icon, `Create New Notice`).
+- **Linear Metric Ribbon**: Replaced 4 bulky, disconnected dashboard cards with a single cohesive white ribbon (`p-4 sm:p-5`, `rounded-2xl`, hairline dividers `divide-x divide-border-subtle/70` on desktop, 2x2 grid on mobile). Displays 20-24px figures, 11px uppercase labels, and 10x10 soft lavender icon boxes for Total Announcements, Public Dispatches, Members & Followers, and Department Targeted notices, calculated 100% across the complete operator dataset.
+- **Unified Search & Segmented Filter Toolbar**: Search input with leading icon and instant clear button paired with 5 distinct audience filter pills (`All`, `Public`, `Followers`, `Members`, `Department`), each showing live item count chips (`All (N)`, `Public (N)`, etc.) computed from the full deduplicated dataset.
+- **Notice Cards & Quiet Empty States**: Compact `rounded-2xl p-4 sm:p-5` cards with subtle hover shadow, audience badges (`Public`, `Followers`, `Club Members`, `Department: [Dept]`), formatted Asia/Dhaka timestamps, direct preview links to public club board, and compact Edit/Delete actions. Removed noisy technical `UUID: ...` strings and replaced with informative audience scope metadata. Implemented quiet Stitch zero-state (`py-10 text-center`) and filter-mismatch state with a "Clear Filters" action.
+- **Compact Modal Dialogs**: Refined Create, Edit, and Delete modals to compact `max-w-lg` (`max-w-md` for delete), `rounded-2xl p-6` structures. Replaced harsh alert boxes with subtle Stitch policy strips. In Edit modal, audience and department scope are presented as a compact badge row.
+- **Navbar Operator Navigation Alignment**:
+  - Updated operator center navigation pill to: `Overview` (`/dashboard`), `Explore Clubs` (`/clubs`), `Members` (`/operator/members`), `Events` (`/operator/events`), `Notices` (`/operator/notices`).
+  - Added secondary `Explore Events` link (`/events`) on desktop right-side controls and mobile drawer menu to preserve public campus event calendar access for operators.
+  - Kept student navigation links completely untouched (`Overview`, `Explore Clubs`, `My Clubs`, `Events`).
+- **Multi-Page Pagination Safety Cap Findings**: Confirmed multi-page loop safety cap at `pageNum >= 20` (1,000 notices max). Normal campus clubs (10-100 notices) fetch 100% of data and exit cleanly on `!data.next` or `accumulated.length >= count`. Clubs exceeding 1,000 notices will be stopped at 1,000 notices without hanging.
+
+### Stage 5 Final Correction (Pagination Completeness & Honest Metrics)
+```bash
+# 1. ESLint Static Analysis
+npm --prefix frontend run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm --prefix frontend run build
+# Output: Exit code 0 (122 modules transformed, built in 1.01s)
+```
+- **Incomplete Retrieval Detection**:
+  - Dynamically captures backend `data.count` into `totalBackendCount`.
+  - Determines `isPartiallyLoaded` when the 20-page safety cap is activated (`pageNum >= 20`) while backend `data.next` exists and `allNotices.length < totalBackendCount`.
+  - Preserves UUID deduplication and monotonic `generationRef` / `currentIdentity` request guards.
+- **Clear & Unobtrusive Warning**:
+  - Renders visible notice banner when incomplete: *"Showing the latest {loadedCount} of {totalBackendCount} notices. Some older notices are not loaded."*
+  - Populates actual unique loaded count and actual backend count dynamically without hardcoded values.
+- **Honest Metric Ribbon Labels**:
+  - Automatically switches ribbon metric labels from total to loaded when incomplete:
+    - *"Loaded Notices"* (with `{loaded} / {total}` indicator)
+    - *"Loaded Public"*
+    - *"Loaded Members & Followers"*
+    - *"Loaded Department"*
+  - Restores *"Total Notices"*, *"Public Notices"*, *"Members & Followers"*, and *"Department Targeted"* when complete dataset is retrieved.
+- **Search & Filter Disclosure**:
+  - Discloses that search and audience filters operate strictly over the loaded dataset.
+  - Updates search placeholder: *"Search within {loaded} loaded notices..."*.
+  - Adds contextual disclosure notice: *"Search and audience filters apply to the {loaded} loaded notices only. Older notices might not appear in search results."*
+  - Provides Filter Mismatch empty state continuation option to load older records.
+- **Safe Continuation**:
+  - Adds user-controlled *"Load More Records"* action continuing from `nextBackendPage`.
+  - Fetches up to `BATCH_PAGE_CAP = 10` pages (500 notices) per click with `loadingMore` concurrency lock.
+  - Preserves active search queries and audience tab selections.
+  - Automatically transitions to complete state when all pages are exhausted, clearing the warning banner and restoring standard total metric labels.

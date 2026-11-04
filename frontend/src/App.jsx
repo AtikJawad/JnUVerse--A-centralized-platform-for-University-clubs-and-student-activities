@@ -15,6 +15,7 @@ import EventDetail from "./pages/EventDetail";
 import OperatorEventForm from "./pages/OperatorEventForm";
 import OperatorEvents from "./pages/OperatorEvents";
 import OperatorEventAttendees from "./pages/OperatorEventAttendees";
+import OperatorNotices from "./pages/OperatorNotices";
 import Notifications from "./pages/Notifications";
 
 function App() {
@@ -107,6 +108,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["club_operator"]}>
                 <OperatorEventAttendees />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Club Operator Notice Management Route */}
+          <Route
+            path="/operator/notices"
+            element={
+              <ProtectedRoute allowedRoles={["club_operator"]}>
+                <OperatorNotices />
               </ProtectedRoute>
             }
           />

@@ -167,7 +167,7 @@ export default function Navbar() {
                     : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                Manage Members
+                Members
               </Link>
               <Link
                 to="/operator/events"
@@ -177,31 +177,43 @@ export default function Navbar() {
                     : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                Manage Events
+                Events
+              </Link>
+              <Link
+                to="/operator/notices"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/operator/notices")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Notices
               </Link>
             </>
           ) : (
-            <Link
-              to="/my-clubs"
-              className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isActive("/my-clubs")
-                  ? "bg-primary text-white font-bold shadow-sm"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              My Clubs
-            </Link>
+            <>
+              <Link
+                to="/my-clubs"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/my-clubs")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                My Clubs
+              </Link>
+              <Link
+                to="/events"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/events")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Events
+              </Link>
+            </>
           )}
-          <Link
-            to="/events"
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              isActive("/events")
-                ? "bg-primary text-white font-bold shadow-sm"
-                : "text-on-surface-variant hover:text-on-surface"
-            }`}
-          >
-            Events
-          </Link>
         </nav>
 
         {/* ============================================================ */}
@@ -210,6 +222,22 @@ export default function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3 justify-self-end">
           {isAuthenticated ? (
             <>
+              {/* Secondary Discovery Link for Club Operators */}
+              {user?.role === "club_operator" && (
+                <Link
+                  to="/events"
+                  className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                    isActive("/events")
+                      ? "bg-primary text-white font-bold shadow-xs"
+                      : "border border-border-subtle bg-surface-white hover:bg-surface-lavender text-text-muted hover:text-on-surface shadow-xs"
+                  }`}
+                  title="Explore public campus events calendar"
+                >
+                  <span className="material-symbols-outlined text-[15px] text-primary">calendar_month</span>
+                  <span>Explore Events</span>
+                </Link>
+              )}
+
               {/* Notification Bell with Dropdown Popover & Poller */}
               <NotificationBell />
 
@@ -312,7 +340,7 @@ export default function Navbar() {
                     : "text-on-surface hover:bg-surface-lavender"
                 }`}
               >
-                Manage Members
+                Members
               </Link>
               <Link
                 to="/operator/events"
@@ -323,33 +351,60 @@ export default function Navbar() {
                     : "text-on-surface hover:bg-surface-lavender"
                 }`}
               >
-                Manage Events
+                Events
+              </Link>
+              <Link
+                to="/operator/notices"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/operator/notices")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Notices
+              </Link>
+              <div className="pt-2 pb-1 px-4 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                Public Discovery
+              </div>
+              <Link
+                to="/events"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/events")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Explore Events
               </Link>
             </>
           ) : (
-            <Link
-              to="/my-clubs"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-                isActive("/my-clubs")
-                  ? "bg-primary text-white"
-                  : "text-on-surface hover:bg-surface-lavender"
-              }`}
-            >
-              My Clubs
-            </Link>
+            <>
+              <Link
+                to="/my-clubs"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/my-clubs")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                My Clubs
+              </Link>
+              <Link
+                to="/events"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/events")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Events
+              </Link>
+            </>
           )}
-          <Link
-            to="/events"
-            onClick={() => setMobileMenuOpen(false)}
-            className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-              isActive("/events")
-                ? "bg-primary text-white"
-                : "text-on-surface hover:bg-surface-lavender"
-            }`}
-          >
-            Events
-          </Link>
 
           {isAuthenticated && (
             <div className="pt-3 border-t border-surface-lavender flex items-center justify-between">

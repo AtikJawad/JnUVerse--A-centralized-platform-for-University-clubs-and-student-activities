@@ -298,19 +298,21 @@ export default function Notifications() {
 
   /**
    * Resolve appropriate deep navigation target for a notification.
-   * Handles notice club slug lookup via noticesAPI.getById(id).
+   * Handles notice club slug lookup via noticesAPI.getById(id) and passes notice UUID in navigation state.
    */
   const resolveDestination = async (notif) => {
-    if (!notif) return "/notifications";
+    if (!notif) return { pathname: "/notifications" };
 
     const eventId = typeof notif.event === "object" ? notif.event?.id : notif.event;
 
     if (["event_published", "event_cancelled", "event_updated"].includes(notif.type)) {
-      return eventId ? `/events/${eventId}` : "/events";
+      return { pathname: eventId ? `/events/${eventId}` : "/events" };
     }
 
     if (notif.type === "membership_update") {
-      return user?.role === "club_operator" ? "/operator/members" : "/my-clubs";
+      return {
+        pathname: user?.role === "club_operator" ? "/operator/members" : "/my-clubs",
+      };
     }
 
     if (notif.type === "notice") {
@@ -319,19 +321,24 @@ export default function Notifications() {
         try {
           const res = await noticesAPI.getById(noticeId);
           const slug = res.data?.club?.slug;
-          if (slug) return `/clubs/${slug}`;
+          if (slug) {
+            return {
+              pathname: `/clubs/${slug}`,
+              state: { noticeId },
+            };
+          }
         } catch {
           // If notice detail fetch fails or user is restricted, fallback to /clubs
         }
       }
-      return "/clubs";
+      return { pathname: "/clubs" };
     }
 
     if (notif.type === "collaboration_update") {
-      return "/notifications";
+      return { pathname: "/notifications" };
     }
 
-    return "/notifications";
+    return { pathname: "/notifications" };
   };
 
   /**
@@ -403,7 +410,7 @@ export default function Notifications() {
       try {
         const target = await resolveDestination(notif);
         if (!isRequestCurrent(reqGen, reqIdent)) return;
-        navigate(target);
+        navigate(target.pathname || target, target.state ? { state: target.state } : undefined);
       } finally {
         if (isRequestCurrent(reqGen, reqIdent)) {
           inFlightIdsRef.current.delete(notif.id);
@@ -437,7 +444,7 @@ export default function Notifications() {
       const target = await resolveDestination(notif);
 
       if (!isRequestCurrent(reqGen, reqIdent)) return;
-      navigate(target);
+      navigate(target.pathname || target, target.state ? { state: target.state } : undefined);
     } catch (err) {
       // Rollback on failure: do not navigate
       if (!isRequestCurrent(reqGen, reqIdent)) return;

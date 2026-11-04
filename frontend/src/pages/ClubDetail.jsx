@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api, { extractErrorMessage } from "../services/api";
+import api, { extractErrorMessage, noticesAPI } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
 
@@ -40,10 +40,101 @@ function getCategoryLabel(club) {
   return "Student Society";
 }
 
+/**
+ * Format ISO timestamps to Asia/Dhaka (+06:00 BST) date string.
+ * Example: "Nov 4, 2026 • 05:30 PM BST"
+ */
+function formatDhakaTimestamp(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return "";
+
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Dhaka",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Dhaka",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+
+  return `${datePart} • ${timePart} BST`;
+}
+
+/**
+ * Return audience badge visual metadata based on backend Notice.Audience values.
+ */
+function getAudienceBadge(audience, department) {
+  switch (audience) {
+    case "public":
+      return {
+        label: "Public",
+        icon: "public",
+        containerClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      };
+    case "followers":
+      return {
+        label: "Followers",
+        icon: "visibility",
+        containerClass: "bg-blue-50 text-blue-800 border-blue-200",
+      };
+    case "members":
+      return {
+        label: "Club Members",
+        icon: "groups",
+        containerClass: "bg-purple-50 text-purple-800 border-purple-200",
+      };
+    case "department":
+      return {
+        label: department ? `Department: ${department}` : "Department",
+        icon: "school",
+        containerClass: "bg-amber-50 text-amber-800 border-amber-200",
+      };
+    default:
+      return {
+        label: audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : "Notice",
+        icon: "campaign",
+        containerClass: "bg-surface-lavender text-primary border-primary/20",
+      };
+  }
+}
+
+/**
+ * Skeleton loading cards for notice board.
+ */
+function NoticeSkeletons() {
+  return (
+    <div className="flex flex-col gap-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="p-5 rounded-2xl bg-canvas-base/50 border border-border-subtle/80 flex flex-col gap-3 animate-pulse"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-24 h-5 rounded-full bg-surface-lavender/80" />
+            <div className="w-28 h-4 rounded bg-surface-lavender/60" />
+          </div>
+          <div className="w-3/4 h-5 rounded bg-surface-lavender/80" />
+          <div className="space-y-2 pt-1">
+            <div className="w-full h-3.5 rounded bg-surface-lavender/50" />
+            <div className="w-5/6 h-3.5 rounded bg-surface-lavender/50" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ClubDetail() {
   const { slug } = useParams();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [club, setClub] = useState(null);
   const [membershipStatus, setMembershipStatus] = useState(null);
@@ -63,6 +154,31 @@ export default function ClubDetail() {
   });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
+
+  // Notice Board State
+  const [notices, setNotices] = useState([]);
+  const [noticesLoading, setNoticesLoading] = useState(true);
+  const [noticesError, setNoticesError] = useState("");
+  const [noticesPage, setNoticesPage] = useState(1);
+  const [noticesTotalCount, setNoticesTotalCount] = useState(0);
+  const [hasMoreNotices, setHasMoreNotices] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [highlightedNoticeId, setHighlightedNoticeId] = useState(null);
+
+  const noticeReqGenRef = useRef(0);
+
+  const currentIdentity =
+    isAuthenticated && user
+      ? `${user.id ?? user.email ?? "auth"}:${user.role ?? "user"}`
+      : "anonymous";
+
+  const identityRef = useRef(currentIdentity);
+  identityRef.current = currentIdentity;
+
+  const targetNoticeId =
+    location.state?.noticeId ||
+    new URLSearchParams(location.search).get("notice") ||
+    new URLSearchParams(location.search).get("notice_id");
 
   const fetchClubData = useCallback(async () => {
     setLoading(true);
@@ -96,6 +212,165 @@ export default function ClubDetail() {
   useEffect(() => {
     fetchClubData();
   }, [fetchClubData]);
+
+  // Fetch Notices for the current club (audience visibility handled by backend)
+  const fetchNotices = useCallback(
+    async (pageNumber = 1, isLoadMore = false) => {
+      if (!slug) return;
+      const currentGen = ++noticeReqGenRef.current;
+      const requestIdentity = currentIdentity;
+      const requestSlug = slug;
+
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setNoticesLoading(true);
+        setNoticesError("");
+      }
+
+      try {
+        const response = await noticesAPI.getAll({
+          club: slug,
+          page: pageNumber,
+          page_size: 5,
+        });
+
+        if (
+          currentGen !== noticeReqGenRef.current ||
+          requestSlug !== slug ||
+          requestIdentity !== identityRef.current
+        ) {
+          return;
+        }
+
+        const data = response.data;
+        const newResults = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.results)
+          ? data.results
+          : [];
+        const count = typeof data?.count === "number" ? data.count : newResults.length;
+        const hasNext = Boolean(data?.next);
+
+        // If targetNoticeId is specified on initial load and not present in page 1,
+        // attempt to fetch the specific notice so it can be highlighted, strictly verifying club ownership
+        if (targetNoticeId && !isLoadMore && !newResults.some((n) => n.id === targetNoticeId)) {
+          try {
+            const singleNoticeRes = await noticesAPI.getById(targetNoticeId);
+
+            // Verify the request still belongs to the active generation, slug, and authenticated identity
+            if (
+              currentGen === noticeReqGenRef.current &&
+              requestSlug === slug &&
+              requestIdentity === identityRef.current
+            ) {
+              const noticeData = singleNoticeRes.data;
+              const noticeClub = noticeData?.club;
+              const noticeClubSlug =
+                typeof noticeClub === "object" ? noticeClub?.slug : noticeClub;
+
+              // Strictly verify that the notice belongs to the currently displayed club
+              if (noticeData && noticeClubSlug && noticeClubSlug === slug) {
+                newResults.unshift(noticeData);
+              }
+            }
+          } catch {
+            // Notice is deleted, inaccessible, outside audience permissions, or mismatched; ignore gracefully
+          }
+        }
+
+        if (
+          currentGen !== noticeReqGenRef.current ||
+          requestSlug !== slug ||
+          requestIdentity !== identityRef.current
+        ) {
+          return;
+        }
+
+        if (isLoadMore) {
+          setNotices((prev) => {
+            const existingIds = new Set(prev.map((n) => n.id));
+            const filteredNew = newResults.filter((n) => !existingIds.has(n.id));
+            return [...prev, ...filteredNew];
+          });
+        } else {
+          setNotices(newResults);
+        }
+
+        setNoticesPage(pageNumber);
+        setNoticesTotalCount(count);
+        setHasMoreNotices(hasNext);
+      } catch (err) {
+        if (
+          currentGen !== noticeReqGenRef.current ||
+          requestSlug !== slug ||
+          requestIdentity !== identityRef.current
+        ) {
+          return;
+        }
+        const errorMsg = extractErrorMessage(err, "Failed to load club announcements.");
+        if (isLoadMore) {
+          setFeedback({ type: "error", text: errorMsg });
+        } else {
+          setNoticesError(errorMsg);
+        }
+      } finally {
+        if (
+          currentGen === noticeReqGenRef.current &&
+          requestSlug === slug &&
+          requestIdentity === identityRef.current
+        ) {
+          setNoticesLoading(false);
+          setLoadingMore(false);
+        }
+      }
+    },
+    [slug, targetNoticeId, currentIdentity]
+  );
+
+  // Load next page of notices without duplicating entries
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMoreNotices) return;
+    fetchNotices(noticesPage + 1, true);
+  };
+
+  // Reset notice state on club slug change
+  useEffect(() => {
+    setNotices([]);
+    setNoticesPage(1);
+    setNoticesTotalCount(0);
+    setHasMoreNotices(false);
+    setNoticesError("");
+    setHighlightedNoticeId(null);
+  }, [slug]);
+
+  // Initial and reactive fetch of notices on mount, club change, auth change, follow, or membership updates
+  useEffect(() => {
+    fetchNotices(1, false);
+  }, [fetchNotices, isAuthenticated, user, club?.is_following, membershipStatus]);
+
+  // Scroll to and highlight notice card if arriving from notifications or query param
+  useEffect(() => {
+    if (!targetNoticeId || noticesLoading) return;
+    const match = notices.find((n) => n.id === targetNoticeId);
+    if (match) {
+      // Club ownership verification before highlighting:
+      const noticeClub = match.club;
+      const noticeClubSlug = typeof noticeClub === "object" ? noticeClub?.slug : noticeClub;
+      if (noticeClubSlug && noticeClubSlug !== slug) {
+        return;
+      }
+
+      setHighlightedNoticeId(targetNoticeId);
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`notice-${targetNoticeId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [targetNoticeId, noticesLoading, notices, slug]);
 
   // Handle Follow / Unfollow Toggle
   const handleFollowToggle = async () => {
@@ -493,6 +768,158 @@ export default function ClubDetail() {
                             >
                               Manage Members
                             </Link>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* NOTICE BOARD SECTION */}
+                  <div
+                    id="notice-board"
+                    className="bg-surface-white rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-2px_rgba(43,52,185,0.04)] border border-border-subtle flex flex-col gap-6"
+                  >
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between pb-4 border-b border-border-subtle flex-wrap gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-surface-lavender text-primary flex items-center justify-center shrink-0 shadow-xs">
+                          <span className="material-symbols-outlined text-[22px]">campaign</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-base font-bold text-on-surface">Notice Board</h2>
+                            {noticesTotalCount > 0 && (
+                              <span className="px-2 py-0.5 rounded-full bg-surface-lavender text-primary font-bold text-[11px]">
+                                {noticesTotalCount} {noticesTotalCount === 1 ? "notice" : "notices"}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-text-muted mt-0.5">
+                            Stay informed with the latest announcements from this club.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Loading Skeleton View */}
+                    {noticesLoading && <NoticeSkeletons />}
+
+                    {/* Error State with Retry Button */}
+                    {!noticesLoading && noticesError && (
+                      <div className="p-6 rounded-2xl bg-error-container/30 border border-error/20 text-center flex flex-col items-center justify-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-error-container text-on-error-container flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">error</span>
+                        </div>
+                        <div className="flex flex-col gap-1 max-w-md">
+                          <h3 className="text-sm font-bold text-on-surface">Unable to load announcements</h3>
+                          <p className="text-xs text-text-muted leading-relaxed">{noticesError}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => fetchNotices(1, false)}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors shadow-xs"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">refresh</span>
+                          <span>Retry</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!noticesLoading && !noticesError && notices.length === 0 && (
+                      <div className="py-12 px-6 rounded-2xl bg-canvas-base/60 border border-border-subtle text-center flex flex-col items-center justify-center">
+                        <div className="w-12 h-12 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center mb-3 shadow-xs">
+                          <span className="material-symbols-outlined text-[26px]">campaign</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-on-surface">No announcements yet</h3>
+                        <p className="text-xs text-text-muted max-w-sm mt-1 leading-relaxed">
+                          This club hasn't published any notices yet. Check back later for updates.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Notice Cards List */}
+                    {!noticesLoading && !noticesError && notices.length > 0 && (
+                      <div className="flex flex-col gap-4">
+                        {notices.map((notice) => {
+                          const badge = getAudienceBadge(notice.audience, notice.department);
+                          const isHighlighted = highlightedNoticeId === notice.id;
+
+                          return (
+                            <article
+                              key={notice.id}
+                              id={`notice-${notice.id}`}
+                              className={`p-5 rounded-2xl border transition-all flex flex-col gap-3 ${
+                                isHighlighted
+                                  ? "bg-primary/[0.03] border-primary/40 ring-2 ring-primary/20 shadow-md"
+                                  : "bg-surface-white hover:bg-canvas-base/40 border-border-subtle shadow-xs"
+                              }`}
+                            >
+                              {/* Top Meta Row */}
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold ${badge.containerClass}`}
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]">
+                                      {badge.icon}
+                                    </span>
+                                    <span>{badge.label}</span>
+                                  </span>
+
+                                  {isHighlighted && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold">
+                                      <span className="material-symbols-outlined text-[12px]">star</span>
+                                      <span>Highlighted Announcement</span>
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                                  <span className="material-symbols-outlined text-[14px]">schedule</span>
+                                  <time dateTime={notice.created_at}>
+                                    {formatDhakaTimestamp(notice.created_at)}
+                                  </time>
+                                </div>
+                              </div>
+
+                              {/* Notice Title */}
+                              <h3 className="text-base font-bold text-on-surface leading-snug break-words">
+                                {notice.title}
+                              </h3>
+
+                              {/* Notice Body */}
+                              <div className="text-xs sm:text-sm text-on-surface-variant leading-relaxed whitespace-pre-line break-words">
+                                {notice.body}
+                              </div>
+                            </article>
+                          );
+                        })}
+
+                        {/* Load More Pagination */}
+                        {hasMoreNotices && (
+                          <div className="pt-2 flex flex-col items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleLoadMore}
+                              disabled={loadingMore}
+                              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-surface-lavender hover:bg-surface-variant text-primary font-bold text-xs transition-colors shadow-xs disabled:opacity-50"
+                            >
+                              {loadingMore ? (
+                                <>
+                                  <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                  <span>Loading announcements...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="material-symbols-outlined text-[16px]">expand_more</span>
+                                  <span>Load More Announcements</span>
+                                </>
+                              )}
+                            </button>
+                            <span className="text-[11px] text-text-muted">
+                              Showing {notices.length} of {noticesTotalCount} announcements
+                            </span>
                           </div>
                         )}
                       </div>
