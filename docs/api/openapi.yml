@@ -467,6 +467,200 @@ paths:
               schema:
                 $ref: '#/components/schemas/Membership'
           description: ''
+  /api/clubs/{slug}/partners/:
+    get:
+      operationId: api_clubs_partners_list
+      description: 'Public: clubs with at least one accepted collaboration with this
+        club.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPartnerList'
+          description: ''
+  /api/collaborations/:
+    get:
+      operationId: api_collaborations_list
+      parameters:
+      - in: query
+        name: box
+        schema:
+          type: string
+          enum:
+          - received
+          - sent
+        description: 'Only sent or only received requests (default: both).'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - cancelled
+          - pending
+          - rejected
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCollaborationList'
+          description: ''
+    post:
+      operationId: api_collaborations_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollaborationCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollaborationCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollaborationCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaboration'
+          description: ''
+  /api/collaborations/{id}/:
+    get:
+      operationId: api_collaborations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaboration'
+          description: ''
+  /api/collaborations/{id}/accept/:
+    post:
+      operationId: api_collaborations_accept_create
+      description: Accept / reject (target club) or cancel (requesting club), pending
+        requests only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaboration'
+          description: ''
+  /api/collaborations/{id}/cancel/:
+    post:
+      operationId: api_collaborations_cancel_create
+      description: Accept / reject (target club) or cancel (requesting club), pending
+        requests only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaboration'
+          description: ''
+  /api/collaborations/{id}/reject/:
+    post:
+      operationId: api_collaborations_reject_create
+      description: Accept / reject (target club) or cancel (requesting club), pending
+        requests only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collaboration'
+          description: ''
   /api/events/:
     get:
       operationId: api_events_list
@@ -643,6 +837,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/rating/:
+    get:
+      operationId: api_events_rating_retrieve
+      description: A student's own rating of an event (1-5, no comments).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRating'
+          description: ''
+    put:
+      operationId: api_events_rating_update
+      description: A student's own rating of an event (1-5, no comments).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RatingInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RatingInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+  /api/events/{id}/rating-summary/:
+    get:
+      operationId: api_events_rating_summary_retrieve
+      description: 'Operator of the owning club: average, count and 1-5 breakdown
+        (never individual ratings).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingSummary'
           description: ''
   /api/events/{id}/register/:
     post:
@@ -1106,6 +1384,101 @@ components:
           type: string
           format: email
           maxLength: 254
+    CollabEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        starts_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - starts_at
+      - title
+    Collaboration:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        requesting_club:
+          allOf:
+          - $ref: '#/components/schemas/ClubMini'
+          readOnly: true
+        target_club:
+          allOf:
+          - $ref: '#/components/schemas/ClubMini'
+          readOnly: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/CollabEvent'
+          readOnly: true
+          nullable: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CollaborationStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - description
+      - event
+      - id
+      - requesting_club
+      - responded_at
+      - status
+      - target_club
+      - title
+    CollaborationCreate:
+      type: object
+      properties:
+        target_club:
+          type: string
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        event:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - target_club
+      - title
+    CollaborationStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `accepted` - Accepted
+        * `rejected` - Rejected
+        * `cancelled` - Cancelled
     DepartmentEnum:
       enum:
       - Bangla
@@ -1241,17 +1614,32 @@ components:
           type: boolean
           readOnly: true
           nullable: true
+        average_rating:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        rating_count:
+          type: integer
+          readOnly: true
+        my_rating:
+          type: integer
+          readOnly: true
+          nullable: true
         created_at:
           type: string
           format: date-time
           readOnly: true
       required:
+      - average_rating
       - club
       - created_at
       - ends_at
       - id
       - is_completed
       - is_registered
+      - my_rating
+      - rating_count
       - registered_count
       - remaining_capacity
       - starts_at
@@ -1442,6 +1830,14 @@ components:
         * `rejected` - Rejected
         * `left` - Left
         * `removed` - Removed
+    MyRating:
+      type: object
+      properties:
+        rating:
+          type: integer
+          nullable: true
+      required:
+      - rating
     Notice:
       type: object
       properties:
@@ -1577,6 +1973,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ClubPublic'
+    PaginatedCollaborationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Collaboration'
     PaginatedEventList:
       type: object
       required:
@@ -1669,6 +2088,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Notification'
+    PaginatedPartnerList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Partner'
     PaginatedRegistrationList:
       type: object
       required:
@@ -1692,6 +2134,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Registration'
+    Partner:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        logo:
+          type: string
+        partner_since:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - id
+      - logo
+      - name
+      - partner_since
+      - slug
     PatchedClubUpdate:
       type: object
       properties:
@@ -1734,6 +2198,32 @@ components:
           maxLength: 200
         body:
           type: string
+    RatingInput:
+      type: object
+      properties:
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+      required:
+      - rating
+    RatingSummary:
+      type: object
+      properties:
+        average:
+          type: number
+          format: double
+          nullable: true
+        count:
+          type: integer
+        breakdown:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - average
+      - breakdown
+      - count
     ReadAllResult:
       type: object
       properties:
