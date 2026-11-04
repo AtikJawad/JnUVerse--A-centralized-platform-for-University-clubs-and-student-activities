@@ -345,17 +345,48 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
   - *Status Badge Consistency:* Follows the identical lifecycle condition: Draft events remain labeled `Draft`, Cancelled events `Cancelled`, and only Published events with passed end time or `is_completed: true` display as `Completed`.
   - *Authorization Guard:* Catches backend 403 Forbidden responses ("Only this club's operator can do this.") and renders a dedicated access denied state with navigation back to `/operator/events`.
 
+### 7. Week 5 Notices & Notifications (API Service Foundation & Navbar Bell)
+The Week 5 API layer integrates club broadcast announcements, audience scoping (`public`, `followers`, `members`, `department`), in-app personal notifications, unread count polling, and mark-as-read actions:
+
+- **Notices Service (`noticesAPI` in [`api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)):**
+  - `getAll(params)`: `GET /api/notices/` with query params `club` (slug), `mine` (boolean, operator only), `page`, `page_size`. Audience-scoped server-side filtering.
+  - `getById(id)`: `GET /api/notices/<id>/` returning notice detail or 404 for unpermitted audience.
+  - `create(payload)`: `POST /api/notices/` accepting `{ title, body, audience, department? }`. Publishes immediately (no drafts) and dispatches notifications automatically.
+  - `update(id, payload)`: `PATCH /api/notices/<id>/` accepting `{ title?, body? }`. Audience and department are immutable post-creation.
+  - `delete(id)`: `DELETE /api/notices/<id>/` returning 204 No Content. Cascades deletion to related notifications.
+
+- **Notifications Service (`notificationsAPI` in [`api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)):**
+  - `getAll(params)`: `GET /api/notifications/` with query params `unread` (boolean), `page`, `page_size`. Chronological personal feed.
+  - `getUnreadCount()`: `GET /api/notifications/unread-count/` returning lightweight `{ unread_count: N }` for header bell badge.
+  - `markRead(id)`: `POST /api/notifications/<id>/read/` (idempotent mark-as-read preserving first `read_at`).
+  - `markAllRead()`: `POST /api/notifications/read-all/` returning `{ updated: N }`.
+
+- **Notification Bell & Poller ([`NotificationBell.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/NotificationBell.jsx)):**
+  - *Dynamic Unread Badge:* Real-time unread count indicator (capped at `99+`) hidden when count is 0.
+  - *Background Poller:* Periodic unread counter polling every 45s with tab visibility change detection (`document.visibilityState === 'hidden'` pauses polling; returning to visible triggers immediate fetch) and in-flight request guard (`isPollingRef`).
+  - *Preview Popover Dropdown:* Displays latest 5 notifications with loading skeleton, empty state ("You're all caught up!"), and retryable error state.
+  - *Optimistic Mark-as-Read & Deep Navigation:* Clicking an unread item immediately decrements the badge, updates read styling, sends `POST /api/notifications/<id>/read/`, and routes to the relevant entity (`/events/:id` for events, `/operator/members` or `/my-clubs` for memberships, `/clubs` for notices). If the request fails, changes are automatically rolled back to their exact snapshot and an error alert is presented without leaving an inconsistent unread badge.
+  - *Account Switching & Concurrency Guard:* Tracks `currentIdentity` (`${id/email}:${role}`) paired with monotonic `generationRef` to instantly wipe stale notifications upon session changes, ignore lingering in-flight responses from prior accounts, and prevent older requests from resetting active polling guards. Listens to `notifications:updated` event for instant badge synchronization. Footer link navigates to `/notifications`.
+
+- **Full Notifications Inbox ([`Notifications.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/Notifications.jsx)):**
+  - *Route:* `/notifications` protected for authenticated users (`student`, `club_operator`).
+  - *Server-Side Filtering:* `All` (read and unread) and `Unread` (`unread=true`) filter tabs with real-time backend counts.
+  - *Server-Side Pagination:* 15 items per page with Previous/Next controls, total counts, and filter-preservation across page turns.
+  - *Bulk & Individual Read Actions:* One-click "Mark all as read" button (`POST /api/notifications/read-all/`) with confirmation-first execution, and card/inline mark-as-read actions (`POST /api/notifications/<id>/read/`) with shared synchronous in-flight locking (`inFlightIdsRef`) and immediate Navbar bell synchronization via `notifications:updated`.
+  - *Deep Navigation Mapping:* Routes `event_*` to `/events/:id`, `membership_update` to `/my-clubs` (student) or `/operator/members` (operator), `collaboration_update` safely to `/notifications`, and resolves `notice` club slug via `noticesAPI.getById(id)` to `/clubs/:slug` (fallback `/clubs`).
+  - *Stitch System UI States:* Loading pulse skeletons, custom empty states for "All" and "Unread", and action error banners with rollback protections.
+
 ---
 
-## 7. Implementation Status Matrix
+## 8. Implementation Status Matrix
 
 | Module / Feature | Planned Week | Frontend Status | Backend API Status | Reference Documentation |
 |:---|:---:|:---:|:---:|:---|
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 6 Completed: Operator Event Management & Attendee Roster Verified) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
-| **Notices & Notifications** | Week 5 | Not Started | Models Exist (No Endpoints) | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
+| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Notices & Notifications** | Week 5 | **In Progress** (Stage 3 Completed: Full Notifications Inbox Verified) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
@@ -364,7 +395,7 @@ The Week 4 UI implements the official Google Stitch event designs in `docs/ui/st
 
 ---
 
-## 7. Weekly Workflow Documentation Directory
+## 9. Weekly Workflow Documentation Directory
 
 Detailed implementation notes, acceptance criteria, verified test commands, and files changed for each development stage are preserved in:
 
@@ -381,7 +412,7 @@ Detailed implementation notes, acceptance criteria, verified test commands, and 
 
 ---
 
-## 8. Backend Handoff Reference
+## 10. Backend Handoff Reference
 
 The consolidated backend API contract and handoff document is located at:  
 👉 **[`backend/FRONTEND_REQUIREMENTS.md`](../backend/FRONTEND_REQUIREMENTS.md)**  

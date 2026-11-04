@@ -240,4 +240,87 @@ export const eventsAPI = {
     api.get(`/api/events/${id}/registrations/`, { params }),
 };
 
+/**
+ * Notices API Service — Week 5 Backend Integration
+ * Encapsulates backend-verified endpoints for club announcements,
+ * audience scoping (public, followers, members, department), and operator management.
+ */
+export const noticesAPI = {
+  /**
+   * List notices with audience filtering and pagination.
+   * Query params: club, mine, page, page_size
+   * - Public notices visible to all.
+   * - Followers notices visible to followers and approved members.
+   * - Members notices visible to approved members only.
+   * - Department notices visible to students of that department.
+   * - `mine=true` returns all own club notices (operator only).
+   * @param {Object} [params] - Axios query params
+   */
+  getAll: (params) => api.get("/api/notices/", { params }),
+
+  /**
+   * Retrieve single notice detail by UUID.
+   * Returns 200 or 404 (if notice not found or user outside allowed audience).
+   * @param {string} id - Notice UUID
+   */
+  getById: (id) => api.get(`/api/notices/${id}/`),
+
+  /**
+   * Create a new notice (Club Operator only for own club).
+   * Publishes immediately and creates in-app notifications.
+   * @param {Object} payload - { title, body, audience, department? }
+   * - audience: "public" | "followers" | "members" | "department"
+   * - department: required if audience === "department", disallowed otherwise.
+   */
+  create: (payload) => api.post("/api/notices/", payload),
+
+  /**
+   * Update a notice (Owning Club Operator only).
+   * Note: Only `title` and `body` can be updated; audience and department are immutable.
+   * @param {string} id - Notice UUID
+   * @param {Object} payload - { title?, body? }
+   */
+  update: (id, payload) => api.patch(`/api/notices/${id}/`, payload),
+
+  /**
+   * Delete a notice (Owning Club Operator only).
+   * Returns 204 No Content. Cascades deletion to related notifications.
+   * @param {string} id - Notice UUID
+   */
+  delete: (id) => api.delete(`/api/notices/${id}/`),
+};
+
+/**
+ * Notifications API Service — Week 5 Backend Integration
+ * Encapsulates backend-verified endpoints for in-app personal notifications,
+ * unread counter polling, and mark-as-read operations.
+ */
+export const notificationsAPI = {
+  /**
+   * List personal notifications for the authenticated user (newest first).
+   * Query params: unread (boolean, e.g. "true"), page, page_size
+   * @param {Object} [params] - Axios query params
+   */
+  getAll: (params) => api.get("/api/notifications/", { params }),
+
+  /**
+   * Retrieve unread notifications count for navbar badge.
+   * Lightweight endpoint returning { unread_count: N }.
+   */
+  getUnreadCount: () => api.get("/api/notifications/unread-count/"),
+
+  /**
+   * Mark a single notification as read (Idempotent POST).
+   * Returns updated Notification object.
+   * @param {string} id - Notification UUID
+   */
+  markRead: (id) => api.post(`/api/notifications/${id}/read/`),
+
+  /**
+   * Mark all unread notifications as read for current user.
+   * Returns { updated: N }.
+   */
+  markAllRead: () => api.post("/api/notifications/read-all/"),
+};
+
 export default api;

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 /**
  * Navbar Component — JnUVerse Stitch Reference Design
@@ -15,19 +16,6 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const notifRef = useRef(null);
-
-  // Close notifications dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setNotificationsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const isActive = (path) => {
     if (path === "/" || path === "/dashboard") {
@@ -222,41 +210,8 @@ export default function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3 justify-self-end">
           {isAuthenticated ? (
             <>
-              {/* Notification Bell with Indicator Dot */}
-              <div className="relative" ref={notifRef}>
-                <button
-                  type="button"
-                  onClick={() => setNotificationsOpen((prev) => !prev)}
-                  aria-label="Notifications"
-                  aria-expanded={notificationsOpen}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-lavender hover:text-on-surface transition-colors relative"
-                >
-                  <span className="material-symbols-outlined text-[22px]">notifications</span>
-                  {/* Subtle Unread Indicator Dot */}
-                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
-                </button>
-
-                {/* Notifications Dropdown Popover */}
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-surface-white border border-border-subtle shadow-xl p-4 z-50 animate-fadeIn">
-                    <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
-                      <span className="text-xs font-bold text-on-surface">Notifications</span>
-                      <span className="text-[10px] font-semibold text-primary px-2 py-0.5 rounded-full bg-surface-lavender">
-                        Campus Feed
-                      </span>
-                    </div>
-                    <div className="py-3 flex flex-col gap-1.5 text-center">
-                      <div className="w-8 h-8 rounded-full bg-surface-lavender text-primary flex items-center justify-center mx-auto mb-1">
-                        <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                      </div>
-                      <p className="text-xs font-semibold text-on-surface">You're all caught up!</p>
-                      <p className="text-[11px] text-text-muted leading-relaxed">
-                        Official guild notices, membership updates, and event reminders will appear here.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Notification Bell with Dropdown Popover & Poller */}
+              <NotificationBell />
 
               {/* User Details Stack & Profile Icon */}
               <div className="hidden md:flex items-center gap-2.5 pl-1">

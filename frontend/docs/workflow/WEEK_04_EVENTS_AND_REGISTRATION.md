@@ -1,7 +1,7 @@
 # Week 04 — Events & Registration
 
 **Focus:** Campus events discovery, event details, student RSVP/registration workflow, operator event creation/lifecycle, and attendee rosters  
-**Status:** **In Progress** (Stage 6 Completed: Operator Event Management & Attendee Roster Verified)  
+**Status:** **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked)  
 **Assigned:** Anik Khondokar (Frontend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_04_BACKEND_HANDOFF.md`, 86 backend tests passing)  
 **Target:** October 2026  
@@ -77,9 +77,12 @@
    - Consumed `eventsAPI.getById(id)` for event context and `eventsAPI.getRegistrations(id, params)` with DRF pagination (`page`, `page_size: 20`).
    - **Neutral Privacy Wording:** Replaced unsupported university regulation claims with neutral wording: *"Student email addresses and contact details are not displayed in this roster."*
    - Strictly displays only serializer-confirmed fields (`id`, `student_id`, `name`, `department`, `batch`, `registered_at`, `status`).
-   - Added global and mobile navigation link "Manage Events" in `Navbar.jsx`.
 7. [ ] **Stage 7: Integration Review, Quality Gates & Documentation**
-   - Full end-to-end audit, static linting, and production build verification.
+   - Completed full-stack architectural audit across Student and Club Operator journeys.
+   - Frontend static linting (`npm run lint`) passed with 0 errors, 0 warnings.
+   - Frontend production bundle (`npm run build`) passed cleanly (119 modules transformed).
+   - Backend automated tests blocked in local runtime (missing dev packages `pytest`/`pytest-django` and local PostgreSQL daemon on `127.0.0.1:5432`).
+   - Demo event data investigation: 0 demo events in development database. Safe seeding command recommended.
 
 ---
 
@@ -195,12 +198,21 @@ npm run build
 # Output: Exit code 0 (118 modules transformed, built in 886ms)
 ```
 
-### Stage 6 Final Corrections Verification
-- **Completed Metric & Filter Condition:** Strictly aligned to `status === "published" && (is_completed || ends_at <= now)`.
-- **Status Badges:** Checked cancelled and draft states first so drafts/cancelled with past end times never show as Completed.
-- **Dataset Retrieval:** Verified multi-page retrieval loop (`page_size: 50`) with deduplication across `GET /api/events/?mine=true`.
-- **Privacy Wording:** Neutralized wording in privacy notice: *"Student email addresses and contact details are not displayed in this roster."*
-- **Action Triggers:** Verified fresh API request triggers on publish, cancel, manual refresh, and connection error retry.
+### Stage 7 Full-Stack Integration Audit & Verification
+```bash
+# 1. ESLint Static Analysis
+npm run lint
+# Output: Exit code 0 (0 errors, 0 warnings)
+
+# 2. Vite Production Build
+npm run build
+# Output: Exit code 0 (119 modules transformed, built in 915ms)
+```
+- **Student Journey:** Verified explore page, search, Dhaka timestamps, capacity gauges, RSVP register/cancel workflows, and 409 conflict states.
+- **Club Operator Journey:** Verified dedicated operator login, role enforcement, event creation/edit with wall-clock Dhaka conversion, publish/cancel modals, and attendee roster.
+- **Role Separation & Privacy:** Confirmed students cannot access operator workspaces or view attendee rosters; confirmed operators cannot register as students; confirmed student emails are structurally omitted from attendee serializers.
+- **Demo Data Status:** Database query `GET /api/events/` returns 0 events. Demo seeding command recommended before manual testing.
+- **Backend Tests Status:** Local automated test execution blocked by missing `pytest`/`pytest-django` dev dependencies and offline local PostgreSQL (`127.0.0.1:5432`). Safe isolated test environment required to run the 86 backend tests.
 
 
 

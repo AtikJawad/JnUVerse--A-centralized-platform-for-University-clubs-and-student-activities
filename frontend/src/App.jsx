@@ -15,6 +15,7 @@ import EventDetail from "./pages/EventDetail";
 import OperatorEventForm from "./pages/OperatorEventForm";
 import OperatorEvents from "./pages/OperatorEvents";
 import OperatorEventAttendees from "./pages/OperatorEventAttendees";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -37,6 +38,16 @@ function App() {
           <Route path="/clubs/:slug" element={<ClubDetail />} />
           <Route path="/events" element={<ExploreEvents />} />
           <Route path="/events/:id" element={<EventDetail />} />
+
+          {/* Notifications Inbox Route */}
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute allowedRoles={["student", "club_operator"]}>
+                <Notifications />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Student Membership Routes */}
           <Route
