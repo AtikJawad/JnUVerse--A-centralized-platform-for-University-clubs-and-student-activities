@@ -11,6 +11,8 @@ from apps.clubs.models import Club, ClubFollow, ClubMembership
 from apps.events.models import Event, EventRegistration
 from apps.notifications import services as notify
 from apps.notifications.models import Notice, Notification
+from apps.collaborations.models import CollaborationRequest
+from apps.feedback.models import EventRating
 
 PREFIX = "[DEMO] "
 DEMO_EMAIL_DOMAIN = "demo.jnuverse.test"
@@ -47,6 +49,8 @@ class Command(BaseCommand):
 
     def reset(self):
         events = Event.objects.filter(title__startswith=PREFIX)
+        CollaborationRequest.objects.filter(title__startswith=PREFIX).delete()
+        EventRating.objects.filter(event__in=events).delete()
         EventRegistration.objects.filter(event__in=events).delete()
         n_events = events.count()
         events.delete()
@@ -129,6 +133,8 @@ class Command(BaseCommand):
         )
         made_clubs = self.seed_clubs(o, profiles, now)
         self.seed_notifications(profiles)
+        self.seed_ratings(profiles, now)
+        self.seed_collaborations()
         self.stdout.write(self.style.SUCCESS(
             f"Done. New events: {made}. New demo clubs: {made_clubs}. "
             f"Logins: demo1..demo5 and democlub1..democlub5@{DEMO_EMAIL_DOMAIN} (password: {o['password']})."
@@ -193,7 +199,8 @@ class Command(BaseCommand):
             )
             notify.notify_notice(notice)  # same rules as the real API; duplicates are ignored
 
-        for event in Event.objects.filter(club=club, status=Event.Status.PUBLISHED, title__startswith=PREFIX):
+        for event in Event.objects.filter(club=club, status=Event.Status.PUBLISHED, title__startswith=PREFIX,
+                                          ends_at__gt=timezone.now()):
             notify.notify_event_published(event)
         for title, send in (
             ("Cancelled Event Example", notify.notify_event_cancelled),
@@ -218,3 +225,55 @@ class Command(BaseCommand):
         Notification.objects.filter(
             recipient_id=profiles[0].user_id, notice__title=PREFIX + "Welcome to Robotics", read_at__isnull=True
         ).update(read_at=timezone.now())
+
+    def seed_ratings(self, profiles, now):
+        club = Club.objects.get(operator__email=f"democlub1@{DEMO_EMAIL_DOMAIN}")
+        # title, hours since it ended, registered student indexes, {student index: rating}
+        specs = [
+            ("Rated Workshop", 24, [0, 1, 2, 3], {1: 5, 2: 4, 3: 4}),   # rating open; demo1 has not rated yet
+            ("Closed Rating Event", 12 * 24, [0, 1, 2], {0: 3, 1: 5}),  # 7-day window already over
+            ("Just Ended Event", 2, [0, 1], {}),                        # rating open, no ratings yet
+        ]
+        for title, hours_ago, regs, ratings in specs:
+            ends = now - timedelta(hours=hours_ago)
+            event, _ = Event.objects.get_or_create(
+                club=club, title=PREFIX + title,
+                defaults={
+                    "created_by": club.operator, "description": "Demo data for frontend development.",
+                    "venue": "Room 101", "starts_at": ends - timedelta(hours=2), "ends_at": ends,
+                    "capacity": 30, "status": Event.Status.PUBLISHED,
+                },
+            )
+            for i in regs:
+                EventRegistration.objects.get_or_create(event=event, student=profiles[i])
+            for i, value in ratings.items():
+                EventRating.objects.get_or_create(event=event, student=profiles[i], defaults={"rating": value})
+
+    def seed_collaborations(self):
+        clubs = {i: Club.objects.get(operator__email=f"democlub{i}@{DEMO_EMAIL_DOMAIN}") for i in range(1, 6)}
+        linked = Event.objects.filter(club=clubs[1], title=PREFIX + "Robotics Club Meetup 1").first()
+        S = CollaborationRequest.Status
+        # requester, target, title, status, linked event
+        specs = [
+            (1, 2, "Joint Robotics-Debate Night", S.PENDING, linked),
+            (4, 1, "Festival robotics showcase", S.PENDING, None),
+            (3, 1, "Photo coverage of robot demos", S.ACCEPTED, None),
+            (2, 3, "Debate and photo exhibition", S.ACCEPTED, None),
+            (5, 1, "Sports-tech day", S.REJECTED, None),
+            (3, 4, "Cultural photo walk", S.CANCELLED, None),
+        ]
+        for a, b, title, st, event in specs:
+            req, created = CollaborationRequest.objects.get_or_create(
+                requesting_club=clubs[a], target_club=clubs[b], title=PREFIX + title,
+                defaults={
+                    "description": "Demo collaboration request.", "status": st, "event": event,
+                    "responded_at": None if st == S.PENDING else timezone.now(),
+                },
+            )
+            if not created:
+                continue  # notifications only on first creation, so re-runs add nothing
+            notify.notify_collaboration_request(req)
+            if st in (S.ACCEPTED, S.REJECTED):
+                notify.notify_collaboration_response(req, st.value)
+            elif st == S.CANCELLED:
+                notify.notify_collaboration_cancelled(req)
