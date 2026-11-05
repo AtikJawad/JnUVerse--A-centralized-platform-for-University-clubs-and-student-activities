@@ -6,6 +6,7 @@ import { eventsAPI, extractErrorMessage } from "../services/api";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
 import Badge from "../components/Badge";
+import EventRatingBreakdown from "../components/EventRatingBreakdown";
 
 /**
  * Format timestamps strictly in Asia/Dhaka (+06:00 BST).
@@ -126,6 +127,9 @@ export default function OperatorEvents() {
   const [eventToCancel, setEventToCancel] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [modalError, setModalError] = useState("");
+
+  // Rating Summary Expanded State (Week 6 Stage 3)
+  const [expandedRatingEventId, setExpandedRatingEventId] = useState(null);
 
   // Fetch operator's events from backend
   const fetchOperatorEvents = useCallback(async () => {
@@ -315,6 +319,7 @@ export default function OperatorEvents() {
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
     setCurrentPage(1);
+    setExpandedRatingEventId(null);
   };
 
   const clubName = user?.name || "Your Club";
@@ -587,10 +592,8 @@ export default function OperatorEvents() {
                         event.starts_at && new Date(event.starts_at) <= new Date();
 
                       return (
-                        <div
-                          key={event.id}
-                          className="p-5 sm:p-6 hover:bg-surface-lavender/30 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-5"
-                        >
+                        <div key={event.id} className="transition-colors">
+                          <div className="p-5 sm:p-6 hover:bg-surface-lavender/30 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                           {/* Event Metadata */}
                           <div className="space-y-2 flex-1 min-w-0">
                             <div className="flex items-center flex-wrap gap-2">
@@ -694,7 +697,49 @@ export default function OperatorEvents() {
                               </span>
                             </Link>
 
-                            {/* 4. Publish Action (Drafts Only) */}
+                            {/* 4. Ratings Summary Action (Published Events) */}
+                            {isPublished && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedRatingEventId((prev) =>
+                                    prev === event.id ? null : event.id
+                                  )
+                                }
+                                className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs ${
+                                  expandedRatingEventId === event.id
+                                    ? "bg-primary text-white border-primary shadow-sm"
+                                    : "border-border-subtle bg-surface-white hover:bg-surface-lavender text-on-surface"
+                                }`}
+                                title={
+                                  expandedRatingEventId === event.id
+                                    ? "Hide student rating breakdown"
+                                    : "Inspect student rating breakdown"
+                                }
+                                aria-expanded={expandedRatingEventId === event.id}
+                              >
+                                <span className="text-amber-500 text-[14px] leading-none">★</span>
+                                <span>Ratings</span>
+                                {Number.isInteger(event.rating_count) && event.rating_count > 0 && (
+                                  <span
+                                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                                      expandedRatingEventId === event.id
+                                        ? "bg-white/20 text-white"
+                                        : "bg-surface-lavender text-primary"
+                                    }`}
+                                  >
+                                    {event.rating_count}
+                                  </span>
+                                )}
+                                <span className="material-symbols-outlined text-[15px]">
+                                  {expandedRatingEventId === event.id
+                                    ? "expand_less"
+                                    : "expand_more"}
+                                </span>
+                              </button>
+                            )}
+
+                            {/* 5. Publish Action (Drafts Only) */}
                             {canPublish && (
                               <button
                                 type="button"
@@ -711,7 +756,7 @@ export default function OperatorEvents() {
                               </button>
                             )}
 
-                            {/* 5. Cancel Action (Published Only) */}
+                            {/* 6. Cancel Action (Published Only) */}
                             {canCancel && (
                               <button
                                 type="button"
@@ -741,7 +786,19 @@ export default function OperatorEvents() {
                             )}
                           </div>
                         </div>
-                      );
+
+                        {/* Expandable Rating Breakdown Section */}
+                        {expandedRatingEventId === event.id && (
+                          <div className="px-5 sm:px-6 pb-6 pt-2 bg-surface-lavender/20 border-t border-border-subtle/50 animate-in fade-in duration-200">
+                            <EventRatingBreakdown
+                              eventId={event.id}
+                              eventTitle={event.title}
+                              onClose={() => setExpandedRatingEventId(null)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
                     })}
                   </div>
                 </div>

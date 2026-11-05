@@ -61,6 +61,14 @@ function getEventStatus(event) {
     };
   }
 
+  if (event.status === "draft") {
+    return {
+      label: "Draft",
+      color: "text-amber-900 bg-amber-100/70 border border-amber-300",
+      pulse: false,
+    };
+  }
+
   const now = new Date();
   const startsAt = new Date(event.starts_at);
   const endsAt = new Date(event.ends_at);
@@ -359,19 +367,30 @@ export default function ExploreEvents() {
                             UP NEXT
                           </div>
 
-                          {(() => {
-                            const status = getEventStatus(featuredEvent);
-                            return (
-                              <span
-                                className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-semibold shadow-xs ${status.color}`}
-                              >
-                                {status.pulse && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping" />
-                                )}
-                                {status.label}
+                          <div className="flex items-center gap-2">
+                            {featuredEvent.rating_count > 0 && featuredEvent.average_rating !== null && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container text-xs font-bold shadow-xs">
+                                <span className="text-amber-500 text-[13px] leading-none">★</span>
+                                <span>{Number(featuredEvent.average_rating).toFixed(1)}</span>
+                                <span className="text-text-muted font-normal text-[11px]">
+                                  ({featuredEvent.rating_count})
+                                </span>
                               </span>
-                            );
-                          })()}
+                            )}
+                            {(() => {
+                              const status = getEventStatus(featuredEvent);
+                              return (
+                                <span
+                                  className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-semibold shadow-xs ${status.color}`}
+                                >
+                                  {status.pulse && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping" />
+                                  )}
+                                  {status.label}
+                                </span>
+                              );
+                            })()}
+                          </div>
                         </div>
 
                         <div>
@@ -449,16 +468,31 @@ export default function ExploreEvents() {
                           </span>
                         </Link>
 
-                        <span className="text-xs text-text-muted flex items-center gap-1.5 font-medium">
-                          <span className="material-symbols-outlined text-[16px] text-primary">
-                            confirmation_number
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-xs text-text-muted flex items-center gap-1.5 font-medium">
+                            <span className="material-symbols-outlined text-[16px] text-primary">
+                              confirmation_number
+                            </span>
+                            {featuredEvent.capacity !== null
+                              ? `${featuredEvent.remaining_capacity ?? 0} seats left (${
+                                  featuredEvent.registered_count || 0
+                                } registered)`
+                              : "Unlimited Capacity"}
                           </span>
-                          {featuredEvent.capacity !== null
-                            ? `${featuredEvent.remaining_capacity ?? 0} seats left (${
-                                featuredEvent.registered_count || 0
-                              } registered)`
-                            : "Unlimited Capacity"}
-                        </span>
+
+                          {Number.isInteger(featuredEvent.rating_count) &&
+                            featuredEvent.rating_count > 0 &&
+                            typeof featuredEvent.average_rating === "number" &&
+                            Number.isFinite(featuredEvent.average_rating) && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container text-xs font-bold shrink-0">
+                                <span className="text-amber-500 text-[13px] leading-none">★</span>
+                                <span>{Number(featuredEvent.average_rating).toFixed(1)}</span>
+                                <span className="text-text-muted text-[11px] font-normal">
+                                  ({featuredEvent.rating_count})
+                                </span>
+                              </span>
+                            )}
+                        </div>
                       </div>
                     </div>
 
@@ -697,12 +731,26 @@ export default function ExploreEvents() {
 
                           {/* Card Content Area */}
                           <div className="p-5 sm:p-6 space-y-3">
-                            <div className="flex items-center gap-1.5 text-text-muted text-xs">
-                              <span className="font-semibold text-primary truncate max-w-[200px]">
-                                {event.club?.name}
-                              </span>
-                              <span>•</span>
-                              <span>Chartered</span>
+                            <div className="flex items-center justify-between gap-2 text-text-muted text-xs">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span className="font-semibold text-primary truncate max-w-[180px]">
+                                  {event.club?.name}
+                                </span>
+                                <span>•</span>
+                                <span>Chartered</span>
+                              </div>
+                              {Number.isInteger(event.rating_count) &&
+                                event.rating_count > 0 &&
+                                typeof event.average_rating === "number" &&
+                                Number.isFinite(event.average_rating) && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-lavender text-primary-container text-[11px] font-bold shrink-0">
+                                    <span className="text-amber-500 text-[12px] leading-none">★</span>
+                                    <span>{Number(event.average_rating).toFixed(1)}</span>
+                                    <span className="text-text-muted text-[10px] font-normal">
+                                      ({event.rating_count})
+                                    </span>
+                                  </span>
+                                )}
                             </div>
 
                             <h3 className="text-base sm:text-lg text-on-surface font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">

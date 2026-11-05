@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import { eventsAPI, extractErrorMessage } from "../services/api";
+import { eventsAPI, ratingsAPI, extractErrorMessage } from "../services/api";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
+import StarRating, { RATING_LABELS } from "../components/StarRating";
 
 /**
  * Date and Time Formatting Helpers using strict Asia/Dhaka Timezone.
@@ -66,6 +67,15 @@ function getEventStatus(event) {
     };
   }
 
+  if (event.status === "draft") {
+    return {
+      label: "Draft",
+      color: "text-amber-900 bg-amber-100/70 border border-amber-300",
+      icon: "edit_note",
+      pulse: false,
+    };
+  }
+
   const now = new Date();
   const startsAt = new Date(event.starts_at);
   const endsAt = new Date(event.ends_at);
@@ -93,15 +103,6 @@ function getEventStatus(event) {
       label: "Full",
       color: "text-amber-800 bg-amber-50 border border-amber-200",
       icon: "group_off",
-      pulse: false,
-    };
-  }
-
-  if (event.status === "draft") {
-    return {
-      label: "Draft",
-      color: "text-amber-900 bg-amber-100/70 border border-amber-300",
-      icon: "edit_note",
       pulse: false,
     };
   }
@@ -158,27 +159,66 @@ export default function EventDetail() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
+  // Rating states (Week 6 Stage 2)
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [ratingError, setRatingError] = useState("");
+  const [ratingSuccess, setRatingSuccess] = useState("");
+
+  const generationRef = useRef(0);
+  const currentIdentity = user ? `${user.id || user.email}:${user.role}` : "anonymous";
+  const identityRef = useRef(currentIdentity);
+
   // Fetch event details
   const fetchEvent = useCallback(async () => {
     setLoading(true);
     setError("");
+    const currentGen = generationRef.current;
     try {
       const res = await eventsAPI.getById(id);
+      if (generationRef.current !== currentGen) return;
       setEvent(res.data);
+      if (res.data?.my_rating) {
+        setSelectedRating(res.data.my_rating);
+      } else {
+        setSelectedRating(0);
+      }
     } catch (err) {
+      if (generationRef.current !== currentGen) return;
       if (err.response?.status === 404) {
         setError("The requested campus event could not be found or is not visible.");
       } else {
         setError(extractErrorMessage(err, "Failed to load event details. Please try again."));
       }
     } finally {
-      setLoading(false);
+      if (generationRef.current === currentGen) {
+        setLoading(false);
+      }
     }
   }, [id]);
 
   useEffect(() => {
+    generationRef.current += 1;
+    if (identityRef.current !== currentIdentity) {
+      identityRef.current = currentIdentity;
+      setSelectedRating(0);
+      setRatingSuccess("");
+      setRatingError("");
+      setActionSuccess("");
+      setActionError("");
+    }
+  }, [currentIdentity, id]);
+
+  useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
+
+  useEffect(() => {
+    if (event?.my_rating) {
+      setSelectedRating(event.my_rating);
+    }
+  }, [event?.my_rating]);
 
   // Handle Student RSVP Registration
   const handleRegister = async () => {
@@ -294,6 +334,52 @@ export default function EventDetail() {
     }
   };
 
+  // Handle Student Rating Submission / Update (Week 6 Stage 2)
+  const handleRatingSubmit = async () => {
+    if (!selectedRating || selectedRating < 1 || selectedRating > 5) {
+      setRatingError("Please select a rating from 1 to 5 stars before submitting.");
+      return;
+    }
+
+    setRatingSubmitting(true);
+    setRatingError("");
+    setRatingSuccess("");
+
+    const currentGen = generationRef.current;
+    try {
+      const res = await ratingsAPI.submitRating(event.id, selectedRating);
+      if (generationRef.current !== currentGen) return;
+
+      // The backend returns the updated Event object with annotated rating fields
+      if (res?.data && typeof res.data === "object" && "id" in res.data) {
+        setEvent(res.data);
+        if (res.data.my_rating) {
+          setSelectedRating(res.data.my_rating);
+        }
+      }
+      setRatingSuccess(
+        event.my_rating
+          ? "Your rating has been updated successfully!"
+          : "Your rating has been submitted successfully! Thank you for helping the JnU community."
+      );
+    } catch (err) {
+      if (generationRef.current !== currentGen) return;
+      if (err.response?.status === 409) {
+        setRatingError(err.response.data?.detail || "Event rating window is no longer eligible.");
+      } else if (err.response?.status === 403) {
+        setRatingError(err.response.data?.detail || "Only students registered for this event can rate it.");
+      } else if (err.response?.status === 401) {
+        navigate("/login", { state: { from: location.pathname } });
+      } else {
+        setRatingError(extractErrorMessage(err, "Failed to submit rating. Please try again."));
+      }
+    } finally {
+      if (generationRef.current === currentGen) {
+        setRatingSubmitting(false);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-canvas-base flex flex-col font-sans text-on-surface antialiased">
@@ -349,11 +435,31 @@ export default function EventDetail() {
   const endsAt = new Date(event.ends_at);
 
   const isCancelled = event.status === "cancelled";
-  const isEnded = event.is_completed || endsAt <= now;
+  const isDraft = event.status === "draft";
+  const isPublished = event.status === "published";
+  const isCompleted = isPublished && (event.is_completed === true || endsAt <= now);
+  const isEnded = isCompleted;
   const isStarted = startsAt <= now;
   const isFull = event.remaining_capacity === 0;
   const isRegistered = event.is_registered === true;
   const canCancel = isRegistered && !isStarted;
+
+  // Rating eligibility calculations (Week 6 Stage 2)
+  const isStudent = isAuthenticated && user?.role === "student";
+  const RATING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 7-day post-event rating window
+  const isRatingWindowOpen = isCompleted && now.getTime() < endsAt.getTime() + RATING_WINDOW_MS;
+  const isRatingWindowExpired = isCompleted && now.getTime() >= endsAt.getTime() + RATING_WINDOW_MS;
+  const canStudentRate = isStudent && isRegistered && isPublished && isCompleted;
+  const showInteractiveRating = canStudentRate && isRatingWindowOpen;
+  const showExpiredRatingNotice = canStudentRate && isRatingWindowExpired;
+  const activeRatingScore = hoverRating > 0 ? hoverRating : selectedRating;
+
+  // Aggregate rating validity check (prevents null, undefined, NaN, or 0 from rendering misleading badges)
+  const hasValidRatingSummary =
+    Number.isInteger(event.rating_count) &&
+    event.rating_count > 0 &&
+    typeof event.average_rating === "number" &&
+    Number.isFinite(event.average_rating);
 
   // Capacity calculations
   const hasCapacityLimit = event.capacity !== null && event.capacity !== undefined;
@@ -509,6 +615,24 @@ export default function EventDetail() {
                           : "Unlimited Capacity"}
                       </span>
                     </div>
+
+                    {hasValidRatingSummary && (
+                      <>
+                        <span>•</span>
+                        <div
+                          className="flex items-center gap-1.5"
+                          title={`${Number(event.average_rating).toFixed(1)} out of 5 stars from ${event.rating_count} attendee ratings`}
+                        >
+                          <span className="text-amber-500 text-[15px] leading-none">★</span>
+                          <span className="font-bold text-on-surface">
+                            {Number(event.average_rating).toFixed(1)}
+                          </span>
+                          <span className="text-text-muted">
+                            ({event.rating_count} {event.rating_count === 1 ? "rating" : "ratings"})
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </section>
 
@@ -598,6 +722,23 @@ export default function EventDetail() {
                     <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
                   </Link>
                 </section>
+
+                {/* Academic Policy Card — Stitch Design Alignment */}
+                {(isCompleted || hasValidRatingSummary) && (
+                  <section className="bg-surface-white rounded-3xl p-6 sm:p-7 shadow-xs border border-border-subtle flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-surface-lavender text-primary-container flex items-center justify-center shrink-0 shadow-xs">
+                      <span className="material-symbols-outlined text-[22px]">policy</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="font-title-md text-sm sm:text-base text-on-surface font-bold">
+                        Strict Single-Dimension Governance
+                      </h3>
+                      <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                        JnUVerse utilizes a 1 to 5 star rating metric. Qualitative comments and text submissions are disabled. Individual ratings and student identities are kept strictly confidential from club operators, who only see aggregate statistics and distributions.
+                      </p>
+                    </div>
+                  </section>
+                )}
               </div>
 
               {/* ============================================================ */}
@@ -829,8 +970,25 @@ export default function EventDetail() {
                           </div>
                         )}
 
+                        {/* Substate B1: Not registered, Event is Draft */}
+                        {!isRegistered && isDraft && (
+                          <div className="space-y-2">
+                            <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 font-medium">
+                              <span className="material-symbols-outlined text-[18px]">edit_note</span>
+                              <span>This event is currently an unpublished draft.</span>
+                            </div>
+                            <button
+                              type="button"
+                              disabled
+                              className="w-full py-3 rounded-full bg-surface-lavender text-text-muted text-xs font-bold cursor-not-allowed"
+                            >
+                              Draft Event
+                            </button>
+                          </div>
+                        )}
+
                         {/* Substate C: Not registered, Event has Ended */}
-                        {!isRegistered && !isCancelled && isEnded && (
+                        {!isRegistered && !isCancelled && !isDraft && isEnded && (
                           <div className="space-y-2">
                             <div className="p-3.5 rounded-2xl bg-surface-lavender border border-border-subtle flex items-center gap-2.5 text-xs text-text-muted font-medium">
                               <span className="material-symbols-outlined text-[18px]">
@@ -849,7 +1007,7 @@ export default function EventDetail() {
                         )}
 
                         {/* Substate D: Not registered, Event has Started */}
-                        {!isRegistered && !isCancelled && !isEnded && isStarted && (
+                        {!isRegistered && !isCancelled && !isDraft && !isEnded && isStarted && (
                           <div className="space-y-2">
                             <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 font-medium">
                               <span className="material-symbols-outlined text-[18px]">
@@ -868,7 +1026,7 @@ export default function EventDetail() {
                         )}
 
                         {/* Substate E: Not registered, Event is Full */}
-                        {!isRegistered && !isCancelled && !isEnded && !isStarted && isFull && (
+                        {!isRegistered && !isCancelled && !isDraft && !isEnded && !isStarted && isFull && (
                           <div className="space-y-2">
                             <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 font-medium">
                               <span className="material-symbols-outlined text-[18px]">
@@ -887,7 +1045,7 @@ export default function EventDetail() {
                         )}
 
                         {/* Substate F: Open for Student RSVP */}
-                        {!isRegistered && !isCancelled && !isEnded && !isStarted && !isFull && (
+                        {!isRegistered && isPublished && !isCancelled && !isEnded && !isStarted && !isFull && (
                           <div className="space-y-3">
                             <button
                               type="button"
@@ -916,6 +1074,234 @@ export default function EventDetail() {
                     )}
                   </div>
                 </div>
+
+                {/* ============================================================ */}
+                {/* STUDENT EVENT RATING WIDGET (Week 6 Stage 2 — Stitch Layout) */}
+                {/* ============================================================ */}
+
+                {/* State A: Interactive Rating Form (Registered Student, Event Ended, Window Open) */}
+                {showInteractiveRating && (
+                  <section
+                    id="feedback-card"
+                    aria-label="Rate your event experience"
+                    className="bg-surface-white rounded-3xl p-6 sm:p-7 shadow-xs border border-border-subtle space-y-5 relative overflow-hidden"
+                  >
+                    {/* Rating Header */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-on-surface">
+                          Rate your experience
+                        </h3>
+                        <span className="px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary-container text-[11px] font-extrabold uppercase tracking-wider">
+                          1–5 Metric
+                        </span>
+                      </div>
+                      <p className="text-xs text-text-muted">
+                        Select a rating from 1 to 5 stars.
+                      </p>
+                    </div>
+
+                    {/* Dynamic Star Selection Box */}
+                    <div className="py-5 px-4 rounded-2xl bg-canvas-base flex flex-col items-center justify-center gap-3 text-center border border-border-subtle/50">
+                      <StarRating
+                        value={selectedRating}
+                        onChange={(val) => {
+                          setSelectedRating(val);
+                          setRatingError("");
+                          setRatingSuccess("");
+                        }}
+                        onHover={setHoverRating}
+                        disabled={ratingSubmitting}
+                        size="lg"
+                      />
+
+                      {/* Dynamic Rating Label Badge */}
+                      <div>
+                        {activeRatingScore === 0 ? (
+                          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-lavender/60 text-text-muted text-xs font-medium">
+                            Tap a star to rate
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-lavender text-primary-container text-xs font-bold shadow-xs">
+                            <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
+                            Rating: {activeRatingScore} / 5 — {RATING_LABELS[activeRatingScore]}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-[11px] text-text-muted">
+                        Feedback is limited to a verified 1 to 5 rating per registered student attendee.
+                      </p>
+                    </div>
+
+                    {/* Auditorium Live Consensus / Aggregate Rating */}
+                    {hasValidRatingSummary && (
+                      <div className="pt-3 border-t border-border-subtle/70 flex items-center justify-between text-xs">
+                        <span className="text-[11px] uppercase tracking-wider text-text-muted font-bold">
+                          Auditorium Live Consensus
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <StarRating value={Number(event.average_rating)} readOnly size="sm" />
+                          <span className="font-bold text-primary-container">
+                            {Number(event.average_rating).toFixed(1)} Avg ({event.rating_count})
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Status Box: Success */}
+                    {ratingSuccess && (
+                      <div
+                        role="status"
+                        className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-950 animate-in fade-in duration-200 shadow-xs"
+                      >
+                        <span className="material-symbols-outlined text-emerald-600 text-[20px] shrink-0 mt-0.5">
+                          check_circle
+                        </span>
+                        <div className="flex flex-col space-y-0.5">
+                          <span className="font-bold text-emerald-950">
+                            {ratingSuccess}
+                          </span>
+                          <span className="text-emerald-800 text-[11px] leading-relaxed">
+                            Your rating has been recorded. Individual ratings and student identities are kept strictly confidential from club operators, who only see aggregate statistics.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Status Box: Error with Retry */}
+                    {ratingError && (
+                      <div
+                        role="alert"
+                        className="p-3.5 rounded-2xl bg-error-container/40 border border-error/20 flex items-start justify-between gap-2.5 text-xs text-error animate-in fade-in duration-200"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">
+                            error
+                          </span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-on-error-container">Submission failed</span>
+                            <span className="text-on-error-container/80 text-[11px]">{ratingError}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRatingSubmit}
+                          className="shrink-0 px-2.5 py-1 rounded-lg bg-error text-white text-[11px] font-bold hover:opacity-90 transition"
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Submission Action Button */}
+                    <div className="space-y-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleRatingSubmit}
+                        disabled={ratingSubmitting || selectedRating === 0}
+                        className="w-full py-3 rounded-full bg-primary-container hover:bg-primary-hover disabled:opacity-50 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {ratingSubmitting ? (
+                          <>
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Submitting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-[18px]">star</span>
+                            <span>{event.my_rating ? "Update Rating" : "Submit Rating"}</span>
+                          </>
+                        )}
+                      </button>
+                      {event.my_rating && (
+                        <p className="text-[11px] text-text-muted text-center">
+                          You rated this event {event.my_rating} / 5 ({RATING_LABELS[event.my_rating]}). You can update it within 7 days of event completion.
+                        </p>
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* State B: Rating Window Expired (Registered Student, Event Ended, Window Expired) */}
+                {showExpiredRatingNotice && (
+                  <section
+                    aria-label="Event rating closed"
+                    className="bg-surface-white rounded-3xl p-6 sm:p-7 shadow-xs border border-border-subtle space-y-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-bold text-on-surface">
+                          Event Rating Closed
+                        </h3>
+                        <span className="px-2.5 py-0.5 rounded-full bg-surface-lavender text-text-muted text-[10px] font-bold uppercase tracking-wider">
+                          Closed
+                        </span>
+                      </div>
+                      <p className="text-xs text-text-muted">
+                        The 7-day post-event rating window for this event has concluded.
+                      </p>
+                    </div>
+
+                    {event.my_rating ? (
+                      <div className="p-3.5 rounded-2xl bg-surface-lavender/60 border border-border-subtle space-y-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted block">
+                          Your Recorded Rating
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <StarRating value={event.my_rating} readOnly size="sm" />
+                          <span className="text-xs font-bold text-on-surface">
+                            {event.my_rating} / 5 — {RATING_LABELS[event.my_rating]}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-2xl bg-surface-container-low text-xs text-text-muted">
+                        No rating was submitted during the 7-day active feedback window.
+                      </div>
+                    )}
+
+                    {hasValidRatingSummary && (
+                      <div className="pt-2 border-t border-border-subtle/70 flex items-center justify-between text-xs">
+                        <span className="text-[11px] text-text-muted">Final Consensus</span>
+                        <span className="font-bold text-primary-container">
+                          {Number(event.average_rating).toFixed(1)} Avg ({event.rating_count})
+                        </span>
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* State C: Non-attendee / Anonymous / Operator Aggregate Consensus Card (when ratings exist and not showing active rating) */}
+                {!showInteractiveRating && !showExpiredRatingNotice && hasValidRatingSummary && (
+                  <section
+                    aria-label="Event attendee rating summary"
+                    className="bg-surface-white rounded-3xl p-6 sm:p-7 shadow-xs border border-border-subtle space-y-3"
+                  >
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                        Attendee Consensus
+                      </span>
+                      <h3 className="text-base font-bold text-on-surface">
+                        Event Rating Summary
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-surface-container-low">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-amber-500 text-[20px] leading-none">★</span>
+                        <span className="text-2xl font-extrabold text-on-surface">
+                          {Number(event.average_rating).toFixed(1)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col border-l border-border-subtle pl-3">
+                        <StarRating value={Number(event.average_rating)} readOnly size="sm" />
+                        <span className="text-[11px] text-text-muted font-medium mt-0.5">
+                          Based on {event.rating_count} {event.rating_count === 1 ? "verified attendee rating" : "verified attendee ratings"}
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+                )}
               </div>
             </div>
           </div>

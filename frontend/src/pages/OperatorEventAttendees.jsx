@@ -6,6 +6,7 @@ import { eventsAPI, extractErrorMessage } from "../services/api";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
 import Badge from "../components/Badge";
+import EventRatingBreakdown from "../components/EventRatingBreakdown";
 
 /**
  * Format timestamps strictly in Asia/Dhaka (+06:00 BST).
@@ -80,6 +81,7 @@ export default function OperatorEventAttendees() {
   const [pageLoading, setPageLoading] = useState(false);
   const [error, setError] = useState("");
   const [isForbidden, setIsForbidden] = useState(false);
+  const [showRatingBreakdown, setShowRatingBreakdown] = useState(false);
 
   // Fetch Event Context
   const fetchEventDetails = useCallback(async () => {
@@ -218,19 +220,41 @@ export default function OperatorEventAttendees() {
             <span>Back to Manage Events</span>
           </Link>
 
-          {event && (
-            <Link
-              to={`/events/${event.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-white border border-border-subtle hover:bg-surface-lavender text-on-surface text-xs font-semibold transition-colors shadow-xs"
-            >
-              <span>Public Event Page</span>
-              <span className="material-symbols-outlined text-[14px] text-text-muted">
-                open_in_new
-              </span>
-            </Link>
-          )}
+          <div className="flex items-center gap-2">
+            {event && event.status === "published" && (
+              <button
+                type="button"
+                onClick={() => setShowRatingBreakdown((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all shadow-xs ${
+                  showRatingBreakdown
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "bg-surface-white hover:bg-surface-lavender border-border-subtle text-on-surface"
+                }`}
+                title={showRatingBreakdown ? "Hide rating breakdown" : "View rating breakdown"}
+                aria-expanded={showRatingBreakdown}
+              >
+                <span className="text-amber-500 text-[14px] leading-none">★</span>
+                <span>{showRatingBreakdown ? "Hide Ratings" : "Rating Performance"}</span>
+                <span className="material-symbols-outlined text-[15px]">
+                  {showRatingBreakdown ? "expand_less" : "insights"}
+                </span>
+              </button>
+            )}
+
+            {event && (
+              <Link
+                to={`/events/${event.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-white border border-border-subtle hover:bg-surface-lavender text-on-surface text-xs font-semibold transition-colors shadow-xs"
+              >
+                <span>Public Event Page</span>
+                <span className="material-symbols-outlined text-[14px] text-text-muted">
+                  open_in_new
+                </span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Access Denied Feedback */}
@@ -370,6 +394,17 @@ export default function OperatorEventAttendees() {
                 </span>
               </div>
             </div>
+
+            {/* Expandable Event Rating Breakdown Section */}
+            {showRatingBreakdown && event && (
+              <div className="animate-in fade-in duration-200">
+                <EventRatingBreakdown
+                  eventId={event.id}
+                  eventTitle={event.title}
+                  onClose={() => setShowRatingBreakdown(false)}
+                />
+              </div>
+            )}
 
             {/* Attendee Roster Section */}
             <div className="bg-surface-white rounded-3xl border border-border-subtle shadow-sm overflow-hidden">

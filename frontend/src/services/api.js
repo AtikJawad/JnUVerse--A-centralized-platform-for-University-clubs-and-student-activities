@@ -334,4 +334,122 @@ export const authAPI = {
   getDepartments: () => api.get("/api/auth/departments/"),
 };
 
+/**
+ * Event Ratings API Service — Week 6 Backend Integration
+ * Encapsulates backend-verified endpoints for attendee 1–5 star ratings (no comments)
+ * and owning club operator aggregate rating summaries.
+ */
+export const ratingsAPI = {
+  /**
+   * Submit or update an event rating (Student attendee only).
+   * Endpoint: PUT /api/events/:id/rating/
+   * - First rating returns 201 Created.
+   * - Updated rating inside the 7-day post-event window returns 200 OK.
+   * - Returns the full updated Event object (average_rating, rating_count, my_rating).
+   * - 403 Forbidden if student not registered.
+   * - 409 Conflict if not published, not ended, or > 7 days after ends_at.
+   * @param {string} eventId - Event UUID
+   * @param {number} rating - Integer between 1 and 5
+   */
+  submitRating: (eventId, rating) =>
+    api.put(`/api/events/${eventId}/rating/`, { rating }),
+
+  /**
+   * Retrieve the authenticated student's own rating for an event.
+   * Endpoint: GET /api/events/:id/rating/
+   * Returns: { rating: number | null }
+   * @param {string} eventId - Event UUID
+   */
+  getMyRating: (eventId) =>
+    api.get(`/api/events/${eventId}/rating/`),
+
+  /**
+   * Retrieve event rating summary with 1-5 star distribution breakdown
+   * (Owning Club Operator only).
+   * Endpoint: GET /api/events/:id/rating-summary/
+   * Returns: { average: number | null, count: number, breakdown: { "1": N, "2": N, "3": N, "4": N, "5": N } }
+   * - 403 Forbidden if not the operator of the event's club.
+   * @param {string} eventId - Event UUID
+   */
+  getRatingSummary: (eventId) =>
+    api.get(`/api/events/${eventId}/rating-summary/`),
+};
+
+/**
+ * Collaborations API Service — Week 6 Backend Integration
+ * Encapsulates backend-verified endpoints for inter-club collaboration requests,
+ * request lifecycle management (accept, reject, cancel), and public partner clubs.
+ */
+export const collaborationsAPI = {
+  /**
+   * List collaboration requests involving the operator's own club.
+   * Endpoint: GET /api/collaborations/
+   * Query params:
+   * - box: "sent" | "received" (default: both)
+   * - status: "pending" | "accepted" | "rejected" | "cancelled"
+   * - page: integer
+   * - page_size: integer
+   * @param {Object} [params] - Axios query params
+   */
+  getAll: (params) => api.get("/api/collaborations/", { params }),
+
+  /**
+   * Retrieve single collaboration request detail by UUID.
+   * Accessible only to the requesting or target club operator.
+   * Endpoint: GET /api/collaborations/:id/
+   * @param {string} id - Collaboration UUID
+   */
+  getById: (id) => api.get(`/api/collaborations/${id}/`),
+
+  /**
+   * Propose a new collaboration request to another club (Club Operator only).
+   * Endpoint: POST /api/collaborations/
+   * Payload:
+   * - target_club (string, required): slug of the target club
+   * - title (string, required): max 200 chars
+   * - description (string, optional): proposal text
+   * - event (string, optional): UUID of published, not-yet-ended own club event
+   * Returns: 201 Created with Collaboration object
+   * Errors: 400 validation error, 409 Conflict if pending request already exists between clubs.
+   * @param {Object} payload - { target_club, title, description?, event? }
+   */
+  create: (payload) => api.post("/api/collaborations/", payload),
+
+  /**
+   * Accept an incoming pending collaboration request (Target Club Operator only).
+   * Endpoint: POST /api/collaborations/:id/accept/
+   * Transitions status from "pending" -> "accepted" and establishes partner club status.
+   * @param {string} id - Collaboration UUID
+   */
+  accept: (id) => api.post(`/api/collaborations/${id}/accept/`),
+
+  /**
+   * Reject an incoming pending collaboration request (Target Club Operator only).
+   * Endpoint: POST /api/collaborations/:id/reject/
+   * Transitions status from "pending" -> "rejected".
+   * @param {string} id - Collaboration UUID
+   */
+  reject: (id) => api.post(`/api/collaborations/${id}/reject/`),
+
+  /**
+   * Cancel an outgoing pending collaboration request (Requesting Club Operator only).
+   * Endpoint: POST /api/collaborations/:id/cancel/
+   * Transitions status from "pending" -> "cancelled".
+   * @param {string} id - Collaboration UUID
+   */
+  cancel: (id) => api.post(`/api/collaborations/${id}/cancel/`),
+
+  /**
+   * List public partner clubs for a club (at least one accepted collaboration).
+   * Endpoint: GET /api/clubs/:slug/partners/
+   * Public: Accessible to anonymous, students, and operators.
+   * Paginated: returns { count, next, previous, results: [ Partner ] }
+   * Partner object: { id, name, slug, logo, partner_since }
+   * @param {string} clubSlug - Club slug
+   * @param {Object} [params] - Axios query params (page, page_size)
+   */
+  getPartners: (clubSlug, params) =>
+    api.get(`/api/clubs/${clubSlug}/partners/`, { params }),
+};
+
 export default api;

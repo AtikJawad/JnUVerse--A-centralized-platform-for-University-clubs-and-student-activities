@@ -403,9 +403,50 @@ The Week 5 API layer integrates club broadcast announcements, audience scoping (
   - *Delete Notice Workflow:* Modal confirmation identifying notice title and timestamp, explaining cascading student in-app notification deletion, and executing `DELETE /api/notices/:id/` with backend-confirmation-first (HTTP 204) list removal.
   - *Navbar Integration:* Updated operator center navigation pill to: `Overview` (`/dashboard`), `Explore Clubs` (`/clubs`), `Members` (`/operator/members`), `Events` (`/operator/events`), `Notices` (`/operator/notices`). Added secondary `Explore Events` link (`/events`) on desktop and mobile drawer to preserve public event discovery. Student navigation remains completely unchanged.
 
+### 8. Week 6 Ratings & Collaboration (Stages 1, 2 & 3 Completed)
+The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 stars only, zero written comments), operator rating summaries with 1–5 distribution breakdowns, and inter-club collaboration requests with public partner listings:
+
+- **Ratings Service (`ratingsAPI` in [`api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)):**
+  - `submitRating(eventId, rating)`: `PUT /api/events/:id/rating/` with `{ rating: 1-5 }`. Only registered attendees can rate, only for published/completed events, and within 7 days after `ends_at`. Returns updated Event object (`average_rating`, `rating_count`, `my_rating`).
+  - `getMyRating(eventId)`: `GET /api/events/:id/rating/` returning `{ rating: number | null }` for the logged-in student.
+  - `getRatingSummary(eventId)`: `GET /api/events/:id/rating-summary/` returning `{ average, count, breakdown: { "1": N, ... "5": N } }` for the owning club operator. Preserves individual student rating anonymity.
+
+- **Collaborations Service (`collaborationsAPI` in [`api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)):**
+  - `getAll(params)`: `GET /api/collaborations/` supporting query params `box` (`sent` or `received`), `status` (`pending`, `accepted`, `rejected`, `cancelled`), `page`, `page_size`.
+  - `getById(id)`: `GET /api/collaborations/:id/` returning collaboration details for involved clubs.
+  - `create(payload)`: `POST /api/collaborations/` accepting `{ target_club, title, description?, event? }`. Enforces one pending request per club pair constraint (`409 Conflict`).
+  - `accept(id)`: `POST /api/collaborations/:id/accept/` (target club operator only) transitioning request to `accepted` and creating partnership.
+  - `reject(id)`: `POST /api/collaborations/:id/reject/` (target club operator only) transitioning request to `rejected`.
+  - `cancel(id)`: `POST /api/collaborations/:id/cancel/` (requesting club operator only) transitioning pending request to `cancelled`.
+  - `getPartners(clubSlug, params)`: `GET /api/clubs/:slug/partners/` (public endpoint) returning paginated accepted partner clubs.
+
+- **Student Event Rating Component ([`StarRating.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/StarRating.jsx)):**
+  - *Reference:* `jnuverse_student_event_feedback/code.html`.
+  - *Interactive Mode:* Exactly 5 selectable stars with hover preview, active scale effects, dynamic text label (`Rating: 5 / 5 — Excellent`), and full keyboard navigation (Arrows, Home, End, Space, Enter) with roving `tabIndex` and DOM focus shift.
+  - *Read-Only Mode:* Displays aggregate scores (`value out of 5 stars`) with fractional fill representation across cards and headers.
+  - *Accessibility:* ARIA radio group semantics (`role="radiogroup"`, `role="radio"`, `aria-checked`, `aria-label`), roving tabindex, `requestAnimationFrame` focus shifting, and screen reader announcements.
+
+- **Operator Event Rating Breakdown Component ([`EventRatingBreakdown.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/EventRatingBreakdown.jsx)):**
+  - *Prominent Average Score:* Displays verified numerical average (`4.5 / 5`) alongside consensus tier label and read-only `StarRating.jsx` representation.
+  - *Total Rating Count:* Displays actual backend `count` (distinct from RSVP attendee numbers).
+  - *5-Star Distribution:* Renders 5-tier breakdown (5 down to 1 stars) with tier label, count, percentage (`Math.round((count/total)*100)`), and horizontal progressbars (`role="progressbar"`).
+  - *State Handling:* Clean loading skeleton, empty state ("No student ratings yet"), error alerts (401, 403, 404, network), and manual refresh control.
+  - *Strict Privacy:* Aggregate metrics only. Individual student ratings, names, emails, IDs, and timestamps are strictly never fetched or displayed.
+  - *Operator Workspace Integration:* Embedded as an expandable inline drawer in [`OperatorEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEvents.jsx) and attendee overview in [`OperatorEventAttendees.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEventAttendees.jsx).
+
+- **Event Detail Rating Integration ([`EventDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/EventDetail.jsx)):**
+  - *Header Summary Bar:* Integrated read-only aggregate rating indicator (`★ 4.3 (3 ratings)`) alongside schedule, venue, and capacity with strict numeric validation guards.
+  - *Stitch Asymmetric Composition:* Embedded Academic Policy Card (*"Strict Single-Dimension Governance"*) in the 7-column primary section, and Student Event Rating Card (`#feedback-card`) in the 5-column sticky logistics section.
+  - *Eligibility Guards:* Restricted to verified attendees (`is_registered === true`) for published, completed events (`status === "published"` and `is_completed === true` or `ends_at <= now`) within the 7-day post-event window. Draft and cancelled events are strictly non-rateable. Pre-fills previously saved ratings and enables updates.
+  - *Post-Window & Non-Attendee States:* Renders read-only recorded rating if the 7-day window has expired, or aggregate attendee consensus for non-attendees / operators.
+  - *Security & Privacy:* Zero written comments/text review fields. Individual ratings and student identities remain confidential from club operators. Concurrency protected via `generationRef` and composite identity tracking.
+
+- **Explore Events Card Integration ([`ExploreEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ExploreEvents.jsx)):**
+  - Integrated compact read-only aggregate rating chips (`★ 4.3 (3)`) in the featured event spotlight and event cards guarded by strict numeric checks (`Number.isInteger(event.rating_count) && event.rating_count > 0 && typeof event.average_rating === "number" && Number.isFinite(event.average_rating)`).
+
 ---
 
-## 8. Implementation Status Matrix
+## 9. Implementation Status Matrix
 
 | Module / Feature | Planned Week | Frontend Status | Backend API Status | Reference Documentation |
 |:---|:---:|:---:|:---:|:---|
@@ -414,7 +455,7 @@ The Week 5 API layer integrates club broadcast announcements, audience scoping (
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
 | **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
-| **Ratings & Collaboration** | Week 6 | Not Started | Models Exist (No Endpoints) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
+| **Ratings & Collaboration** | Week 6 | **In Progress** (Stage 3 Operator Event Rating Summary & Distribution Breakdown Completed & Verified) | **Source & Contract Verified** (Backend pytest suite blocked locally due to missing environment runner; contracts verified via source inspection & API smoke tests) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
 | **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
@@ -422,7 +463,7 @@ The Week 5 API layer integrates club broadcast announcements, audience scoping (
 
 ---
 
-## 9. Weekly Workflow Documentation Directory
+## 10. Weekly Workflow Documentation Directory
 
 Detailed implementation notes, acceptance criteria, verified test commands, and files changed for each development stage are preserved in:
 
