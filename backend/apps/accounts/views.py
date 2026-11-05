@@ -8,8 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
-from .serializers import ClubRegistrationSerializer, ClubSerializer, StudentRegistrationSerializer, UserSerializer, LoginSerializer
+from .serializers import ClubRegistrationSerializer, ClubSerializer, StudentRegistrationSerializer, UserSerializer, LoginSerializer, InterestIdsSerializer, InterestListSerializer
 from .constants import DEPARTMENTS
+from .models import Interest
+from .permissions import IsStudent
 
 class StudentRegisterView(APIView):
     authentication_classes = []
@@ -91,3 +93,34 @@ class DepartmentListView(APIView):
         "departments": serializers.ListField(child=serializers.CharField())}))
     def get(self, request):
         return Response({"departments": DEPARTMENTS})
+
+class InterestListView(APIView):
+    """Public: the fixed list of interests to choose from."""
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses=InterestListSerializer)
+    def get(self, request):
+        return Response(InterestListSerializer({"interests": Interest.objects.order_by("name")}).data)
+
+
+class MyInterestsView(APIView):
+    """A student's own interests: read, or replace the whole selection."""
+
+    permission_classes = [IsStudent]
+
+    @staticmethod
+    def _out(profile):
+        return InterestListSerializer({"interests": profile.interests.order_by("name")}).data
+
+    @extend_schema(responses=InterestListSerializer)
+    def get(self, request):
+        return Response(self._out(request.user.student_profile))
+
+    @extend_schema(request=InterestIdsSerializer, responses=InterestListSerializer)
+    def put(self, request):
+        serializer = InterestIdsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        profile = request.user.student_profile
+        profile.interests.set(serializer.validated_data["interests"])
+        return Response(self._out(profile))

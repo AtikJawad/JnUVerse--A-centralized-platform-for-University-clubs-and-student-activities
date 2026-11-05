@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.clubs.models import Club
 
 from .constants import DEPARTMENTS
-from .models import StudentProfile, User, ValidStudentRecord
+from .models import StudentProfile, User, ValidStudentRecord, Interest
 
 
 def _check_passwords(attrs):
@@ -155,3 +155,16 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid credentials.")
         attrs["user"] = user
         return attrs
+
+class InterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interest
+        fields = ["id", "name"]
+
+
+class InterestListSerializer(serializers.Serializer):
+    interests = InterestSerializer(many=True)
+
+
+class InterestIdsSerializer(serializers.Serializer):
+    interests = serializers.PrimaryKeyRelatedField(many=True, queryset=Interest.objects.all())

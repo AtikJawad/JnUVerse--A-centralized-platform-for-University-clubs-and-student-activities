@@ -1,6 +1,7 @@
 from django.urls import path
 
-app_name = "reports"
+from .views import ReportListCreateView
 
-# URL patterns for the reports app will be added as its views are implemented.
-urlpatterns = []
+urlpatterns = [
+    path("", ReportListCreateView.as_view(), name="report-list"),
+]

@@ -33,7 +33,7 @@ def club_queryset(user=None):
     else:
         following = Value(None, output_field=BooleanField())
         my_membership = Value(None, output_field=CharField())
-    return qs.annotate(is_following=following, my_membership=my_membership).order_by("name")
+    return qs.annotate(is_following=following, my_membership=my_membership).order_by("name").prefetch_related("interests")
 
 
 class ClubPagination(PageNumberPagination):

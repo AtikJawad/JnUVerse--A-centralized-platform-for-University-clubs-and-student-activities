@@ -18,6 +18,7 @@ class Club(models.Model):
     description = models.TextField(blank=True)
     logo = models.URLField(blank=True)
     contact_email = models.EmailField(blank=True)
+    interests = models.ManyToManyField("accounts.Interest", blank=True, related_name="clubs")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

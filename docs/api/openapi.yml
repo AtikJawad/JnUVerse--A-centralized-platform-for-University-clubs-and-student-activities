@@ -18,6 +18,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/DepartmentList'
           description: ''
+  /api/auth/interests/:
+    get:
+      operationId: api_auth_interests_retrieve
+      description: 'Public: the fixed list of interests to choose from.'
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestList'
+          description: ''
   /api/auth/login/:
     post:
       operationId: api_auth_login_create
@@ -57,6 +73,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeResponse'
+          description: ''
+  /api/auth/me/interests/:
+    get:
+      operationId: api_auth_me_interests_retrieve
+      description: 'A student''s own interests: read, or replace the whole selection.'
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestList'
+          description: ''
+    put:
+      operationId: api_auth_me_interests_update
+      description: 'A student''s own interests: read, or replace the whole selection.'
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterestIds'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InterestIds'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InterestIds'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestList'
           description: ''
   /api/auth/refresh/:
     post:
@@ -661,6 +718,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/Collaboration'
           description: ''
+  /api/dashboard/club/:
+    get:
+      operationId: api_dashboard_club_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubDashboard'
+          description: ''
+  /api/dashboard/student/:
+    get:
+      operationId: api_dashboard_student_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDashboard'
+          description: ''
   /api/events/:
     get:
       operationId: api_events_list
@@ -1215,6 +1300,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/UnreadCount'
           description: ''
+  /api/reports/:
+    get:
+      operationId: api_reports_list
+      description: 'Any logged-in user: report a club or event (POST) and see their
+        own reports (GET).'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReportList'
+          description: ''
+    post:
+      operationId: api_reports_create
+      description: 'Any logged-in user: report a club or event (POST) and see their
+        own reports (GET).'
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
 components:
   schemas:
     AudienceEnum:
@@ -1263,6 +1404,57 @@ components:
       - id
       - is_verified
       - name
+    ClubCounts:
+      type: object
+      properties:
+        followers:
+          type: integer
+        members:
+          type: integer
+        pending_membership_requests:
+          type: integer
+        upcoming_events:
+          type: integer
+        draft_events:
+          type: integer
+        pending_collaboration_requests:
+          type: integer
+        unread_notifications:
+          type: integer
+      required:
+      - draft_events
+      - followers
+      - members
+      - pending_collaboration_requests
+      - pending_membership_requests
+      - unread_notifications
+      - upcoming_events
+    ClubDashboard:
+      type: object
+      properties:
+        club:
+          $ref: '#/components/schemas/ClubMini'
+        counts:
+          $ref: '#/components/schemas/ClubCounts'
+        ratings:
+          $ref: '#/components/schemas/ClubRatings'
+        next_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        recent_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        registrations_last_7_days:
+          type: integer
+      required:
+      - club
+      - counts
+      - next_events
+      - ratings
+      - recent_events
+      - registrations_last_7_days
     ClubMini:
       type: object
       properties:
@@ -1321,6 +1513,11 @@ components:
           type: string
           readOnly: true
           nullable: true
+        interests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interest'
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -1329,11 +1526,24 @@ components:
       - created_at
       - follower_count
       - id
+      - interests
       - is_following
       - is_verified
       - member_count
       - my_membership
       - name
+    ClubRatings:
+      type: object
+      properties:
+        average:
+          type: number
+          format: double
+          nullable: true
+        count:
+          type: integer
+      required:
+      - average
+      - count
     ClubRegistration:
       type: object
       properties:
@@ -1384,6 +1594,11 @@ components:
           type: string
           format: email
           maxLength: 254
+        interests:
+          type: array
+          items:
+            type: string
+            format: uuid
     CollabEvent:
       type: object
       properties:
@@ -1691,6 +1906,38 @@ components:
       required:
       - follower_count
       - following
+    Interest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    InterestIds:
+      type: object
+      properties:
+        interests:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - interests
+    InterestList:
+      type: object
+      properties:
+        interests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interest'
+      required:
+      - interests
     Login:
       type: object
       properties:
@@ -2134,6 +2381,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Registration'
+    PaginatedReportList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
     Partner:
       type: object
       properties:
@@ -2169,6 +2439,11 @@ components:
           type: string
           format: email
           maxLength: 254
+        interests:
+          type: array
+          items:
+            type: string
+            format: uuid
     PatchedEventWrite:
       type: object
       properties:
@@ -2231,6 +2506,20 @@ components:
           type: integer
       required:
       - updated
+    ReasonEnum:
+      enum:
+      - inappropriate
+      - spam
+      - misleading
+      - harassment
+      - other
+      type: string
+      description: |-
+        * `inappropriate` - Inappropriate content
+        * `spam` - Spam
+        * `misleading` - Misleading information
+        * `harassment` - Harassment
+        * `other` - Other
     Registration:
       type: object
       properties:
@@ -2269,6 +2558,92 @@ components:
       description: |-
         * `registered` - Registered
         * `cancelled` - Cancelled
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        target_type:
+          type: string
+          readOnly: true
+        club:
+          allOf:
+          - $ref: '#/components/schemas/ClubMini'
+          readOnly: true
+          nullable: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/ReportEvent'
+          readOnly: true
+          nullable: true
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/ReasonEnum'
+          readOnly: true
+        details:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - club
+      - created_at
+      - details
+      - event
+      - id
+      - reason
+      - status
+      - target_type
+    ReportCreate:
+      type: object
+      properties:
+        target_type:
+          $ref: '#/components/schemas/TargetTypeEnum'
+        target:
+          type: string
+          description: Club slug, or event id.
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        details:
+          type: string
+          maxLength: 1000
+      required:
+      - reason
+      - target
+      - target_type
+    ReportEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+      required:
+      - id
+      - title
+    ReportStatusEnum:
+      enum:
+      - open
+      - under_review
+      - resolved
+      - dismissed
+      type: string
+      description: |-
+        * `open` - Open
+        * `under_review` - Under review
+        * `resolved` - Resolved
+        * `dismissed` - Dismissed
     RoleEnum:
       enum:
       - student
@@ -2277,6 +2652,53 @@ components:
       description: |-
         * `student` - Student
         * `club_operator` - Club Operator
+    StudentCounts:
+      type: object
+      properties:
+        clubs_followed:
+          type: integer
+        clubs_joined:
+          type: integer
+        pending_membership_requests:
+          type: integer
+        unread_notifications:
+          type: integer
+        events_registered_upcoming:
+          type: integer
+        events_to_rate:
+          type: integer
+      required:
+      - clubs_followed
+      - clubs_joined
+      - events_registered_upcoming
+      - events_to_rate
+      - pending_membership_requests
+      - unread_notifications
+    StudentDashboard:
+      type: object
+      properties:
+        has_interests:
+          type: boolean
+        counts:
+          $ref: '#/components/schemas/StudentCounts'
+        next_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        rating_prompts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        suggested_clubs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClubPublic'
+      required:
+      - counts
+      - has_interests
+      - next_events
+      - rating_prompts
+      - suggested_clubs
     StudentRegistration:
       type: object
       properties:
@@ -2304,6 +2726,14 @@ components:
       - password
       - password_confirm
       - student_id
+    TargetTypeEnum:
+      enum:
+      - club
+      - event
+      type: string
+      description: |-
+        * `club` - club
+        * `event` - event
     TokenRefresh:
       type: object
       properties:
