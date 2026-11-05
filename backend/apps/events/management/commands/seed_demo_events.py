@@ -4,15 +4,17 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import Q
 
 from apps.accounts.constants import DEPARTMENT_CHOICES
-from apps.accounts.models import StudentProfile, User, ValidStudentRecord
+from apps.accounts.models import StudentProfile, User, ValidStudentRecord, Interest
 from apps.clubs.models import Club, ClubFollow, ClubMembership
 from apps.events.models import Event, EventRegistration
 from apps.notifications import services as notify
 from apps.notifications.models import Notice, Notification
 from apps.collaborations.models import CollaborationRequest
 from apps.feedback.models import EventRating
+from apps.reports.models import ContentReport
 
 PREFIX = "[DEMO] "
 DEMO_EMAIL_DOMAIN = "demo.jnuverse.test"
@@ -49,6 +51,10 @@ class Command(BaseCommand):
 
     def reset(self):
         events = Event.objects.filter(title__startswith=PREFIX)
+        ContentReport.objects.filter(
+            Q(reporter__email__endswith="@" + DEMO_EMAIL_DOMAIN)
+            | Q(club__name__startswith=PREFIX) | Q(event__title__startswith=PREFIX)
+        ).delete()
         CollaborationRequest.objects.filter(title__startswith=PREFIX).delete()
         EventRating.objects.filter(event__in=events).delete()
         EventRegistration.objects.filter(event__in=events).delete()
@@ -135,6 +141,8 @@ class Command(BaseCommand):
         self.seed_notifications(profiles)
         self.seed_ratings(profiles, now)
         self.seed_collaborations()
+        self.seed_interests(profiles)
+        self.seed_reports(profiles)
         self.stdout.write(self.style.SUCCESS(
             f"Done. New events: {made}. New demo clubs: {made_clubs}. "
             f"Logins: demo1..demo5 and democlub1..democlub5@{DEMO_EMAIL_DOMAIN} (password: {o['password']})."
@@ -277,3 +285,43 @@ class Command(BaseCommand):
                 notify.notify_collaboration_response(req, st.value)
             elif st == S.CANCELLED:
                 notify.notify_collaboration_cancelled(req)
+    def seed_interests(self, profiles):
+        club_interests = {
+            1: ("Technology", "Programming", "Robotics"),
+            2: ("Debate", "Literature"),
+            3: ("Photography", "Cultural"),
+            4: ("Cultural", "Music"),
+            5: ("Sports",),
+        }
+        for i, names in club_interests.items():
+            club = Club.objects.get(operator__email=f"democlub{i}@{DEMO_EMAIL_DOMAIN}")
+            club.interests.add(*Interest.objects.filter(name__in=names))
+        # demo2 has none, demo4 has none (shows the "choose your interests" prompt)
+        student_interests = {
+            0: ("Photography", "Cultural"),                       # every match is already followed/requested
+            2: ("Technology", "Programming", "Sports"),
+            4: ("Robotics", "Technology", "Debate", "Music"),
+        }
+        for idx, names in student_interests.items():
+            profiles[idx].interests.add(*Interest.objects.filter(name__in=names))
+
+    def seed_reports(self, profiles):
+        R = ContentReport
+
+        def club(i):
+            return Club.objects.get(operator__email=f"democlub{i}@{DEMO_EMAIL_DOMAIN}")
+
+        research = Event.objects.filter(title=PREFIX + "Research Workshop").first()
+        specs = [
+            (profiles[0], {"club": club(5)}, "spam", "Demo report: looks like an advertisement.", R.Status.OPEN),
+            (profiles[0], {"event": research}, "misleading", "Demo report: wrong venue listed.", R.Status.UNDER_REVIEW),
+            (profiles[0], {"club": club(4)}, "inappropriate", "Demo report.", R.Status.RESOLVED),
+            (profiles[1], {"club": club(3)}, "other", "Demo report: please review the description.", R.Status.DISMISSED),
+        ]
+        for student, target, reason, details, status in specs:
+            if None in target.values():
+                continue
+            R.objects.get_or_create(
+                reporter=student.user, **target,
+                defaults={"reason": reason, "details": details, "status": status},
+            )
