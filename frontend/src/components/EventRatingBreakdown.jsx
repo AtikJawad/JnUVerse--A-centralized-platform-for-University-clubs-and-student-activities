@@ -5,6 +5,102 @@ import { ratingsAPI, extractErrorMessage } from "../services/api";
 import StarRating, { RATING_LABELS } from "./StarRating";
 
 /**
+ * Rigorous backend contract validator for Event Rating Summary.
+ *
+ * Backend Contract:
+ * - count: non-negative integer.
+ * - average: null when count === 0; finite float between 1.0 and 5.0 when count > 0.
+ * - breakdown: object with string keys "1" through "5", each mapped to a non-negative integer.
+ * - sum of breakdown tier counts must strictly equal count.
+ */
+function validateRatingSummary(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return {
+      isValid: false,
+      errorReason: "Summary response payload is missing or not a valid object.",
+    };
+  }
+
+  const { average, count, breakdown } = data;
+
+  // 1. Validate count type and range
+  if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+    return {
+      isValid: false,
+      errorReason: "Total rating count must be a non-negative integer.",
+    };
+  }
+
+  // 2. Validate breakdown structure and individual tier values
+  if (!breakdown || typeof breakdown !== "object" || Array.isArray(breakdown)) {
+    return {
+      isValid: false,
+      errorReason: "Rating distribution breakdown is missing or malformed.",
+    };
+  }
+
+  const requiredTiers = ["1", "2", "3", "4", "5"];
+  let breakdownSum = 0;
+  for (const tier of requiredTiers) {
+    if (!(tier in breakdown)) {
+      return {
+        isValid: false,
+        errorReason: `Missing rating tier "${tier}" in distribution breakdown.`,
+      };
+    }
+    const tierCount = breakdown[tier];
+    if (typeof tierCount !== "number" || !Number.isInteger(tierCount) || tierCount < 0) {
+      return {
+        isValid: false,
+        errorReason: `Rating count for tier "${tier}" must be a non-negative integer.`,
+      };
+    }
+    breakdownSum += tierCount;
+  }
+
+  // 3. Verify that the sum of the five breakdown counts equals total count
+  if (breakdownSum !== count) {
+    return {
+      isValid: false,
+      errorReason: `Distribution sum (${breakdownSum}) does not equal total rating count (${count}).`,
+    };
+  }
+
+  // 4. Distinguish Valid Empty State vs. Valid Populated State
+  if (count === 0) {
+    if (average !== null) {
+      return {
+        isValid: false,
+        errorReason: "Average rating must be null when rating count is zero.",
+      };
+    }
+    return {
+      isValid: true,
+      stateType: "empty",
+      count: 0,
+      average: null,
+      breakdown,
+    };
+  }
+
+  // Count > 0: Valid Populated State
+  if (typeof average !== "number" || !Number.isFinite(average) || average < 1 || average > 5) {
+    return {
+      isValid: false,
+      errorReason: "Average rating must be a finite number between 1.0 and 5.0 when ratings exist.",
+    };
+  }
+
+  return {
+    isValid: true,
+    stateType: "populated",
+    count,
+    average,
+    breakdown,
+  };
+}
+
+/**
  * EventRatingBreakdown Component — Week 6 Stage 3
  *
  * Operator-facing aggregate rating summary and 1–5 star distribution breakdown.
@@ -21,7 +117,7 @@ export default function EventRatingBreakdown({
 }) {
   const { user } = useAuth();
 
-  const [summary, setSummary] = useState(null);
+  const [validatedSummary, setValidatedSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -47,12 +143,19 @@ export default function EventRatingBreakdown({
         const res = await ratingsAPI.getRatingSummary(eventId);
         if (generationRef.current !== currentGen) return;
 
-        // Backend response contract: { average: float | null, count: int, breakdown: { "1": int, ... "5": int } }
-        const data = res?.data;
-        if (data && typeof data === "object") {
-          setSummary(data);
+        // Perform strict response validation
+        const validation = validateRatingSummary(res?.data);
+        if (!validation.isValid) {
+          setError({
+            status: 422,
+            isDataInconsistent: true,
+            title: "Inconsistent Rating Summary Data",
+            message: `The server returned an inconsistent rating summary for this event (${validation.errorReason}). Please retry or contact technical support.`,
+          });
+          setValidatedSummary(null);
         } else {
-          setSummary(null);
+          setError(null);
+          setValidatedSummary(validation);
         }
       } catch (err) {
         if (generationRef.current !== currentGen) return;
@@ -73,8 +176,11 @@ export default function EventRatingBreakdown({
 
         setError({
           status: statusCode,
+          isDataInconsistent: false,
+          title: statusCode === 403 ? "Operator Authorization Required" : "Unable to Load Ratings",
           message: errorMessage,
         });
+        setValidatedSummary(null);
       } finally {
         if (generationRef.current === currentGen) {
           setLoading(false);
@@ -90,7 +196,7 @@ export default function EventRatingBreakdown({
     generationRef.current += 1;
     if (identityRef.current !== currentIdentity) {
       identityRef.current = currentIdentity;
-      setSummary(null);
+      setValidatedSummary(null);
       setError(null);
     }
     fetchSummary(false);
@@ -131,10 +237,11 @@ export default function EventRatingBreakdown({
   }
 
   // --------------------------------------------------------------------------
-  // STATE 2: Error State
+  // STATE 2: Error State (Authorization, Network, or Inconsistent Data)
   // --------------------------------------------------------------------------
   if (error) {
     const isAccessDenied = error.status === 403;
+    const isDataInconsistent = error.isDataInconsistent === true;
 
     return (
       <div
@@ -142,6 +249,8 @@ export default function EventRatingBreakdown({
         className={`p-6 rounded-3xl border transition-all ${
           isAccessDenied
             ? "bg-amber-50/70 border-amber-200 text-amber-950"
+            : isDataInconsistent
+            ? "bg-amber-50/80 border-amber-300 text-amber-950"
             : "bg-error-container/30 border-error/20 text-on-error-container"
         }`}
       >
@@ -149,14 +258,18 @@ export default function EventRatingBreakdown({
           <div className="flex items-start gap-3">
             <span
               className={`material-symbols-outlined text-[24px] shrink-0 mt-0.5 ${
-                isAccessDenied ? "text-amber-700" : "text-error"
+                isAccessDenied
+                  ? "text-amber-700"
+                  : isDataInconsistent
+                  ? "text-amber-800"
+                  : "text-error"
               }`}
             >
-              {isAccessDenied ? "shield_lock" : "error"}
+              {isAccessDenied ? "shield_lock" : isDataInconsistent ? "sync_problem" : "error"}
             </span>
             <div className="space-y-1">
               <h4 className="text-sm font-bold">
-                {isAccessDenied ? "Operator Authorization Required" : "Unable to Load Ratings"}
+                {error.title || (isAccessDenied ? "Operator Authorization Required" : "Unable to Load Ratings")}
               </h4>
               <p className="text-xs leading-relaxed text-text-muted">{error.message}</p>
             </div>
@@ -197,18 +310,10 @@ export default function EventRatingBreakdown({
     );
   }
 
-  // Extract verified backend metrics
-  const totalCount =
-    summary && Number.isInteger(summary.count) && summary.count >= 0 ? summary.count : 0;
-  const rawAverage = summary?.average;
-  const hasNumericAverage =
-    typeof rawAverage === "number" && Number.isFinite(rawAverage) && rawAverage > 0;
-  const breakdown = summary?.breakdown && typeof summary.breakdown === "object" ? summary.breakdown : {};
-
   // --------------------------------------------------------------------------
-  // STATE 3: Empty State (No Ratings Submitted Yet)
+  // STATE 3: Valid Empty State (count === 0, average === null)
   // --------------------------------------------------------------------------
-  if (totalCount === 0 || !hasNumericAverage) {
+  if (!validatedSummary || validatedSummary.stateType === "empty") {
     return (
       <div className="p-6 sm:p-7 rounded-3xl bg-surface-container-low border border-border-subtle/80 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -282,8 +387,9 @@ export default function EventRatingBreakdown({
   }
 
   // --------------------------------------------------------------------------
-  // STATE 4: Populated Rating Breakdown State
+  // STATE 4: Valid Populated Rating Breakdown State (count > 0, average 1.0..5.0)
   // --------------------------------------------------------------------------
+  const { count: totalCount, average: rawAverage, breakdown } = validatedSummary;
   const formattedAverage = Number(rawAverage).toFixed(1);
 
   return (
@@ -382,9 +488,8 @@ export default function EventRatingBreakdown({
 
           <div className="space-y-2.5">
             {[5, 4, 3, 2, 1].map((star) => {
-              const levelCount =
-                typeof breakdown[String(star)] === "number" ? breakdown[String(star)] : 0;
-              const percentage = totalCount > 0 ? Math.round((levelCount / totalCount) * 100) : 0;
+              const levelCount = breakdown[String(star)];
+              const percentage = Math.round((levelCount / totalCount) * 100);
 
               return (
                 <div key={star} className="flex items-center gap-3 text-xs">
@@ -448,4 +553,3 @@ EventRatingBreakdown.propTypes = {
   eventTitle: PropTypes.string,
   onClose: PropTypes.func,
 };
-
