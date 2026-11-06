@@ -168,6 +168,25 @@ export function extractErrorMessage(error, defaultMessage = "An error occurred."
 }
 
 /**
+ * Clubs API Service — Centralized club discovery and lookup endpoints
+ */
+export const clubsAPI = {
+  /**
+   * List public clubs with optional search and pagination.
+   * Endpoint: GET /api/clubs/
+   * @param {Object} [params] - Axios query params (search, page, page_size)
+   */
+  getAll: (params) => api.get("/api/clubs/", { params }),
+
+  /**
+   * Retrieve single club public profile by slug.
+   * Endpoint: GET /api/clubs/:slug/
+   * @param {string} slug - Club slug
+   */
+  getBySlug: (slug) => api.get(`/api/clubs/${slug}/`),
+};
+
+/**
  * Events API Service — Week 4 Backend Integration
  * Encapsulates backend-verified endpoints for event discovery,
  * operator event lifecycle management, and student RSVP registrations.

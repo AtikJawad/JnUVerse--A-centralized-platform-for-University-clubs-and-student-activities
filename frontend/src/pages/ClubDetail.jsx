@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import api, { extractErrorMessage, noticesAPI } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
+import PartnerClubsSection from "../components/PartnerClubsSection";
 
 function getClubIcon(club) {
   if (!club) return "groups";
@@ -773,6 +774,9 @@ export default function ClubDetail() {
                       </div>
                     )}
                   </div>
+
+                  {/* PARTNER CLUBS SECTION */}
+                  <PartnerClubsSection clubSlug={club.slug} />
 
                   {/* NOTICE BOARD SECTION */}
                   <div

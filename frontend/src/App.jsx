@@ -16,6 +16,7 @@ import OperatorEventForm from "./pages/OperatorEventForm";
 import OperatorEvents from "./pages/OperatorEvents";
 import OperatorEventAttendees from "./pages/OperatorEventAttendees";
 import OperatorNotices from "./pages/OperatorNotices";
+import OperatorCollaborations from "./pages/OperatorCollaborations";
 import Notifications from "./pages/Notifications";
 
 function App() {
@@ -121,6 +122,17 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Club Operator Collaboration Management Route */}
+          <Route
+            path="/operator/collaborations"
+            element={
+              <ProtectedRoute allowedRoles={["club_operator"]}>
+                <OperatorCollaborations />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/operator-collaborations" element={<Navigate to="/operator/collaborations" replace />} />
 
           {/* Protected General Dashboard Routes */}
           <Route

@@ -403,7 +403,7 @@ The Week 5 API layer integrates club broadcast announcements, audience scoping (
   - *Delete Notice Workflow:* Modal confirmation identifying notice title and timestamp, explaining cascading student in-app notification deletion, and executing `DELETE /api/notices/:id/` with backend-confirmation-first (HTTP 204) list removal.
   - *Navbar Integration:* Updated operator center navigation pill to: `Overview` (`/dashboard`), `Explore Clubs` (`/clubs`), `Members` (`/operator/members`), `Events` (`/operator/events`), `Notices` (`/operator/notices`). Added secondary `Explore Events` link (`/events`) on desktop and mobile drawer to preserve public event discovery. Student navigation remains completely unchanged.
 
-### 8. Week 6 Ratings & Collaboration (Stages 1, 2 & 3 Completed)
+### 8. Week 6 Ratings & Collaboration (Stages 1, 2, 3, 4, 5 & 6 Completed)
 The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 stars only, zero written comments), operator rating summaries with 1–5 distribution breakdowns, and inter-club collaboration requests with public partner listings:
 
 - **Ratings Service (`ratingsAPI` in [`api.js`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/services/api.js)):**
@@ -420,6 +420,31 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
   - `cancel(id)`: `POST /api/collaborations/:id/cancel/` (requesting club operator only) transitioning pending request to `cancelled`.
   - `getPartners(clubSlug, params)`: `GET /api/clubs/:slug/partners/` (public endpoint) returning paginated accepted partner clubs.
 
+- **Operator Collaboration Hub ([`OperatorCollaborations.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorCollaborations.jsx)):**
+  - *Reference:* `jnuverse_collaboration_requests_management/code.html`.
+  - *Route:* `/operator/collaborations`, protected by `ProtectedRoute` for role `club_operator`.
+  - *Navigation:* Integrated in [`Navbar.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/Navbar.jsx) desktop pill navigation and mobile drawer.
+  - *Overview Metrics:* 4 real-time metric cards derived from backend count responses (Incoming Total, Pending Inbound Action, Outgoing Sent, Accepted Partnerships).
+  - *Segmented Tabs:* Incoming (`box=received`) vs. Outgoing (`box=sent`) with dynamic pending badge counter.
+  - *Status Filters & Search:* All, Pending, Accepted, Declined, Cancelled filter chips alongside client-side query over loaded records.
+  - *Action Controls & Lifecycle Enforcement:*
+    - Incoming Pending: Accept Invitation (calls `collaborationsAPI.accept(id)` after modal confirmation) and Decline (calls `collaborationsAPI.reject(id)` after modal confirmation).
+    - Outgoing Pending: Cancel Request (calls `collaborationsAPI.cancel(id)` after modal confirmation).
+    - Finalized States (Accepted, Declined, Cancelled): Mutating actions hidden; status badge displayed.
+  - *Slide-Over Detail Drawer:* Full collaboration brief sheet matching Stitch design, displaying partner club emblem, initiative scope, core statement, linked event with Dhaka date, protocol ID, and resolution timestamps.
+  - *Deduplication & Safety:* `reqGenRef` and `identityRef` prevent cross-account leaks or stale response overwrites.
+  - *Notifications Integration:* Handled naturally by backend notification service (`Notification.objects.create`); frontend refreshes data upon action completion without emitting duplicate alerts.
+
+- **Propose Collaboration Modal ([`ProposeCollaborationModal.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/ProposeCollaborationModal.jsx)):**
+  - *Reference:* `jnuverse_collaboration_requests_management/code.html`.
+  - *Trigger:* Prominent `"Propose Collaboration"` CTA button in the header of [`OperatorCollaborations.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorCollaborations.jsx).
+  - *Target Club Selection:* Dynamic selector populated from `clubsAPI.getAll({ page_size: 50 })`, strictly filtering out the operator's own club to prevent self-collaboration. Includes club monogram, name, slug, and selected recipient preview strip.
+  - *Proposal Details:* Enforces required `title` (max 200 characters with live counter) and optional multiline `description` core brief statement.
+  - *Optional Event Association:* Dynamic dropdown populated from `eventsAPI.getAll({ mine: "true", upcoming: "true", page_size: 50 })`, filtered strictly for published upcoming events owned by the operator's club per backend validation rules.
+  - *Submission & Refresh:* Dispatches proposal via `collaborationsAPI.create(payload)`. On HTTP 201 Created confirmation, closes modal, displays toast confirmation, switches to the Outgoing (`sent`) tab, and refreshes the Sent list and overview metrics.
+  - *Error Handling:* Comprehensive inline and banner mapping for HTTP 409 Conflict (duplicate pending request between clubs), HTTP 400 (field validation), and HTTP 403 (unauthorized). Entered data is preserved on recoverable errors.
+  - *Accessibility & Responsive Design:* Full ARIA dialog semantics (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`), Escape key listener, click-outside dismissal, and mobile-friendly viewport scaling.
+
 - **Student Event Rating Component ([`StarRating.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/StarRating.jsx)):**
   - *Reference:* `jnuverse_student_event_feedback/code.html`.
   - *Interactive Mode:* Exactly 5 selectable stars with hover preview, active scale effects, dynamic text label (`Rating: 5 / 5 — Excellent`), and full keyboard navigation (Arrows, Home, End, Space, Enter) with roving `tabIndex` and DOM focus shift.
@@ -433,6 +458,15 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
   - *State Handling:* Clean loading skeleton, empty state ("No student ratings yet"), error alerts (401, 403, 404, network), and manual refresh control.
   - *Strict Privacy:* Aggregate metrics only. Individual student ratings, names, emails, IDs, and timestamps are strictly never fetched or displayed.
   - *Operator Workspace Integration:* Embedded as an expandable inline drawer in [`OperatorEvents.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEvents.jsx) and attendee overview in [`OperatorEventAttendees.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/OperatorEventAttendees.jsx).
+
+- **Public Partner Clubs Section ([`PartnerClubsSection.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/components/PartnerClubsSection.jsx)):**
+  - *Reference:* Stitch Explore Clubs & Club Profile Management layout.
+  - *Integration:* Embedded in [`ClubDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/ClubDetail.jsx) left column directly below "About This Society" and above `#notice-board`.
+  - *Public Endpoint:* Consumes `GET /api/clubs/:slug/partners/` via `collaborationsAPI.getPartners(clubSlug, params)` (`AllowAny` permission).
+  - *Accepted Collaborations Only:* Displays only established, accepted collaborative partner clubs. Excludes pending, rejected, and cancelled requests.
+  - *Card Display:* Uses verified fields (`name`, `@slug`, `logo` with fallback to stylized avatar, formatted `partner_since` date). No invented fields (no fake ratings, descriptions, or member counts).
+  - *Navigation:* Card heading and "View Club" button link directly to `/clubs/:slug`.
+  - *State Handling & Concurrency:* Loading skeleton, empty state ("No partner clubs yet"), retryable error state, non-destructive refresh error banner, and pagination support. Slug changes invalidate in-flight requests via `reqGenRef` and unmount safety via `isMountedRef`.
 
 - **Event Detail Rating Integration ([`EventDetail.jsx`](file:///Users/anikkhondokar/Desktop/Software/JnUVerse--A-centralized-platform-for-University-clubs-and-student-activities/frontend/src/pages/EventDetail.jsx)):**
   - *Header Summary Bar:* Integrated read-only aggregate rating indicator (`★ 4.3 (3 ratings)`) alongside schedule, venue, and capacity with strict numeric validation guards.
@@ -455,7 +489,7 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
 | **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
-| **Ratings & Collaboration** | Week 6 | **In Progress** (Stage 3 Operator Event Rating Summary & Distribution Breakdown Completed & Verified) | **Source & Contract Verified** (Backend pytest suite blocked locally due to missing environment runner; contracts verified via source inspection & API smoke tests) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
+| **Ratings & Collaboration** | Week 6 | **In Progress** (Stage 6 Propose Collaboration Modal Completed & Verified) | **Source & Contract Verified** (Backend pytest suite blocked locally due to missing environment runner; contracts verified via source inspection & API smoke tests) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
 | **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |

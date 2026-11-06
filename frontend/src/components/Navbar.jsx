@@ -189,6 +189,16 @@ export default function Navbar() {
               >
                 Notices
               </Link>
+              <Link
+                to="/operator/collaborations"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/operator/collaborations")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Collaborations
+              </Link>
             </>
           ) : (
             <>
@@ -363,6 +373,17 @@ export default function Navbar() {
                 }`}
               >
                 Notices
+              </Link>
+              <Link
+                to="/operator/collaborations"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/operator/collaborations")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                Collaborations
               </Link>
               <div className="pt-2 pb-1 px-4 text-[10px] font-bold uppercase tracking-wider text-text-muted">
                 Public Discovery
