@@ -6,6 +6,8 @@ from django.db.models.functions import Lower
 from django.utils.text import slugify
 from django.utils import timezone
 
+from config.images import club_logo_path
+
 class Club(models.Model):
     """Verified on creation: no admin approval workflow."""
 
@@ -16,7 +18,8 @@ class Club(models.Model):
     name = models.CharField(max_length=150)
     slug = models.SlugField(max_length=170, unique=True, blank=True)
     description = models.TextField(blank=True)
-    logo = models.URLField(blank=True)
+    logo = models.URLField(blank=True)  # legacy external URL; kept so existing data keeps working
+    logo_image = models.ImageField(upload_to=club_logo_path, blank=True)  # uploaded logo (path only in DB)
     contact_email = models.EmailField(blank=True)
     interests = models.ManyToManyField("accounts.Interest", blank=True, related_name="clubs")
     created_at = models.DateTimeField(auto_now_add=True)

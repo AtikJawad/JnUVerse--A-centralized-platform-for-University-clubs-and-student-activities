@@ -323,6 +323,54 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/clubs/{slug}/logo/:
+    put:
+      operationId: api_clubs_logo_update
+      description: Upload/replace (PUT, multipart field `logo`) or remove (DELETE)
+        the club logo. Owner operator only.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClubLogoUpload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClubLogoUpload'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubPublic'
+          description: ''
+    delete:
+      operationId: api_clubs_logo_destroy
+      description: Upload/replace (PUT, multipart field `logo`) or remove (DELETE)
+        the club logo. Owner operator only.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/clubs/{slug}/members/:
     get:
       operationId: api_clubs_members_list
@@ -877,6 +925,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/Event'
           description: ''
+  /api/events/{id}/banner/:
+    put:
+      operationId: api_events_banner_update
+      description: |-
+        Upload/replace (PUT, multipart field `banner`) or remove (DELETE) an event banner.
+
+        Owner operator only. Same rule as editing an event: cancelled or ended events return 409.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventBannerUpload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventBannerUpload'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+    delete:
+      operationId: api_events_banner_destroy
+      description: |-
+        Upload/replace (PUT, multipart field `banner`) or remove (DELETE) an event banner.
+
+        Owner operator only. Same rule as editing an event: cancelled or ended events return 409.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/events/{id}/cancel/:
     post:
       operationId: api_events_cancel_create
@@ -1391,8 +1493,8 @@ components:
           type: string
         logo:
           type: string
-          format: uri
-          maxLength: 200
+          nullable: true
+          readOnly: true
         contact_email:
           type: string
           format: email
@@ -1403,6 +1505,7 @@ components:
       required:
       - id
       - is_verified
+      - logo
       - name
     ClubCounts:
       type: object
@@ -1455,6 +1558,14 @@ components:
       - ratings
       - recent_events
       - registrations_last_7_days
+    ClubLogoUpload:
+      type: object
+      properties:
+        logo:
+          type: string
+          format: binary
+      required:
+      - logo
     ClubMini:
       type: object
       properties:
@@ -1490,8 +1601,8 @@ components:
           type: string
         logo:
           type: string
-          format: uri
-          maxLength: 200
+          nullable: true
+          readOnly: true
         contact_email:
           type: string
           format: email
@@ -1529,6 +1640,7 @@ components:
       - interests
       - is_following
       - is_verified
+      - logo
       - member_count
       - my_membership
       - name
@@ -1586,10 +1698,6 @@ components:
       properties:
         description:
           type: string
-        logo:
-          type: string
-          format: uri
-          maxLength: 200
         contact_email:
           type: string
           format: email
@@ -1802,6 +1910,10 @@ components:
         venue:
           type: string
           maxLength: 200
+        banner:
+          type: string
+          nullable: true
+          readOnly: true
         starts_at:
           type: string
           format: date-time
@@ -1847,6 +1959,7 @@ components:
           readOnly: true
       required:
       - average_rating
+      - banner
       - club
       - created_at
       - ends_at
@@ -1860,6 +1973,14 @@ components:
       - starts_at
       - title
       - venue
+    EventBannerUpload:
+      type: object
+      properties:
+        banner:
+          type: string
+          format: binary
+      required:
+      - banner
     EventStatusEnum:
       enum:
       - draft
@@ -2416,6 +2537,7 @@ components:
           type: string
         logo:
           type: string
+          nullable: true
         partner_since:
           type: string
           format: date-time
@@ -2431,10 +2553,6 @@ components:
       properties:
         description:
           type: string
-        logo:
-          type: string
-          format: uri
-          maxLength: 200
         contact_email:
           type: string
           format: email

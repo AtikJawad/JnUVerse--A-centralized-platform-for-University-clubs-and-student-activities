@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from config.images import club_logo_url
+from config.api_fields import UploadImageField
+
 from .models import Club, ClubMembership
 
 from apps.accounts.models import Interest
@@ -12,6 +15,7 @@ class ClubPublicSerializer(serializers.ModelSerializer):
     is_following = serializers.BooleanField(read_only=True, allow_null=True)
     my_membership = serializers.CharField(read_only=True, allow_null=True)
     interests = InterestSerializer(many=True, read_only=True)
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
@@ -21,12 +25,15 @@ class ClubPublicSerializer(serializers.ModelSerializer):
     def get_is_verified(self, obj) -> bool:
         return True  # verified on account creation
 
+    def get_logo(self, obj) -> str | None:
+        return club_logo_url(obj)
+
 
 class ClubUpdateSerializer(serializers.ModelSerializer):
     interests = serializers.PrimaryKeyRelatedField(many=True, queryset=Interest.objects.all(), required=False)
     class Meta:
         model = Club
-        fields = ["description", "logo", "contact_email", "interests"]
+        fields = ["description", "contact_email", "interests"]  # logo: PUT /api/clubs/{slug}/logo/
 
 class MembershipSerializer(serializers.ModelSerializer):
     student_id = serializers.CharField(source="student.jnu_student_id", read_only=True)
@@ -38,3 +45,6 @@ class MembershipSerializer(serializers.ModelSerializer):
         model = ClubMembership
         fields = ["id", "student_id", "name", "department", "batch",
                   "status", "requested_at", "reviewed_at"]
+
+class ClubLogoUploadSerializer(serializers.Serializer):
+    logo = UploadImageField()

@@ -54,5 +54,5 @@ class PartnerSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField()
     slug = serializers.CharField()
-    logo = serializers.CharField(allow_blank=True)
+    logo = serializers.CharField(allow_null=True)
     partner_since = serializers.DateTimeField(allow_null=True)

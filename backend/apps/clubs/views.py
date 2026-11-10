@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.files.base import ContentFile
 from django.db.models import BooleanField, CharField, Count, Exists, OuterRef, Q, Subquery, Value
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -5,6 +7,7 @@ from django.db import transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view, inline_serializer
 from rest_framework import filters, generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,9 +17,11 @@ from apps.accounts.permissions import IsClubOperator, IsStudent
 from apps.accounts.models import User
 from apps.notifications import services as notify
 
+from config.images import ImageRejected, validate_image
+
 from .models import Club, ClubFollow, ClubMembership
 from .permissions import IsOwnerOrReadOnly
-from .serializers import ClubPublicSerializer, ClubUpdateSerializer, MembershipSerializer
+from .serializers import ClubPublicSerializer, ClubUpdateSerializer, MembershipSerializer, ClubLogoUploadSerializer
 
 
 def club_queryset(user=None):
@@ -89,6 +94,46 @@ class ClubDetailView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(ClubPublicSerializer(self.get_queryset().get(pk=club.pk)).data)
+
+class ClubLogoView(APIView):
+    """Upload/replace (PUT, multipart field `logo`) or remove (DELETE) the club logo. Owner operator only."""
+
+    permission_classes = [IsClubOperator]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_club(self, request, slug):
+        club = get_object_or_404(Club, slug=slug)
+        if club.operator_id != request.user.id:
+            raise PermissionDenied("Only this club's operator can change its logo.")
+        return club
+
+    @extend_schema(request=ClubLogoUploadSerializer, responses=ClubPublicSerializer)
+    def put(self, request, slug):
+        club = self.get_club(request, slug)
+        upload = request.FILES.get("logo")
+        if upload is None:
+            return Response({"logo": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data, ext = validate_image(upload, settings.CLUB_LOGO_MAX_BYTES)
+        except ImageRejected as e:
+            return Response({"logo": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+        old = club.logo_image.name
+        club.logo_image.save(f"logo.{ext}", ContentFile(data), save=False)
+        club.save(update_fields=["logo_image", "updated_at"])
+        if old:
+            club.logo_image.storage.delete(old)
+        return Response(ClubPublicSerializer(club_queryset(request.user).get(pk=club.pk)).data)
+
+    @extend_schema(request=None, responses={204: None})
+    def delete(self, request, slug):
+        club = self.get_club(request, slug)
+        old = club.logo_image.name
+        if old:
+            club.logo_image = ""
+            club.save(update_fields=["logo_image", "updated_at"])
+            club.logo_image.storage.delete(old)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ClubFollowView(APIView):
     permission_classes = [IsStudent]

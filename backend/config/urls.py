@@ -7,6 +7,8 @@ routes (accounts, clubs, events, ...) are included here as each app's
 views are implemented in its scheduled week.
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
@@ -45,3 +47,6 @@ urlpatterns = [
     # path("api/collaborations/", include("apps.collaborations.urls")),
     # path("api/reports/", include("apps.reports.urls")),
 ]
+
+if settings.DEBUG:  # local-storage dev only; production images come from Supabase
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

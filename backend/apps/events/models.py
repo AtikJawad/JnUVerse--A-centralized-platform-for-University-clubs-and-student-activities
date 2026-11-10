@@ -6,6 +6,9 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 
+from config.images import event_banner_path
+
+
 class Event(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -22,6 +25,7 @@ class Event(models.Model):
     ends_at = models.DateTimeField()
     capacity = models.PositiveIntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    banner = models.ImageField(upload_to=event_banner_path, blank=True)  # path only in DB
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

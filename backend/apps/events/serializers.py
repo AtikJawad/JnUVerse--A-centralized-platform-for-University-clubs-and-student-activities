@@ -1,7 +1,10 @@
 from django.utils import timezone
 from rest_framework import serializers
+from config.api_fields import UploadImageField
 
 from apps.clubs.models import Club
+
+from config.images import media_url
 
 from .models import Event, EventRegistration
 
@@ -21,13 +24,17 @@ class EventSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     rating_count = serializers.IntegerField(read_only=True)
     my_rating = serializers.IntegerField(read_only=True, allow_null=True)
+    banner = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
-        fields = ["id", "club", "title", "description", "venue", "starts_at", "ends_at", "capacity",
+        fields = ["id", "club", "title", "description", "venue", "banner", "starts_at", "ends_at", "capacity",
                   "registered_count", "remaining_capacity", "status", "is_completed", "is_registered",
                   "average_rating", "rating_count", "my_rating",
                   "created_at"]
+
+    def get_banner(self, obj) -> str | None:
+        return media_url(obj.banner)
 
     def get_remaining_capacity(self, obj) -> int | None:
         if obj.capacity is None:
@@ -75,3 +82,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventRegistration
         fields = ["id", "student_id", "name", "department", "batch", "status", "registered_at"]
+
+class EventBannerUploadSerializer(serializers.Serializer):
+    banner = UploadImageField()

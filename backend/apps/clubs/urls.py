@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    ClubDetailView, ClubFollowView, ClubListView, ClubMemberListView, ClubMembershipRequestListView,
+    ClubDetailView, ClubFollowView, ClubLogoView, ClubListView, ClubMemberListView, ClubMembershipRequestListView,
     ClubMembershipView, MembershipApproveView, MembershipRejectView, MembershipRemoveView,
 )
 
@@ -10,6 +10,7 @@ app_name = "clubs"
 urlpatterns = [
     path("", ClubListView.as_view(), name="club-list"),
     path("<slug:slug>/", ClubDetailView.as_view(), name="club-detail"),
+    path("<slug:slug>/logo/", ClubLogoView.as_view(), name="club-logo"),
     path("<slug:slug>/follow/", ClubFollowView.as_view(), name="club-follow"),
     path("<slug:slug>/membership/", ClubMembershipView.as_view(), name="club-membership"),
     path("<slug:slug>/members/", ClubMemberListView.as_view(), name="club-members"),

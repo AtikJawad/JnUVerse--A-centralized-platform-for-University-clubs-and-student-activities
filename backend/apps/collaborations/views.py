@@ -14,6 +14,7 @@ from apps.accounts.permissions import IsClubOperator
 from apps.clubs.models import Club
 from apps.clubs.views import ClubPagination
 from apps.notifications import services as notify
+from config.images import club_logo_url
 
 from .models import CollaborationRequest
 from .serializers import CollaborationCreateSerializer, CollaborationSerializer, PartnerSerializer
@@ -158,7 +159,7 @@ class ClubPartnersView(generics.ListAPIView):
         for r in accepted:
             other = r.target_club if r.requesting_club_id == club.id else r.requesting_club
             entry = partners.setdefault(other.id, {
-                "id": other.id, "name": other.name, "slug": other.slug, "logo": other.logo,
+                "id": other.id, "name": other.name, "slug": other.slug, "logo": club_logo_url(other),
                 "partner_since": r.responded_at})
             if r.responded_at and (entry["partner_since"] is None or r.responded_at < entry["partner_since"]):
                 entry["partner_since"] = r.responded_at

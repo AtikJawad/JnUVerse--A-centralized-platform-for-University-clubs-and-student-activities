@@ -4,6 +4,7 @@ from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
 from apps.clubs.models import Club
+from config.images import club_logo_url
 
 from .constants import DEPARTMENTS
 from .models import StudentProfile, User, ValidStudentRecord, Interest
@@ -50,10 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ClubSerializer(serializers.ModelSerializer):
     is_verified = serializers.SerializerMethodField()
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
         fields = ["id", "name", "slug", "description", "logo", "contact_email", "is_verified"]
+
+    def get_logo(self, obj) -> str | None:
+        return club_logo_url(obj)
 
     def get_is_verified(self, obj) -> bool:
         return True  # verified on account creation

@@ -173,6 +173,15 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# --- Media (uploaded club logos / event banners) ---
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+# Used only to make LOCAL (relative) media URLs absolute in dev. Not needed with Supabase (URLs are absolute).
+PUBLIC_BASE_URL = env("PUBLIC_BASE_URL", "http://localhost:8000")
+CLUB_LOGO_MAX_BYTES = int(env("CLUB_LOGO_MAX_BYTES", 2 * 1024 * 1024))
+EVENT_BANNER_MAX_BYTES = int(env("EVENT_BANNER_MAX_BYTES", 5 * 1024 * 1024))
+IMAGE_MAX_SIDE = int(env("IMAGE_MAX_SIDE", 4096))
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
@@ -231,3 +240,24 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+
+
+# --- Supabase Storage (S3-compatible API) for uploaded images ---
+# Off by default (local files under MEDIA_ROOT). Set USE_SUPABASE_STORAGE=True on Render.
+if env_bool("USE_SUPABASE_STORAGE", False):
+    _bucket = env("SUPABASE_S3_BUCKET", required=True)
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": _bucket,
+            "endpoint_url": env("SUPABASE_S3_ENDPOINT", required=True),
+            "access_key": env("SUPABASE_S3_ACCESS_KEY_ID", required=True),
+            "secret_key": env("SUPABASE_S3_SECRET_ACCESS_KEY", required=True),
+            "region_name": env("SUPABASE_S3_REGION", "us-east-1"),
+            "custom_domain": env("SUPABASE_PUBLIC_MEDIA_DOMAIN", required=True),
+            "default_acl": None,
+            "querystring_auth": False,
+            "file_overwrite": False,
+            "addressing_style": "path",
+        },
+    }

@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import (
     Avg, BooleanField, Count, Exists, FloatField, IntegerField, OuterRef, Q, Subquery, Value,
@@ -5,9 +7,10 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import filters, generics, status
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view, inline_serializer
+from rest_framework import filters, generics, serializers, status
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -16,11 +19,12 @@ from rest_framework.views import APIView
 from apps.accounts.models import User
 from apps.accounts.permissions import IsClubOperator, IsStudent
 from apps.notifications import services as notify
+from config.images import ImageRejected, validate_image
 
 from .models import Event, EventRegistration
 from apps.feedback.models import EventRating
 from .permissions import IsEventOwnerOrReadOnly
-from .serializers import EventSerializer, EventWriteSerializer, RegistrationSerializer
+from .serializers import EventSerializer, EventWriteSerializer, RegistrationSerializer, EventBannerUploadSerializer
 
 PUBLIC_STATUSES = (Event.Status.PUBLISHED, Event.Status.CANCELLED)
 
@@ -142,6 +146,59 @@ class EventDetailView(generics.RetrieveUpdateAPIView):
             if event.status == Event.Status.PUBLISHED and before != (event.starts_at, event.ends_at, event.venue):
                 notify.notify_event_updated(event)
         return Response(EventSerializer(self.get_queryset().get(pk=event.pk)).data)
+
+
+class EventBannerView(APIView):
+    """Upload/replace (PUT, multipart field `banner`) or remove (DELETE) an event banner.
+
+    Owner operator only. Same rule as editing an event: cancelled or ended events return 409.
+    """
+
+    permission_classes = [IsClubOperator]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_event(self, request, pk):
+        visible = get_object_or_404(event_queryset(request.user), pk=pk)  # others' drafts stay hidden (404)
+        if visible.club.operator_id != request.user.id:
+            raise PermissionDenied("Only this club's operator can change this event's banner.")
+        return Event.objects.get(pk=pk)
+
+    @staticmethod
+    def locked(event):
+        if event.status == Event.Status.CANCELLED or event.is_completed:
+            return Response({"detail": "Cancelled or ended events cannot be edited."},
+                            status=status.HTTP_409_CONFLICT)
+
+    @extend_schema(request=EventBannerUploadSerializer, responses=EventSerializer)
+    def put(self, request, pk):
+        event = self.get_event(request, pk)
+        if (resp := self.locked(event)) is not None:
+            return resp
+        upload = request.FILES.get("banner")
+        if upload is None:
+            return Response({"banner": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data, ext = validate_image(upload, settings.EVENT_BANNER_MAX_BYTES)
+        except ImageRejected as e:
+            return Response({"banner": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+        old = event.banner.name
+        event.banner.save(f"banner.{ext}", ContentFile(data), save=False)
+        event.save(update_fields=["banner", "updated_at"])
+        if old:
+            event.banner.storage.delete(old)
+        return Response(EventSerializer(event_queryset(request.user).get(pk=pk)).data)
+
+    @extend_schema(request=None, responses={204: None})
+    def delete(self, request, pk):
+        event = self.get_event(request, pk)
+        if (resp := self.locked(event)) is not None:
+            return resp
+        old = event.banner.name
+        if old:
+            event.banner = ""
+            event.save(update_fields=["banner", "updated_at"])
+            event.banner.storage.delete(old)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class EventActionView(APIView):

@@ -21,3 +21,8 @@ DATABASES = {
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # faster tests
 
 MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]
+
+import tempfile  # noqa: E402
+
+MEDIA_ROOT = tempfile.mkdtemp(prefix="jnuverse-test-media-")
+STORAGES = {**STORAGES, "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"}}  # never hit Supabase
