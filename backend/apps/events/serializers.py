@@ -73,6 +73,10 @@ class EventWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
         return attrs
 
+class AttendanceInputSerializer(serializers.Serializer):
+    registration_ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=True)
+
+
 class RegistrationSerializer(serializers.ModelSerializer):
     student_id = serializers.CharField(source="student.jnu_student_id", read_only=True)
     name = serializers.CharField(source="student.full_name", read_only=True)
@@ -81,7 +85,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EventRegistration
-        fields = ["id", "student_id", "name", "department", "batch", "status", "registered_at"]
+        fields = ["id", "student_id", "name", "department", "batch", "status", "attended", "registered_at"]
 
 class EventBannerUploadSerializer(serializers.Serializer):
     banner = UploadImageField()

@@ -101,7 +101,7 @@ def test_registration_list_for_owner_only(api, login, club, student):
     as_user(api, login, "op@example.com")
     r = api.get(url)
     assert r.status_code == 200 and [x["student_id"] for x in r.data["results"]] == ["B220305051", "B220305050"]
-    assert set(r.data["results"][0]) == {"id", "student_id", "name", "department", "batch", "status", "registered_at"}
+    assert set(r.data["results"][0]) == {"id", "student_id", "name", "department", "batch", "status", "attended", "registered_at"}
     assert api.get(f"{URL}{ZERO}/registrations/").status_code == 404
 
 

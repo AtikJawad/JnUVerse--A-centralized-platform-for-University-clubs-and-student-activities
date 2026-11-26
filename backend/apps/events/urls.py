@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    EventBannerView, EventCancelView, EventDetailView, EventListCreateView, EventPublishView,
+    EventAttendanceView, EventBannerView, EventCancelView, EventDetailView, EventListCreateView, EventPublishView,
     EventRegisterView, EventRegistrationListView,
 )
 app_name = "events"
@@ -9,6 +9,7 @@ app_name = "events"
 urlpatterns = [
     path("", EventListCreateView.as_view(), name="event-list"),
     path("<uuid:pk>/", EventDetailView.as_view(), name="event-detail"),
+    path("<uuid:pk>/attendance/", EventAttendanceView.as_view(), name="event-attendance"),
     path("<uuid:pk>/banner/", EventBannerView.as_view(), name="event-banner"),
     path("<uuid:pk>/publish/", EventPublishView.as_view(), name="event-publish"),
     path("<uuid:pk>/cancel/", EventCancelView.as_view(), name="event-cancel"),

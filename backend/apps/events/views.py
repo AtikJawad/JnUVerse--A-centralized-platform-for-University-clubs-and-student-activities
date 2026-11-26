@@ -24,7 +24,7 @@ from config.images import ImageRejected, validate_image
 from .models import Event, EventRegistration
 from apps.feedback.models import EventRating
 from .permissions import IsEventOwnerOrReadOnly
-from .serializers import EventSerializer, EventWriteSerializer, RegistrationSerializer, EventBannerUploadSerializer
+from .serializers import AttendanceInputSerializer, EventSerializer, EventWriteSerializer, RegistrationSerializer, EventBannerUploadSerializer
 
 PUBLIC_STATUSES = (Event.Status.PUBLISHED, Event.Status.CANCELLED)
 
@@ -308,6 +308,42 @@ class EventRegisterView(APIView):
                     reg.status = EventRegistration.Status.CANCELLED
                     reg.save(update_fields=["status"])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EventAttendanceView(APIView):
+    """Club operator marks who attended. PUT replaces the attended set among current registrations."""
+
+    permission_classes = [IsClubOperator]
+
+    @extend_schema(
+        request=AttendanceInputSerializer,
+        responses=inline_serializer("AttendanceResult", {
+            "registered": serializers.IntegerField(), "attended": serializers.IntegerField()}))
+    def put(self, request, pk):
+        visible = get_object_or_404(event_queryset(request.user), pk=pk)  # others' drafts stay hidden
+        if visible.club.operator_id != request.user.id:
+            raise PermissionDenied("Only this club's operator can mark attendance.")
+        serializer = AttendanceInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = set(serializer.validated_data["registration_ids"])
+        with transaction.atomic():
+            event = Event.objects.select_for_update().get(pk=pk)
+            if event.status != Event.Status.PUBLISHED:
+                return Response({"detail": "Attendance can only be marked for published events."},
+                                status=status.HTTP_409_CONFLICT)
+            if event.starts_at > timezone.now():
+                return Response({"detail": "Attendance can be marked once the event has started."},
+                                status=status.HTTP_409_CONFLICT)
+            regs = EventRegistration.objects.filter(event=event, status=EventRegistration.Status.REGISTERED)
+            valid = set(regs.values_list("id", flat=True))
+            unknown = ids - valid
+            if unknown:
+                return Response({"registration_ids": [
+                    "These ids are not current registrations of this event: "
+                    + ", ".join(str(i) for i in sorted(unknown, key=str))]}, status=status.HTTP_400_BAD_REQUEST)
+            regs.filter(id__in=ids).update(attended=True)
+            regs.exclude(id__in=ids).update(attended=False)
+        return Response({"registered": len(valid), "attended": len(ids)})
 
 
 class EventRegistrationListView(generics.ListAPIView):

@@ -4,6 +4,122 @@ info:
   version: 0.2.0
   description: Backend API for JnUVerse (JnU clubs & student activities).
 paths:
+  /api/analytics/club-comparison/:
+    get:
+      operationId: api_analytics_club_comparison_retrieve
+      description: 'Report 3: all clubs side by side (events launched, registration
+        rate, attendance, ratings).'
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+        description: YYYY-MM-DD. Only events starting on or after this date.
+      - in: query
+        name: date_to
+        schema:
+          type: string
+        description: YYYY-MM-DD. Only events starting on or before this date.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubComparison'
+          description: ''
+  /api/analytics/events/{id}/department-participation/:
+    get:
+      operationId: api_analytics_events_department_participation_retrieve
+      description: 'Report 1: after an event, how many students from each department
+        registered and attended.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentParticipation'
+          description: ''
+  /api/analytics/events/{id}/ratings/:
+    get:
+      operationId: api_analytics_events_ratings_retrieve
+      description: 'Report 2: how many times each rating (1 to 5) was given for one
+        event.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostEventRating'
+          description: ''
+  /api/analytics/my-club/:
+    get:
+      operationId: api_analytics_my_club_retrieve
+      description: 'Report 5: the operator''s own club over time (events, registrations,
+        attendance, ratings).'
+      parameters:
+      - in: query
+        name: date_from
+        schema:
+          type: string
+        description: YYYY-MM-DD. Only events starting on or after this date.
+      - in: query
+        name: date_to
+        schema:
+          type: string
+        description: YYYY-MM-DD. Only events starting on or before this date.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubOwnReport'
+          description: ''
+  /api/analytics/student-activity/:
+    get:
+      operationId: api_analytics_student_activity_retrieve
+      description: 'Report 4: a student''s own activity (memberships, attended events,
+        ratings given).'
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentActivity'
+          description: ''
   /api/auth/departments/:
     get:
       operationId: api_auth_departments_retrieve
@@ -925,6 +1041,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Event'
           description: ''
+  /api/events/{id}/attendance/:
+    put:
+      operationId: api_events_attendance_update
+      description: Club operator marks who attended. PUT replaces the attended set
+        among current registrations.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceResult'
+          description: ''
   /api/events/{id}/banner/:
     put:
       operationId: api_events_banner_update
@@ -1460,6 +1611,26 @@ paths:
           description: ''
 components:
   schemas:
+    AttendanceInput:
+      type: object
+      properties:
+        registration_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - registration_ids
+    AttendanceResult:
+      type: object
+      properties:
+        registered:
+          type: integer
+        attended:
+          type: integer
+      required:
+      - attended
+      - registered
     AudienceEnum:
       enum:
       - public
@@ -1507,6 +1678,67 @@ components:
       - is_verified
       - logo
       - name
+    ClubComparison:
+      type: object
+      properties:
+        period:
+          type: object
+          additionalProperties:
+            type: string
+            format: date
+            nullable: true
+        clubs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClubComparisonRow'
+      required:
+      - clubs
+      - period
+    ClubComparisonRow:
+      type: object
+      properties:
+        club:
+          type: object
+          additionalProperties:
+            type: string
+        is_mine:
+          type: boolean
+        events_launched:
+          type: integer
+        cancelled_events:
+          type: integer
+        completed_events:
+          type: integer
+        registrations:
+          type: integer
+        registration_rate:
+          type: number
+          format: double
+          nullable: true
+        attended:
+          type: integer
+        attendance_rate:
+          type: number
+          format: double
+          nullable: true
+        average_rating:
+          type: number
+          format: double
+          nullable: true
+        rating_count:
+          type: integer
+      required:
+      - attendance_rate
+      - attended
+      - average_rating
+      - cancelled_events
+      - club
+      - completed_events
+      - events_launched
+      - is_mine
+      - rating_count
+      - registration_rate
+      - registrations
     ClubCounts:
       type: object
       properties:
@@ -1583,6 +1815,44 @@ components:
       required:
       - id
       - name
+    ClubOwnReport:
+      type: object
+      properties:
+        club:
+          type: object
+          additionalProperties:
+            type: string
+        period:
+          type: object
+          additionalProperties:
+            type: string
+            format: date
+            nullable: true
+        summary:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+            nullable: true
+        monthly:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthRow'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnEventRow'
+        best_rated_event:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - best_rated_event
+      - club
+      - events
+      - monthly
+      - period
+      - summary
     ClubPublic:
       type: object
       properties:
@@ -1891,6 +2161,48 @@ components:
             type: string
       required:
       - departments
+    DepartmentParticipation:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/EventRef'
+        totals:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+            nullable: true
+        departments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepartmentRow'
+      required:
+      - departments
+      - event
+      - totals
+    DepartmentRow:
+      type: object
+      properties:
+        department:
+          type: string
+        registered:
+          type: integer
+        attended:
+          type: integer
+        attendance_rate:
+          type: number
+          format: double
+          nullable: true
+        share_of_attended:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - attendance_rate
+      - attended
+      - department
+      - registered
+      - share_of_attended
     Event:
       type: object
       properties:
@@ -1981,6 +2293,28 @@ components:
           format: binary
       required:
       - banner
+    EventRef:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        club:
+          type: string
+      required:
+      - club
+      - ends_at
+      - id
+      - starts_at
+      - title
     EventStatusEnum:
       enum:
       - draft
@@ -2198,6 +2532,27 @@ components:
         * `rejected` - Rejected
         * `left` - Left
         * `removed` - Removed
+    MonthRow:
+      type: object
+      properties:
+        month:
+          type: string
+        events_launched:
+          type: integer
+        registrations:
+          type: integer
+        attended:
+          type: integer
+        average_rating:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - attended
+      - average_rating
+      - events_launched
+      - month
+      - registrations
     MyRating:
       type: object
       properties:
@@ -2318,6 +2673,55 @@ components:
     NullEnum:
       enum:
       - null
+    OwnEventRow:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+        is_completed:
+          type: boolean
+        capacity:
+          type: integer
+          nullable: true
+        registered:
+          type: integer
+        fill_rate:
+          type: number
+          format: double
+          nullable: true
+        attended:
+          type: integer
+        attendance_rate:
+          type: number
+          format: double
+          nullable: true
+        average_rating:
+          type: number
+          format: double
+          nullable: true
+        rating_count:
+          type: integer
+      required:
+      - attendance_rate
+      - attended
+      - average_rating
+      - capacity
+      - fill_rate
+      - id
+      - is_completed
+      - rating_count
+      - registered
+      - starts_at
+      - status
+      - title
     PaginatedClubPublicList:
       type: object
       required:
@@ -2591,6 +2995,49 @@ components:
           maxLength: 200
         body:
           type: string
+    PostEventRating:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/EventRef'
+        total_ratings:
+          type: integer
+        average:
+          type: number
+          format: double
+          nullable: true
+        attended:
+          type: integer
+        response_rate:
+          type: number
+          format: double
+          nullable: true
+        distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingBucket'
+      required:
+      - attended
+      - average
+      - distribution
+      - event
+      - response_rate
+      - total_ratings
+    RatingBucket:
+      type: object
+      properties:
+        rating:
+          type: integer
+        count:
+          type: integer
+        percent:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - count
+      - percent
+      - rating
     RatingInput:
       type: object
       properties:
@@ -2659,6 +3106,8 @@ components:
           readOnly: true
         status:
           $ref: '#/components/schemas/RegistrationStatusEnum'
+        attended:
+          type: boolean
         registered_at:
           type: string
           format: date-time
@@ -2770,6 +3219,33 @@ components:
       description: |-
         * `student` - Student
         * `club_operator` - Club Operator
+    StudentActivity:
+      type: object
+      properties:
+        clubs_joined:
+          type: integer
+        clubs_followed:
+          type: integer
+        events_registered:
+          type: integer
+        events_attended:
+          type: integer
+        attendance_rate:
+          type: number
+          format: double
+          nullable: true
+        ratings_given:
+          type: integer
+        activity_score:
+          type: integer
+      required:
+      - activity_score
+      - attendance_rate
+      - clubs_followed
+      - clubs_joined
+      - events_attended
+      - events_registered
+      - ratings_given
     StudentCounts:
       type: object
       properties:

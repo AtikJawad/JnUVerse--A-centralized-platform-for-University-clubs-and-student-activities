@@ -57,6 +57,7 @@ class EventRegistration(models.Model):
     student = models.ForeignKey("accounts.StudentProfile", on_delete=models.PROTECT, related_name="event_registrations")
     registered_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.REGISTERED)
+    attended = models.BooleanField(default=False)  # set by the club operator after the event starts
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["event", "student"], name="event_registration_unique")]
