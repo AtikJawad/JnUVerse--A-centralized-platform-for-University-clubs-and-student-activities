@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stages 1–2 Completed (Stage 2 Source & Build Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–3 Completed (Stages 2–3 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -51,9 +51,16 @@
    - Locked with a reason for drafts, cancelled events and events that have not started yet (mirrors the backend `409` rules); `409` `detail` and `400` `registration_ids` messages are shown, and a `400` reloads the attendance set.
    - No Stitch screen exists for attendance; the existing roster layout (Week 4, Stitch member-management style) is kept.
 
-3. [ ] **Stage 3: Chart Components**
-   - `components/charts/`: horizontal `BarChart` (departments, clubs), `ColumnChart` (rating distribution 1–5), `LineChart` (monthly trend), `MetricRow` (Stitch hairline metrics).
-   - SVG with DESIGN.md colors, readable labels, value labels, and an accessible data table / `aria-label` summary for every chart; empty-data handling.
+3. [x] **Stage 3: Chart Components** (`components/charts/`, no chart library)
+   - Built following the data-viz method (form → color job → validated palette → mark specs → hover layer → accessibility → render check):
+     - `chartTheme.js`: validated palette and tokens — categorical slots `#444ED0`, `#E8692A`, `#00A383`; ordinal ramp `#9EA4F4 → #2F38BF` (rating 1★→5★); de-emphasis gray `#C6C5D6`; hairline grid `#E2E4F3`; text tokens `#181A2C` / `#686B7D`; `niceTicks()` with whole-number ticks for counts.
+     - `ChartFrame.jsx`: card with title, subtitle, legend (only for ≥ 2 series; line keys for lines, swatches for bars) and a **Chart / Table** switch — every chart has a table-view twin. `ChartTooltip`: value first (strong), label second, rendered as text.
+     - `BarChart.jsx`: ranked horizontal bars, 16px (≤ 24px cap), square at the baseline with a 4px rounded data end, value at the tip, one hue for a single series, **emphasis** mode (highlighted row in slot 1, others gray), focusable bars with tooltips.
+     - `ColumnChart.jsx`: SVG columns ≤ 24px with a 4px rounded cap, value on the cap, hairline solid gridlines, whole-band hit areas, optional ordinal colors.
+     - `LineChart.jsx`: one y-axis only (never dual-axis), 2px round lines, r=4 end dots with a 2px surface ring, end-value labels dropped when they would collide, crosshair snapping to the nearest x with one tooltip listing every series, ←/→ keyboard navigation.
+     - `Figures.jsx`: `MetricRow` (Stitch operator-dashboard hairline metrics), `HeroFigure` (one ≥ 48px number per view), `SegmentedBar` (tall 28px, 4px corners, 2px surface gaps, amount inside only when it fits, legend always, tooltip on hover/focus; a zero part draws nothing).
+     - `useChartWidth.js`: measures the card so SVG charts draw at real pixel size (labels stay 11px).
+   - App is light-only, so only the light palette is defined.
 
 4. [ ] **Stage 4: Operator Analytics Hub (`/operator/analytics`)**
    - **My Club report (report 5):** summary metrics (events launched / cancelled / completed, registrations, registration rate, attended, attendance rate, average rating, followers, members), monthly trend line chart, per-event comparison table (fill rate, attendance rate, rating; links to per-event reports), best-rated event.
@@ -111,8 +118,8 @@ All endpoints are `GET` with JWT unless noted. Percentages have one decimal or a
 ## 6. Files to Be Created & Modified
 
 ### Planned New Files
-- `frontend/src/components/charts/BarChart.jsx`, `ColumnChart.jsx`, `LineChart.jsx`, `MetricRow.jsx`
-- `frontend/src/utils/format.js` (percent / rating / month formatters)
+- `frontend/src/components/charts/` *(created, Stage 3)*: `chartTheme.js`, `ChartFrame.jsx`, `BarChart.jsx`, `ColumnChart.jsx`, `LineChart.jsx`, `Figures.jsx` (MetricRow, HeroFigure, SegmentedBar), `useChartWidth.js`, `index.js`
+- `frontend/src/utils/format.js` (percent / rating / month formatters) *(created, Stage 1)*
 - `frontend/src/pages/OperatorAnalytics.jsx`
 - `frontend/src/pages/OperatorEventAnalytics.jsx`
 - `frontend/src/pages/MyActivity.jsx`
@@ -194,7 +201,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 | **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
 | **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
 | **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
-| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 14). |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 16). |
 
 ---
 
@@ -204,11 +211,45 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 - [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
 - [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving attendance (Section 14).
+- [ ] Manual browser QA of saving attendance (Section 16).
 
 ---
 
-## 14. Manual Interactive Browser QA Checklist
+## 14. Stage 3 Verification Results
+
+### 14.1 Palette validation (`dataviz/scripts/validate_palette.js`, light mode, surface `#FFFFFF`)
+
+| Palette | Result | Notes |
+|---|:---:|---|
+| `#2B34B9` (brand primary-container) + orange | **FAIL** | `#2B34B9` below the lightness band (L 0.419) — not used for marks. |
+| `#444ED0, #F47230` | PASS with WARN | Orange 2.88:1 contrast — replaced. |
+| **`#444ED0, #E8692A, #00A383`** (categorical) | **PASS** | All checks; worst adjacent CVD ΔE 11.8 (protan), normal-vision floor ΔE 27.0, contrast ≥ 3:1. |
+| `#BEC2FF … #2B34B9` (ordinal) | **FAIL** | Light end 1.70:1 < 2:1. |
+| **`#9EA4F4, #8086EC, #6168E0, #444ED0, #2F38BF`** (ordinal) | **PASS** | Monotone lightness, adjacent ΔL ≥ 0.06, light end 2.32:1, hue spread 9°. |
+
+### 14.2 Render check
+
+The components were rendered with demo report data (React server rendering + the app's built CSS) and inspected as images. Fixes made from the render: whole-number ticks for counts (were 0.5 steps), real-width SVG so labels render at 11px (were scaled to ~8px), straight bar baseline (a rounded focus wrapper bent it), metric values kept on one line.
+
+### 14.3 Quality gates
+
+| Verification Check | Command | Result |
+|---|---|:---:|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** |
+| **Production Build** | `npm run build` | **PASS (built in 1.17s)** |
+
+---
+
+## 15. Acceptance Criteria (Stage 3)
+
+- [x] Bar, column and line charts plus metric, hero and segmented-bar figures available as reusable components.
+- [x] Palette validated (no eyeballed colors); text uses text tokens only; no dual-axis chart.
+- [x] Every chart has a table view, tooltips on hover and keyboard focus, and a legend for ≥ 2 series.
+- [x] No new dependencies; ESLint and Vite build pass.
+
+---
+
+## 16. Manual Interactive Browser QA Checklist
 
 ### Attendance (democlub1@demo.jnuverse.test)
 - [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
@@ -219,8 +260,8 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 
 ---
 
-## 15. Week 8 Readiness Classification
+## 17. Week 8 Readiness Classification
 
-* **Implementation:** Stages 1–2 of 7 complete (API services foundation; attendance marking).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending. Remaining stages pending.
+* **Implementation:** Stages 1–3 of 7 complete (API services foundation; attendance marking; chart components).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build. Remaining stages pending.
 * **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.
