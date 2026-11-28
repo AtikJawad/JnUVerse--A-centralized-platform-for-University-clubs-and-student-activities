@@ -1,6 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
+import ServerStatusNotice from "./components/ServerStatusNotice";
+import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import OperatorLogin from "./pages/OperatorLogin";
 import Register from "./pages/Register";
@@ -31,10 +34,18 @@ function RoleDashboard() {
   return user?.role === "club_operator" ? <OperatorDashboard /> : <Dashboard />;
 }
 
+// Week 9: a page crash shows a recoverable fallback; navigating elsewhere clears it
+function RouteErrorBoundary({ children }) {
+  const location = useLocation();
+  return <ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary>;
+}
+
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <ServerStatusNotice />
+        <RouteErrorBoundary>
         <Routes>
           {/* Public Authentication Routes */}
           <Route path="/login" element={<Login />} />
@@ -213,9 +224,10 @@ function App() {
             }
           />
 
-          {/* Catch-all redirect to clubs or dashboard */}
-          <Route path="*" element={<Navigate to="/clubs" replace />} />
+          {/* Unknown URLs: Not Found page (Week 9; previously a silent redirect to /clubs) */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        </RouteErrorBoundary>
       </AuthProvider>
     </Router>
   );

@@ -17,7 +17,9 @@ export default function ProtectedRoute({ allowedRoles, children }) {
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Operator-only pages send people to the operator login (Week 9)
+    const operatorOnly = allowedRoles?.length === 1 && allowedRoles[0] === "club_operator";
+    return <Navigate to={operatorOnly ? "/operator/login" : "/login"} state={{ from: location }} replace />;
   }
 
   if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {

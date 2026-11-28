@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { extractErrorMessage } from "../services/api";
+import { extractErrorMessage, SESSION_EXPIRED_KEY } from "../services/api";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import ErrorAlert from "../components/ErrorAlert";
@@ -39,7 +39,16 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/";
+  // Return to the full original URL (path + query), e.g. /events?tab=registered
+  const fromLocation = location.state?.from;
+  const from = fromLocation?.pathname ? `${fromLocation.pathname}${fromLocation.search || ""}` : "/";
+  // Week 9: shown once after an automatic sign-out (refresh token expired)
+  // (read in a pure initializer; cleared in an effect so StrictMode's double render keeps it)
+  const [sessionExpired] = useState(() => sessionStorage.getItem(SESSION_EXPIRED_KEY) === "1");
+  useEffect(() => {
+    sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+  }, []);
+
 
   // Auto-advance visual presentation highlights
   useEffect(() => {
@@ -111,6 +120,14 @@ export default function Login() {
                 Enter your registered Student ID or email address and password to login.
               </p>
             </div>
+
+            {/* Week 9: explain an automatic sign-out after the session could not be refreshed */}
+            {sessionExpired && (
+              <div role="status" className="mb-5 p-3.5 rounded-xl bg-surface-lavender border border-border-subtle flex items-start gap-2.5 text-xs text-on-surface">
+                <span className="material-symbols-outlined text-[18px] text-primary shrink-0">schedule</span>
+                <span>Your session has expired. Please log in again to continue where you left off.</span>
+              </div>
+            )}
 
             {/* Error Banner */}
             <ErrorAlert

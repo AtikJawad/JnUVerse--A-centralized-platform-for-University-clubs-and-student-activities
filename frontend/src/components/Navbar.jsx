@@ -223,6 +223,9 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              {/* Student-only links; logged-out visitors see only public pages (Week 9) */}
+              {isAuthenticated && (
+                <>
               <Link
                 to="/my-clubs"
                 className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
@@ -243,6 +246,8 @@ export default function Navbar() {
               >
                 Activity
               </Link>
+                </>
+              )}
               <Link
                 to="/events"
                 className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
@@ -520,6 +525,8 @@ export default function Navbar() {
                   My Profile
                 </Link>
               )}
+              {isAuthenticated && (
+                <>
               <Link
                 to="/my-clubs"
                 onClick={() => setMobileMenuOpen(false)}
@@ -542,6 +549,8 @@ export default function Navbar() {
               >
                 My Activity
               </Link>
+                </>
+              )}
               <Link
                 to="/events"
                 onClick={() => setMobileMenuOpen(false)}

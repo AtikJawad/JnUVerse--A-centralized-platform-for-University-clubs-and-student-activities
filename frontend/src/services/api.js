@@ -11,6 +11,41 @@ export const api = axios.create({
   },
 });
 
+// Week 9: slow-request signal. The Render free tier sleeps when idle, so the first request can take
+// about a minute. Requests still pending after SLOW_REQUEST_MS raise a window "api:slow" event with the
+// number of slow requests in flight; <ServerStatusNotice /> shows a "waking up the server" message.
+const SLOW_REQUEST_MS = 4000;
+let slowInFlight = 0;
+
+function announceSlow() {
+  window.dispatchEvent(new CustomEvent("api:slow", { detail: { count: slowInFlight } }));
+}
+
+function startSlowTimer(config) {
+  config._slowTimer = setTimeout(() => {
+    config._slowTimer = null;
+    config._wasSlow = true;
+    slowInFlight += 1;
+    announceSlow();
+  }, SLOW_REQUEST_MS);
+}
+
+function settleSlowTimer(config) {
+  if (!config) return;
+  if (config._slowTimer) {
+    clearTimeout(config._slowTimer);
+    config._slowTimer = null;
+  }
+  if (config._wasSlow) {
+    config._wasSlow = false;
+    slowInFlight = Math.max(0, slowInFlight - 1);
+    announceSlow();
+  }
+}
+
+// Set when a refresh fails, so the login page can explain why the user was signed out
+export const SESSION_EXPIRED_KEY = "jnuverse:session-expired";
+
 // Queue to hold requests while a token refresh is in flight
 let isRefreshing = false;
 let failedQueue = [];
@@ -33,6 +68,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    startSlowTimer(config);
     return config;
   },
   (error) => Promise.reject(error)
@@ -40,9 +76,13 @@ api.interceptors.request.use(
 
 // Response interceptor: Handle 401 with automatic token refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    settleSlowTimer(response.config);
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+    settleSlowTimer(originalRequest);
 
     // If no response or not 401, reject immediately
     if (!error.response || error.response.status !== 401) {
@@ -105,6 +145,7 @@ api.interceptors.response.use(
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
+      sessionStorage.setItem(SESSION_EXPIRED_KEY, "1");
       window.dispatchEvent(new Event("auth:logout"));
       return Promise.reject(refreshError);
     } finally {

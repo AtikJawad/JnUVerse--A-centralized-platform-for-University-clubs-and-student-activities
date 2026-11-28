@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **In Progress — Stage 1 Completed (API Contract Audit Clean)**  
+**Status:** **In Progress — Stages 1–2 Completed (Contract Audit Clean; Resilience Suite 9/9 in Headless Chrome)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -44,10 +44,14 @@
    - Coverage: **all 64 backend operations are used by the frontend** (every backend feature is reachable from the UI); 81 call sites.
    - Spec freshness: the spec was regenerated from the backend code (`manage.py spectacular` into a scratch file) and compared — identical operations and schemas; only `operationId` prefixes and tag names differ (cosmetic, reported to the backend developer).
 
-2. [ ] **Stage 2: Resilience & Error Handling**
-   - Global `ErrorBoundary` with a recoverable fallback (reload / go home) instead of a blank page.
-   - `NotFound` page for unknown routes (currently they silently redirect to `/clubs`).
-   - Network failure and Render cold-start notice (first request can take about a minute) shown consistently; session-expiry handling verified (refresh failure → login with a message and a return path).
+2. [x] **Stage 2: Resilience & Error Handling**
+   - `ErrorBoundary.jsx` around all routes (`RouteErrorBoundary` in `App.jsx`, reset on navigation): a page crash shows "Something went wrong on this page." with Try again / Reload / Go to dashboard instead of a blank screen; the error is logged to the console.
+   - `NotFound.jsx` (Stitch empty-state style) for unknown URLs, replacing the silent redirect to `/clubs`; shows the missing path, "Explore clubs" and "Log in" / "Go to dashboard".
+   - `ServerStatusNotice.jsx` + `api.js` request timing: any API request pending longer than 4 s shows "Waking up the server — the first request after a quiet period can take up to a minute." (Render free tier), cleared when requests finish; browser offline/online events show "You are offline…".
+   - Session expiry: when the refresh token is rejected, `api.js` sets a one-time flag; both login pages show "Your session has expired…" once. `ProtectedRoute` now sends operator-only pages to `/operator/login` (previously always `/login`), and both login pages return to the full original URL including the query string.
+   - Defect found and fixed during testing: logged-out visitors saw the student-only "My Clubs" and "Activity" navbar links; they now see Overview, Explore Clubs and Events only.
+   - Defect found and fixed during testing: the session flag was read and removed inside a `useState` initializer, which React StrictMode runs twice, so the notice never showed in development; the initializer is now pure and the flag is cleared in an effect.
+   - `scripts/lib/cdp.mjs` (Chrome DevTools Protocol driver using the installed Chrome and Node's built-in WebSocket) and `scripts/test-resilience.mjs` (`npm run test:resilience`, 9 read-only checks).
 
 3. [ ] **Stage 3: Performance — Code Splitting**
    - Route-level `React.lazy` + `Suspense` with the existing loading state; keep the shared shell eager.
@@ -134,9 +138,39 @@ The local backend (`backend/.env`) connects to the **shared Supabase database** 
 
 ---
 
-## 10. Week 9 Readiness Classification
+## 10. Stage 2 Verification Results
 
-* **Implementation:** Stage 1 of 7 complete (API contract audit).
-* **Verification:** contract audit clean; spec confirmed current.
+`npm run test:resilience` against the local dev server and backend (headless Chrome, read-only):
+
+| # | Check | Result |
+|:---:|---|:---:|
+| 1 | Unknown URL shows the Not Found page | **PASS** |
+| 2 | Logged-out navbar shows only Overview, Explore Clubs, Events | **PASS** |
+| 3 | Expired session on `/my-activity` → `/login` with notice, return path `/my-activity` | **PASS** |
+| 4 | Session notice shown only once | **PASS** |
+| 5 | Expired session on `/operator/analytics` → `/operator/login` with notice, return path kept | **PASS** |
+| 6 | Request slower than 4 s (6 s network latency emulated) shows the waking-up notice | **PASS** |
+| 7 | Waking-up notice clears when requests finish (≈ 3 s after latency removed) | **PASS** |
+| 8 | Offline (emulated) shows the offline notice | **PASS** |
+| 9 | Back online hides the offline notice | **PASS** |
+
+Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fallback is verified at source level only — triggering a real render error would require a deliberately broken component.
+
+---
+
+## 11. Acceptance Criteria (Stage 2)
+
+- [x] A page error shows a recoverable fallback instead of a blank screen (source-verified).
+- [x] Unknown URLs show a Not Found page.
+- [x] Slow-server and offline states show clear, non-blocking notices.
+- [x] Expired sessions land on the correct login page with an explanation and return to the original URL.
+- [x] Checks are repeatable (`npm run test:resilience`); no new dependencies; ESLint and Vite build pass.
+
+---
+
+## 12. Week 9 Readiness Classification
+
+* **Implementation:** Stages 1–2 of 7 complete (API contract audit; resilience and error handling).
+* **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome.
 * **Open:** test-database question and carried-over items (Section 4).
 
