@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **Planned — Stage 0 (Plan Documented; Implementation Not Started)**  
+**Status:** **In Progress — Stage 1 Completed (API Services Foundation Verified)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -38,10 +38,11 @@
 
 ## 3. Implementation Stages & Progress
 
-1. [ ] **Stage 1: API Services Foundation (`analyticsAPI`, attendance)**
-   - `analyticsAPI.departmentParticipation(eventId)`, `postEventRatings(eventId)`, `clubComparison({ date_from, date_to })`, `studentActivity()`, `myClub({ date_from, date_to })`.
-   - `eventsAPI.setAttendance(eventId, registrationIds)` → `PUT /api/events/:id/attendance/`.
-   - Shared formatters: percentage with one decimal or "—" for `null`, rating with one decimal, `YYYY-MM` month labels.
+1. [x] **Stage 1: API Services Foundation (`analyticsAPI`, attendance)**
+   - `analyticsAPI.departmentParticipation(eventId)`, `postEventRatings(eventId)`, `clubComparison({ date_from, date_to })`, `studentActivity()`, `myClub({ date_from, date_to })`; empty date filters are dropped (`cleanPeriod`) so the backend treats them as "no filter".
+   - `eventsAPI.setAttendance(eventId, registrationIds)` → `PUT /api/events/:id/attendance/` with `{ registration_ids }`.
+   - `utils/format.js`: `formatPercent` (66.7 → "66.7%", `null` → "—"), `formatRating`, `formatCount`, `formatMonth` ("2026-11" → "Nov 2026"), `formatDhakaDate`.
+   - Validated against ESLint, Vite build and read-only API smoke tests (Section 10).
 
 2. [ ] **Stage 2: Attendance Marking (`OperatorEventAttendees.jsx`)**
    - Load all registration pages (now include `attended`); checkbox per row, "Mark all / Clear all", Save sends the **full** attended set; "N of M attended" summary from the `{ registered, attended }` response.
@@ -152,3 +153,38 @@ The seed does not mark attendance, so attendance-based figures stay at 0 until a
 - **Charts are hand-built SVG components** (no chart library), consistent with the project's no-new-dependency rule and the earlier question in this file ("lightweight SVG graphs or styled tabular summaries?"): both — every chart has a table alongside it.
 - **Placement:** operator reports live under `/operator/analytics` and `/operator/events/:id/analytics`; the student report lives at `/my-activity`.
 - **Design:** no Stitch analytics screens exist; the operator pages reuse the Stitch operator-dashboard and reports-interface patterns, and the student page reuses the Stitch student-dashboard patterns.
+
+---
+
+## 10. Stage 1 Verification Results
+
+Smoke tests used a Node script with the frontend's Axios 1.20 and the same default headers as the shared instance, against the local backend. Only read requests and one request the backend refuses before writing (403) were sent.
+
+| Verification Check | Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `api.js`, `utils/format.js`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.23s)** | Bundle-size warning only (unchanged). |
+| **My Club Report** | `GET /api/analytics/my-club/` (democlub1) | **PASS (200)** | 5 events, 2 months; with `date_from=2026-11-01` and an empty `date_to` → 200. |
+| **Invalid Date Filters** | `date_from > date_to`; `date_from=nope` | **PASS (400 / 400)** | `{"date_to": ["date_to must not be before date_from."]}`; `{"date_from": ["Date has wrong format. …"]}`. |
+| **Club Comparison** | operator / student | **PASS (200 / 403)** | — |
+| **Student Activity** | student / operator | **PASS (200 / 403)** | — |
+| **Per-Event Reports** | department participation and ratings for Rated Workshop (operator); department participation as student | **PASS (200 / 200 / 403)** | — |
+| **Attendance Permission** | `PUT /api/events/:id/attendance/` on JnU Research Society's event as democlub1 | **PASS (403)** | "Only this club's operator can mark attendance." — refused before any write. |
+| **Registrations Include `attended`** | `GET /api/events/:id/registrations/` (Rated Workshop) | **PASS (200)** | 4 rows, all `attended: false` (attendance not seeded). |
+
+---
+
+## 11. Acceptance Criteria (Stage 1)
+
+- [x] `analyticsAPI` (five reports) and `eventsAPI.setAttendance` implemented in `api.js` matching the Week 8 handoff.
+- [x] Shared formatters show "—" for `null` percentages and ratings.
+- [x] Uses the shared Axios instance with Bearer token injection and 401 refresh queue; trailing-slash URLs respected.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+
+---
+
+## 12. Week 8 Readiness Classification
+
+* **Implementation:** Stage 1 of 7 complete (API services foundation).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests). Remaining stages pending.
+* **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.

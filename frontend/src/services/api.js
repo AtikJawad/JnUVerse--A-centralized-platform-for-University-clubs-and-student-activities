@@ -332,6 +332,19 @@ export const eventsAPI = {
    * @param {string} id - Event UUID
    */
   deleteBanner: (id) => api.delete(`/api/events/${id}/banner/`),
+
+  /**
+   * Mark attendance (owning Club Operator only) — Week 8.
+   * Endpoint: PUT /api/events/:id/attendance/
+   * Replaces the attended set: listed registrations become attended, every other current
+   * registration becomes not attended (send the full set each time; [] clears).
+   * Returns { registered, attended }. 409 if the event is not published or has not started;
+   * 400 if an id is not a current registration of this event.
+   * @param {string} id - Event UUID
+   * @param {string[]} registrationIds - Registration UUIDs (from getRegistrations)
+   */
+  setAttendance: (id, registrationIds) =>
+    api.put(`/api/events/${id}/attendance/`, { registration_ids: registrationIds }),
 };
 
 /**
@@ -612,6 +625,57 @@ export const dashboardAPI = {
    */
   club: () => api.get("/api/dashboard/club/"),
 };
+
+/**
+ * Analytics API Service — Week 8 Backend Integration (five analytical reports)
+ * Percentages are numbers with one decimal, or null when there is nothing to divide by.
+ */
+export const analyticsAPI = {
+  /**
+   * Report 1 — Department-wise participation for one event (owning operator).
+   * Endpoint: GET /api/analytics/events/:id/department-participation/
+   * 409 unless the event is published and has ended.
+   * @param {string} eventId - Event UUID
+   */
+  departmentParticipation: (eventId) =>
+    api.get(`/api/analytics/events/${eventId}/department-participation/`),
+
+  /**
+   * Report 2 — Post-event rating for one event (owning operator).
+   * Endpoint: GET /api/analytics/events/:id/ratings/
+   * 409 unless the event is published. `distribution` always has five rows (1–5).
+   * @param {string} eventId - Event UUID
+   */
+  postEventRatings: (eventId) => api.get(`/api/analytics/events/${eventId}/ratings/`),
+
+  /**
+   * Report 3 — Club vs club (any club operator).
+   * Endpoint: GET /api/analytics/club-comparison/
+   * @param {Object} [params] - { date_from, date_to } as YYYY-MM-DD (filter on event start date)
+   */
+  clubComparison: (params) => api.get("/api/analytics/club-comparison/", { params: cleanPeriod(params) }),
+
+  /**
+   * Report 4 — The logged-in student's own activity (student only).
+   * Endpoint: GET /api/analytics/student-activity/
+   */
+  studentActivity: () => api.get("/api/analytics/student-activity/"),
+
+  /**
+   * Report 5 — The operator's own club report (club operator).
+   * Endpoint: GET /api/analytics/my-club/
+   * @param {Object} [params] - { date_from, date_to } as YYYY-MM-DD (filter on event start date)
+   */
+  myClub: (params) => api.get("/api/analytics/my-club/", { params: cleanPeriod(params) }),
+};
+
+// Drop empty date filters so the backend treats them as "no filter"
+function cleanPeriod(params = {}) {
+  const out = {};
+  if (params?.date_from) out.date_from = params.date_from;
+  if (params?.date_to) out.date_to = params.date_to;
+  return out;
+}
 
 /**
  * Report reason options and status labels shared by report UI components.
