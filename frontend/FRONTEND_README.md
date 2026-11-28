@@ -484,6 +484,10 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
   - *Safe Ceiling Warnings:* Verified multi-page pagination loops for clubs (up to 1,000) and events (up to 500) with accessible loading limit warning notices if ceilings are exceeded.
   - *Readiness Classification:* **Implementation Complete & Verification Complete**; automated backend `pytest` runner blocked in current environment, and manual interactive browser QA is pending.
 
+- **Post-Week 6 Cross-Week Audit (Weeks 1–6):**
+  - Audited all Weeks 1–6 screens against the backend handoffs and fixed six defects: operator club resolution and full member/request pagination in `OperatorMembers.jsx`, full club pagination in `MyClubs.jsx`, `collaboration_update` notification routing, slug-based owner check and rejected/removed membership note in `ClubDetail.jsx`, and a student "My Registrations" tab in `ExploreEvents.jsx`.
+  - Added the shared `fetchAllPages()` helper to `api.js`. Details and verification: [Week 6 Workflow §21](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md).
+
 ---
 
 ## 9. Implementation Status Matrix
@@ -493,11 +497,11 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
 | **Project Foundation & Audit** | Week 1 | **Completed** | **Completed** | [Week 1 Workflow](docs/workflow/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) |
 | **Authentication & Login UI** | Week 2 | **Completed** | **Completed** | [Week 2 Workflow](docs/workflow/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) |
 | **Club Discovery & Memberships** | Week 3 | **Completed** | **Completed** | [Week 3 Workflow](docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) |
-| **Events & RSVP Registration** | Week 4 | **In Progress** (Stage 7 Integrated: Architecture & Frontend Audited; Backend Tests & Demo Data Blocked) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
+| **Events & RSVP Registration** | Week 4 | **Completed** (Re-verified in the post-Week 6 audit; "My Registrations" tab added) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | **Completed** (Stages 1–7 Finalized: Implementation & verification complete; manual browser QA pending) | **Completed & Verified** (Contracts verified via source inspection & live API smoke tests; pytest runner blocked locally) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
-| **Reports & Dashboards** | Week 7 | Not Started | Models Exist (No Endpoints) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
-| **Five Analytical Reports** | Week 8 | Not Started | Not Started | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
+| **Reports & Dashboards** | Week 7 | **Planned** (Stage 0: plan documented) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+| **Five Analytical Reports** | Week 8 | Not Started | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
 | **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
 | **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 

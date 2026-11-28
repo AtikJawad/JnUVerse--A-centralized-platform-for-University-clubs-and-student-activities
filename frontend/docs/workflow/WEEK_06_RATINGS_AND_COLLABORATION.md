@@ -641,3 +641,44 @@ For final end-user validation across interactive browsers:
 * **Manual Browser QA Pending:** Interactive visual and keyboard testing across supported user browsers is documented in Section 19 for operator and student roles.
 * **Production Deployment:** Subject to team deployment schedule and resolution of backend test runner dependencies.
 
+
+---
+
+## 21. Post-Week 6 Cross-Week Audit (Weeks 1–6)
+
+Before starting Week 7, the Weeks 1–6 frontend was audited against `WEEK_01-03`, `WEEK_04`, `WEEK_05` and `WEEK_06_BACKEND_HANDOFF.md`. Contract-compliant areas: API conventions (trailing slashes, error extraction, pagination), JWT login/refresh/logout, role-protected routes, follow and membership flows, event badge priority and register-button states, 409 handling, notification polling, rating window and collaboration rules.
+
+### 21.1 Defects Found & Fixed (commit `b1804be`)
+
+| # | Week | File | Defect | Fix |
+|:---:|:---:|---|---|---|
+| 1 | 3 | `OperatorMembers.jsx` | Club resolved by scanning the first 50 clubs by name, falling back to `list[0]` (another club); only the first page (20) of members and requests loaded | Uses `user.club.slug` from `/api/auth/me/`; loads all pages via `fetchAllPages()` |
+| 2 | 3 | `MyClubs.jsx` | Only the first 50 clubs were inspected, so later clubs never appeared | Loads every page via `fetchAllPages()` |
+| 3 | 6 | `NotificationBell.jsx`, `Notifications.jsx` | `collaboration_update` notifications routed back to `/notifications` | Operators are routed to `/operator/collaborations` |
+| 4 | 3 | `ClubDetail.jsx` | Owner check compared `user.name === club.name` | Compares `user.club.slug === club.slug` |
+| 5 | 3 | `ClubDetail.jsx` | No note for `rejected` / `removed` membership statuses (required by handoff §3.6) | Short explanatory note above "Request Membership" |
+| 6 | 4 | `ExploreEvents.jsx` | No student "My events" view (`GET /api/events/?registered=true` unused) | Student-only "My Registrations" tab, deep link `/events?tab=registered`, non-students fall back to all events |
+| — | — | `services/api.js` | — | New shared `fetchAllPages(url, params, maxPages)` helper (page_size 50, safety ceiling 40 pages) |
+
+Deferred to Week 7: the Club Detail edit form still sends `logo` in `PATCH /api/clubs/:slug/`, which the backend ignores since the Week 7 image addendum; it is replaced by logo upload in Week 7 Stage 2.
+
+### 21.2 Verification Results
+
+| Verification Check | Command | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | Clean across all modified files. |
+| **Production Build** | `npm run build` | **PASS** | Built in ~1.1s (bundle-size warning only, unchanged). |
+| **My Registrations Endpoint** | `GET /api/events/?registered=true` (demo1) | **PASS (200 OK)** | 9 registered events returned. |
+| **My Registrations RBAC** | same endpoint as operator / anonymous | **PASS (403 / 401)** | Matches the non-student fallback in the UI. |
+| **Operator Club Resolution** | `GET /api/auth/me/` (democlub1) | **PASS (200 OK)** | `club.slug = demo-robotics-club`; members 2, pending requests 1. |
+| **Rejected/Removed Data** | `GET /api/clubs/` (demo2) | **PASS (200 OK)** | Debate Society `rejected`, Photography Club `removed`. |
+| **Collaboration Notifications** | `GET /api/notifications/` (democlub1) | **PASS (200 OK)** | 3 `collaboration_update` notifications available for routing. |
+
+### 21.3 Acceptance Criteria (Audit Fixes)
+
+- [x] Operator member management always targets the operator's own club and lists every member and request.
+- [x] My Clubs lists all joined, pending and followed clubs regardless of the total number of clubs.
+- [x] Collaboration notifications open the collaboration hub for operators.
+- [x] Rejected/removed students see an explanatory note; students can list their registered events.
+- [x] No backend files modified; no new dependencies.
+- [ ] Manual browser QA of the six fixes (pending).

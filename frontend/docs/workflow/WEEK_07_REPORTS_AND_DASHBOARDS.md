@@ -1,42 +1,263 @@
-# Week 07 — Reports (Inappropriate Content) & Dashboards
+# Week 07 — Reports & Dashboards
 
-**Focus:** Content moderation reporting for students and unified analytics dashboards for club operators  
-**Status:** **Not Started** (Backend models exist in `apps/reports/`; DRF endpoints pending)  
+**Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
+**Status:** **Planned — Stage 0 (Plan Documented; Implementation Not Started)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
+**Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
+**Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
+**Target:** December 2026  
 
 ---
 
 ## 1. Objectives
-- Implement content reporting dialog allowing students to flag inappropriate clubs, events, or notices.
-- Build comprehensive operator overview dashboard synthesizing membership growth, follower stats, and event registrations.
-- Build student living campus dashboard with quick links to registered events and club updates.
+
+- Let students and clubs choose interests from the fixed list of 13; use student interests for club suggestions.
+- Let club operators upload and remove a club logo and event banners; display them (or a placeholder) on every club and event screen.
+- Let any logged-in user report an inappropriate club or event, and view the status of their own reports.
+- Replace the static dashboard with a data-driven **Student Dashboard** and add a **Club Operator Dashboard**.
+
+---
 
 ## 2. Scope & Exclusions
-- **In Scope:** Report submission modal, student living campus dashboard, club operator overview.
-- **Exclusions:** Report resolution API (reports are resolved by university staff directly through Django Admin `/admin/`).
 
-## 3. Tasks (Planned)
-1. [ ] Build `ReportModal.jsx` with violation category choices and description.
-2. [ ] Integrate `POST /api/reports/` for authenticated students.
-3. [ ] Build Living Campus Student Dashboard (`pages/Dashboard.jsx`).
-4. [ ] Build Operator Metrics Dashboard with summary cards and quick actions.
+- **In Scope:**
+  - `interestsAPI`, `dashboardAPI`, `reportsAPI` and logo/banner upload methods in `frontend/src/services/api.js`.
+  - Shared `ClubLogo` and `InterestPicker` components.
+  - Logo upload/remove and interest selection in the Club Detail operator edit form (the obsolete logo URL field is removed).
+  - Banner upload/remove in `OperatorEventForm.jsx`; banner display on event pages and cards.
+  - Student `/profile` page with editable interests and a dashboard onboarding prompt.
+  - Student Dashboard (`Dashboard.jsx`) and Club Operator Dashboard (`OperatorDashboard.jsx`).
+  - `ReportModal` on Club Detail and Event Detail; `/my-reports` page.
+- **Exclusions:**
+  - Report editing, withdrawal or notifications; public report counts (not built by backend).
+  - Report review UI — reports are reviewed by developers in Django Admin `/admin/`.
+  - Reporting notices (backend accepts only `club` and `event` targets).
+  - Dashboard charts and time series (Week 8 analytical reports).
+  - Server-side filtering of clubs by interest (not provided by the API).
 
-## 4. Relevant Frontend Files (Targeted)
+---
+
+## 3. Implementation Stages & Progress
+
+1. [ ] **Stage 1: API Services Foundation (`interestsAPI`, `dashboardAPI`, `reportsAPI`, image uploads)**
+   - `interestsAPI.getAll()` → `GET /api/auth/interests/`; `getMine()` / `setMine(ids)` → `GET` / `PUT /api/auth/me/interests/`.
+   - `clubsAPI.update(slug, payload)` → `PATCH /api/clubs/:slug/`; `uploadLogo(slug, file)` / `deleteLogo(slug)` → `PUT` / `DELETE /api/clubs/:slug/logo/`.
+   - `eventsAPI.uploadBanner(id, file)` / `deleteBanner(id)` → `PUT` / `DELETE /api/events/:id/banner/`.
+   - `reportsAPI.create(payload)` / `getMine(params)` → `POST` / `GET /api/reports/`.
+   - `dashboardAPI.student()` / `club()` → `GET /api/dashboard/student/` and `/api/dashboard/club/`.
+   - Upload methods send `FormData` with `headers: { "Content-Type": "multipart/form-data" }` (see §5.2).
+
+2. [ ] **Stage 2: Club Logos, Event Banners & Club Interests**
+   - `ClubLogo.jsx`: square logo with `object-cover`, initials placeholder when `logo` is `null`; used in ExploreClubs, ClubDetail, MyClubs, PartnerClubsSection, OperatorCollaborations, ProposeCollaborationModal and OperatorMembers.
+   - Club Detail edit form: remove the logo URL input; add logo upload/replace/remove with preview and client-side type/size checks; add `InterestPicker` for club interests (sent with `PATCH`).
+   - Interest tags on club cards and the club profile.
+   - `OperatorEventForm.jsx`: banner upload/remove (create mode uploads after the event is created); hidden for cancelled/ended events.
+   - 16:9 banner with placeholder on EventDetail, ExploreEvents cards and spotlight, and OperatorEvents rows.
+
+3. [ ] **Stage 3: Student Interests & Profile**
+   - `InterestPicker.jsx`: accessible chip toggles over the 13 interests, reused for students and clubs.
+   - `/profile` page (student only): account details from `/api/auth/me/` (read-only) and editable interests.
+   - Skippable "Choose your interests" prompt on the dashboard when `has_interests` is `false`.
+
+4. [ ] **Stage 4: Student Dashboard (`Dashboard.jsx`)**
+   - Rebuilt on `GET /api/dashboard/student/` following the Stitch "Living Campus" design.
+   - Six count cards: clubs followed, clubs joined, pending membership requests, unread notifications, upcoming registered events, events to rate.
+   - Sections: "Your next events" (up to 5), "Rate your recent events" (opens the existing `StarRating` flow), "Suggested clubs" (with Follow).
+   - Empty states: interests prompt when `has_interests` is `false`; "You're all caught up" when there are interests but no suggestions.
+
+5. [ ] **Stage 5: Club Operator Dashboard (`OperatorDashboard.jsx`)**
+   - Built on `GET /api/dashboard/club/` following the Stitch operator dashboard design.
+   - Count cards linking to management screens: members and pending requests → `/operator/members`; upcoming and draft events → `/operator/events`; pending collaborations → `/operator/collaborations`; followers; unread notifications.
+   - Club rating (average + count), registrations in the last 7 days, next events and recent ended events with ratings.
+   - `/` and `/dashboard` render the student or operator dashboard by role.
+
+6. [ ] **Stage 6: Content Reports (`ReportModal`, `/my-reports`)**
+   - `ReportModal.jsx`: reason selector, details textarea (required for `other`, 1000-character counter), focus trap, Escape to close.
+   - "Report" action on ClubDetail and EventDetail for logged-in users; hidden for the operator's own club and its events.
+   - `409` shown as "You have already reported this."; `400` field errors shown next to their fields.
+   - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
+
+7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 8).
+   - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
+
+---
+
+## 4. Backend Dependencies & Endpoint Contracts
+
+All endpoints use the shared Axios client with automatic Bearer token authentication and trailing-slash URLs.
+
+### 4.1 Interests API (`interestsAPI`)
+
+| Method | Endpoint | HTTP | Description | Request Body / Params | Response Data | Status Codes | Permissions |
+|---|---|:---:|---|---|---|:---:|:---:|
+| `getAll` | `/api/auth/interests/` | `GET` | List the 13 interests (sorted by name) | None | `{ "interests": [ { "id", "name" } ] }` | `200 OK` | Public (`AllowAny`) |
+| `getMine` | `/api/auth/me/interests/` | `GET` | Student's current interests | None | `{ "interests": [ ... ] }` | `200 OK`<br>`401` (anon)<br>`403` (operator) | Student only |
+| `setMine` | `/api/auth/me/interests/` | `PUT` | Replace the whole selection (`[]` clears) | `{ "interests": ["uuid", ...] }` | `{ "interests": [ ... ] }` | `200 OK`<br>`400` (unknown id / not a list)<br>`401`<br>`403` | Student only |
+
+### 4.2 Club Profile & Image APIs (`clubsAPI`, `eventsAPI`)
+
+| Method | Endpoint | HTTP | Description | Request Body / Params | Response Data | Status Codes | Permissions |
+|---|---|:---:|---|---|---|:---:|:---:|
+| `clubsAPI.update` | `/api/clubs/:slug/` | `PATCH` | Update description, contact email, interests | `{ "description", "contact_email", "interests": ["uuid"] }` (`logo` is **ignored**) | `Club` object | `200 OK`<br>`400` (validation)<br>`401`<br>`403` | Owning Club Operator only |
+| `clubsAPI.uploadLogo` | `/api/clubs/:slug/logo/` | `PUT` | Upload or replace club logo | `multipart/form-data`, field `logo` (JPEG/PNG/WebP, ≤ 2 MB) | `Club` object with new `logo` URL | `200 OK`<br>`400` (invalid file)<br>`401`<br>`403`<br>`404` | Owning Club Operator only |
+| `clubsAPI.deleteLogo` | `/api/clubs/:slug/logo/` | `DELETE` | Remove club logo (idempotent) | None | No content | `204`<br>`401`<br>`403` | Owning Club Operator only |
+| `eventsAPI.uploadBanner` | `/api/events/:id/banner/` | `PUT` | Upload or replace event banner | `multipart/form-data`, field `banner` (JPEG/PNG/WebP, ≤ 5 MB) | `Event` object with new `banner` URL | `200 OK`<br>`400`<br>`401`<br>`403`<br>`404`<br>`409` (cancelled/ended) | Owning Club Operator only |
+| `eventsAPI.deleteBanner` | `/api/events/:id/banner/` | `DELETE` | Remove event banner | None | No content | `204`<br>`401`<br>`403`<br>`404` | Owning Club Operator only |
+
+#### Object Changes (affect every club and event screen):
+- `Club.interests`: `[ { "id", "name" } ]` (empty list when none).
+- `Club.logo`: `string | null` (was `""` when empty). `Event.banner`: `string | null`.
+- Replacing an image changes its URL — always use the URL from the response.
+
+### 4.3 Content Reports API (`reportsAPI`)
+
+| Method | Endpoint | HTTP | Description | Request Body / Params | Response Data | Status Codes | Permissions |
+|---|---|:---:|---|---|---|:---:|:---:|
+| `create` | `/api/reports/` | `POST` | Report a club or an event | `{ "target_type": "club" \| "event", "target": "slug or event uuid", "reason": "inappropriate" \| "spam" \| "misleading" \| "harassment" \| "other", "details": "optional (≤ 1000)" }` | `Report` object | `201 Created`<br>`400` (validation / own target / draft)<br>`401`<br>`409` (already reported) | Any logged-in user |
+| `getMine` | `/api/reports/` | `GET` | List own reports, newest first | `params: { page, page_size }` | Paginated `{ count, next, previous, results: [ Report ] }` | `200 OK`<br>`401` | Any logged-in user |
+
+#### Report Object Structure:
+```json
+{
+  "id": "uuid",
+  "target_type": "club",
+  "club": { "id": "uuid", "name": "[DEMO] Sports Club", "slug": "demo-sports-club" },
+  "event": null,
+  "reason": "spam",
+  "details": "optional text",
+  "status": "open",
+  "created_at": "2026-11-20T10:00:00+06:00"
+}
+```
+For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status labels: `open` → "Received", `under_review` → "Under review", `resolved` → "Resolved", `dismissed` → "Dismissed".
+
+### 4.4 Dashboard API (`dashboardAPI`)
+
+| Method | Endpoint | HTTP | Description | Request Body / Params | Response Data | Status Codes | Permissions |
+|---|---|:---:|---|---|---|:---:|:---:|
+| `student` | `/api/dashboard/student/` | `GET` | Student dashboard in one call | None | See structure below | `200 OK`<br>`401`<br>`403` (operator) | Student only |
+| `club` | `/api/dashboard/club/` | `GET` | Club operator dashboard in one call | None | See structure below | `200 OK`<br>`401`<br>`403` (student) | Club Operator only |
+
+#### Student Dashboard Structure:
+```json
+{
+  "has_interests": true,
+  "counts": { "clubs_followed": 2, "clubs_joined": 2, "pending_membership_requests": 1,
+              "unread_notifications": 8, "events_registered_upcoming": 4, "events_to_rate": 2 },
+  "next_events": [ "Event", "..." ],
+  "rating_prompts": [ "Event", "..." ],
+  "suggested_clubs": [ "Club", "..." ]
+}
+```
+
+#### Club Dashboard Structure:
+```json
+{
+  "club": { "id": "uuid", "name": "[DEMO] Robotics Club", "slug": "demo-robotics-club" },
+  "counts": { "followers": 2, "members": 2, "pending_membership_requests": 1, "upcoming_events": 2,
+              "draft_events": 0, "pending_collaboration_requests": 1, "unread_notifications": 4 },
+  "ratings": { "average": 4.2, "count": 5 },
+  "next_events": [ "Event", "..." ],
+  "recent_events": [ "Event", "..." ],
+  "registrations_last_7_days": 9
+}
+```
+
+---
+
+## 5. Backend Business Rules & Enforcement
+
+### 5.1 Interests
+1. **Shared Fixed List:** Students and clubs choose from the same 13 interests; there is no maximum.
+2. **Replace Semantics:** `PUT /api/auth/me/interests/` and `PATCH /api/clubs/:slug/` replace the whole selection; `[]` clears it.
+3. **Suggestions:** Suggested clubs share at least one interest with the student and exclude clubs already followed, joined or requested; ordered by shared interests, then followers, then name.
+
+### 5.2 Club Logos & Event Banners
+1. **Dedicated Endpoints:** Logos and banners are uploaded only through their own endpoints; `PATCH` ignores `logo`/`banner`.
+2. **File Rules:** JPEG, PNG or WebP (checked on file contents), logo ≤ 2 MB, banner ≤ 5 MB, ≤ 4096 px on the longest side.
+3. **Event State:** Banners can be changed for draft and published events; cancelled or ended events return `409`.
+4. **Axios FormData Handling:** The shared Axios instance defaults to `Content-Type: application/json`, and Axios 1.20 converts `FormData` to JSON when that header is set. Upload calls must override the header with `multipart/form-data` so the file is sent as multipart.
+
+### 5.3 Content Reports
+1. **Targets:** Clubs (by slug) and published or cancelled events (by id); drafts cannot be reported.
+2. **Own Content:** A club operator cannot report their own club or its events (`400`).
+3. **One Report per Target:** A second report by the same user returns `409`; reports cannot be edited or withdrawn.
+4. **Details:** Required when `reason` is `other`; at most 1000 characters.
+5. **Privacy:** Users see only their own reports; reported clubs never see reports; no notifications are sent.
+
+### 5.4 Dashboards
+1. **Student `next_events`:** Up to 5 registered, published, not-yet-ended events, soonest first.
+2. **Student `rating_prompts`:** Up to 5 events still ratable (ended within 7 days, not yet rated); `counts.events_to_rate` is the total.
+3. **Club `recent_events`:** Up to 5 most recently ended published events with `average_rating` and `rating_count`.
+4. **Club `ratings`:** Club-wide average (1 decimal, `null` when none) and total count; individual ratings are never exposed.
+5. **`registrations_last_7_days`:** Registrations for the club's events in the last 7 days, excluding cancelled registrations.
+
+---
+
+## 6. Files to Be Created & Modified
+
+### Planned New Files
+- `frontend/src/components/ClubLogo.jsx`
+- `frontend/src/components/InterestPicker.jsx`
 - `frontend/src/components/ReportModal.jsx`
-- `frontend/src/pages/Dashboard.jsx`
 - `frontend/src/pages/OperatorDashboard.jsx`
+- `frontend/src/pages/Profile.jsx`
+- `frontend/src/pages/MyReports.jsx`
 
-## 5. Backend Dependencies & Endpoints Needed
-- `POST /api/reports/` (Submit content report: target club, event, or notice, reason, details)
-- `GET /api/clubs/<slug>/stats/` (Club operator analytics: member count, follower trends, event RSVPs)
+### Planned Modified Files
+- `frontend/src/services/api.js`
+- `frontend/src/App.jsx` (routes `/profile`, `/my-reports`, role-based dashboard)
+- `frontend/src/components/Navbar.jsx` (Profile and My Reports links)
+- `frontend/src/pages/Dashboard.jsx`, `ClubDetail.jsx`, `EventDetail.jsx`, `ExploreClubs.jsx`, `ExploreEvents.jsx`, `MyClubs.jsx`, `OperatorEventForm.jsx`, `OperatorEvents.jsx`, `OperatorMembers.jsx`, `OperatorCollaborations.jsx`
+- `frontend/src/components/PartnerClubsSection.jsx`, `ProposeCollaborationModal.jsx`
+- `frontend/FRONTEND_README.md`
 
-## 6. Acceptance Criteria
-- [ ] Students can submit reports with clear feedback without disrupting browsing.
-- [ ] Duplicate unresolved reports on the same entity are handled gracefully.
-- [ ] Operator dashboard displays accurate counts derived from backend models.
+---
 
-## 7. Verification Commands & Results
-*(Pending backend endpoint implementation in Week 7)*
+## 7. Acceptance Criteria (Week 7)
 
-## 8. Decisions & Outstanding Questions
-- **Decision:** As established in project architecture, report resolution is carried out exclusively through Django Admin by authorized staff, keeping frontend API footprint lean.
+- [ ] All Week 7 API methods implemented in `api.js` using the shared Axios instance and trailing-slash URLs.
+- [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
+- [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
+- [ ] Students can set, change and clear interests; club operators can set club interests.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 8 and link to the correct management screens.
+- [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
+- [ ] No backend files modified; no new package dependencies.
+- [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
+
+---
+
+## 8. Manual Interactive Browser QA Checklist
+
+Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
+
+### Student Dashboard & Interests
+- [ ] `demo1@demo.jnuverse.test`: counts show followed 2, joined 2, pending 1, unread 8, upcoming registered 4, events to rate 2; suggestions show "You're all caught up".
+- [ ] `demo3@demo.jnuverse.test`: one suggestion, `[DEMO] Sports Club`.
+- [ ] `demo4@demo.jnuverse.test`: "Choose your interests" prompt appears; choosing interests updates suggestions.
+- [ ] `demo5@demo.jnuverse.test`: suggestions in order Robotics Club, Cultural Forum, Debate Society.
+- [ ] Rating prompt opens the star rating and the count decreases after rating.
+- [ ] `/profile`: change and clear interests; reload confirms persistence.
+
+### Club Operator Dashboard, Logos & Banners
+- [ ] `democlub1@demo.jnuverse.test`: followers 2, members 2, pending requests 1, upcoming events 2, drafts 0, pending collaborations 1, rating 4.2 (5 ratings), 3 recent events, 9 registrations in the last 7 days.
+- [ ] Count cards navigate to Members, Events and Collaborations.
+- [ ] Upload a logo (valid PNG), replace it, remove it; try a file over 2 MB and a non-image file.
+- [ ] Set club interests and confirm tags on the club profile and Explore Clubs card.
+- [ ] Upload a banner on a draft event; verify it on the event page and cards; verify banner controls are hidden on a cancelled event.
+
+### Content Reports
+- [ ] `demo1@demo.jnuverse.test` → `/my-reports`: 3 reports with "Received", "Under review" and "Resolved".
+- [ ] `demo2@demo.jnuverse.test` → `/my-reports`: 1 "Dismissed" report.
+- [ ] Report a new club with reason `other` and empty details: field error shown.
+- [ ] Report the same club again: "You have already reported this."
+- [ ] As `democlub1`, the Report action is hidden on the Robotics Club page and its events.
+
+---
+
+## 9. Week 7 Readiness Classification
+
+* **Implementation:** Not started (Stage 0 — plan documented).
+* **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
+* **Verification:** Pending; stage verification results will be appended to this document as each stage completes.
