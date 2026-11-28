@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import { eventsAPI, extractErrorMessage } from "../services/api";
+import { eventsAPI, extractErrorMessage, fetchAllPages } from "../services/api";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
 import Badge from "../components/Badge";
@@ -66,6 +66,36 @@ function getInitials(name) {
  * OperatorEventAttendees Component — Week 4, Stage 6
  * Operator-only attendee roster with pagination, privacy compliance, and event context.
  */
+/**
+ * Attendance checkbox (DESIGN.md: 20px control, subtle border, primary fill when checked).
+ * Read-only badge when attendance cannot be marked.
+ */
+function AttendanceControl({ checked, editable, name, onToggle }) {
+  if (!editable) {
+    return checked ? (
+      <Badge variant="success" size="sm" dot>
+        Attended
+      </Badge>
+    ) : (
+      <span className="text-[11px] text-text-muted">Not marked</span>
+    );
+  }
+  return (
+    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+      <span className={`text-[11px] font-semibold ${checked ? "text-primary" : "text-text-muted"}`}>
+        {checked ? "Attended" : "Absent"}
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onToggle}
+        aria-label={`Mark ${name || "student"} as attended`}
+        className="w-5 h-5 rounded border-border-subtle accent-primary cursor-pointer"
+      />
+    </label>
+  );
+}
+
 export default function OperatorEventAttendees() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -82,6 +112,31 @@ export default function OperatorEventAttendees() {
   const [error, setError] = useState("");
   const [isForbidden, setIsForbidden] = useState(false);
   const [showRatingBreakdown, setShowRatingBreakdown] = useState(false);
+
+  // Week 8 attendance: PUT /api/events/:id/attendance/ replaces the whole attended set,
+  // so the saved and draft sets cover every registration, not just the visible page.
+  const [allRegistrationIds, setAllRegistrationIds] = useState([]);
+  const [savedAttended, setSavedAttended] = useState(() => new Set());
+  const [draftAttended, setDraftAttended] = useState(() => new Set());
+  const [attendanceLoading, setAttendanceLoading] = useState(true);
+  const [attendanceSaving, setAttendanceSaving] = useState(false);
+  const [attendanceMessage, setAttendanceMessage] = useState(null); // { type, text }
+
+  const loadAttendance = useCallback(async () => {
+    setAttendanceLoading(true);
+    try {
+      const rows = await fetchAllPages(`/api/events/${id}/registrations/`);
+      const attended = new Set(rows.filter((r) => r.attended).map((r) => r.id));
+      setAllRegistrationIds(rows.map((r) => r.id));
+      setSavedAttended(attended);
+      setDraftAttended(new Set(attended));
+    } catch {
+      // The roster section reports load errors; attendance controls stay disabled
+      setAllRegistrationIds([]);
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }, [id]);
 
   // Fetch Event Context
   const fetchEventDetails = useCallback(async () => {
@@ -143,6 +198,62 @@ export default function OperatorEventAttendees() {
     },
     [id, pageSize]
   );
+
+  useEffect(() => {
+    loadAttendance();
+  }, [loadAttendance]);
+
+  // Backend rules: published events that have already started (drafts/cancelled → 409)
+  const attendanceLock = useMemo(() => {
+    if (!event) return "Loading event…";
+    if (event.status === "draft") return "Attendance can be marked after the event is published and has started.";
+    if (event.status === "cancelled") return "Attendance cannot be marked for a cancelled event.";
+    if (new Date(event.starts_at) > new Date()) {
+      return `Attendance opens when the event starts (${formatDhakaDate(event.starts_at)}, ${formatDhakaTime(event.starts_at)} BST).`;
+    }
+    return "";
+  }, [event]);
+  const canMarkAttendance = !attendanceLock && !attendanceLoading;
+
+  const attendanceDirty = useMemo(() => {
+    if (savedAttended.size !== draftAttended.size) return true;
+    for (const rid of draftAttended) if (!savedAttended.has(rid)) return true;
+    return false;
+  }, [savedAttended, draftAttended]);
+
+  const toggleAttended = (registrationId) => {
+    setAttendanceMessage(null);
+    setDraftAttended((prev) => {
+      const next = new Set(prev);
+      if (next.has(registrationId)) next.delete(registrationId);
+      else next.add(registrationId);
+      return next;
+    });
+  };
+
+  const handleSaveAttendance = async () => {
+    setAttendanceSaving(true);
+    setAttendanceMessage(null);
+    try {
+      const ids = Array.from(draftAttended);
+      const res = await eventsAPI.setAttendance(id, ids);
+      setSavedAttended(new Set(ids));
+      setAttendees((prev) => prev.map((a) => ({ ...a, attended: draftAttended.has(a.id) })));
+      setAttendanceMessage({
+        type: "success",
+        text: `Attendance saved: ${res.data?.attended ?? ids.length} of ${res.data?.registered ?? allRegistrationIds.length} registered students attended.`,
+      });
+    } catch (err) {
+      const data = err.response?.data;
+      const text =
+        (data && (data.detail || (data.registration_ids && [].concat(data.registration_ids).join(" ")))) ||
+        extractErrorMessage(err, "Failed to save attendance.");
+      setAttendanceMessage({ type: "error", text });
+      if (err.response?.status === 400) loadAttendance(); // registrations changed meanwhile
+    } finally {
+      setAttendanceSaving(false);
+    }
+  };
 
   // Initial load
   useEffect(() => {
@@ -426,6 +537,84 @@ export default function OperatorEventAttendees() {
                 </div>
               </div>
 
+              {/* Attendance toolbar (Week 8) */}
+              {totalCount > 0 && (
+                <div className="px-6 py-3.5 border-b border-border-subtle bg-canvas-base/60 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-lavender text-primary text-[11px] font-bold">
+                      <span className="material-symbols-outlined text-[15px]">how_to_reg</span>
+                      {attendanceLoading
+                        ? "Loading attendance…"
+                        : `${draftAttended.size} of ${allRegistrationIds.length} attended`}
+                    </span>
+                    {attendanceDirty && (
+                      <span className="text-[11px] font-semibold text-amber-700">Unsaved changes</span>
+                    )}
+                    {attendanceLock && <span className="text-[11px] text-text-muted">{attendanceLock}</span>}
+                  </div>
+                  {canMarkAttendance && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttendanceMessage(null);
+                          setDraftAttended(new Set(allRegistrationIds));
+                        }}
+                        disabled={attendanceSaving}
+                        className="px-3.5 py-1.5 rounded-full border border-border-subtle bg-surface-white hover:bg-surface-lavender text-on-surface text-xs font-semibold transition-colors disabled:opacity-50"
+                      >
+                        Mark all
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttendanceMessage(null);
+                          setDraftAttended(new Set());
+                        }}
+                        disabled={attendanceSaving}
+                        className="px-3.5 py-1.5 rounded-full border border-border-subtle bg-surface-white hover:bg-surface-lavender text-on-surface text-xs font-semibold transition-colors disabled:opacity-50"
+                      >
+                        Clear all
+                      </button>
+                      {attendanceDirty && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAttendanceMessage(null);
+                            setDraftAttended(new Set(savedAttended));
+                          }}
+                          disabled={attendanceSaving}
+                          className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-text-muted hover:text-on-surface transition-colors"
+                        >
+                          Discard
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleSaveAttendance}
+                        disabled={attendanceSaving || !attendanceDirty}
+                        className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">save</span>
+                        {attendanceSaving ? "Saving…" : "Save Attendance"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {attendanceMessage && (
+                <div
+                  role={attendanceMessage.type === "error" ? "alert" : "status"}
+                  className={`px-6 py-2.5 text-xs font-semibold border-b border-border-subtle ${
+                    attendanceMessage.type === "error"
+                      ? "bg-error-container text-on-error-container"
+                      : "bg-emerald-50 text-emerald-800"
+                  }`}
+                >
+                  {attendanceMessage.text}
+                </div>
+              )}
+
               {/* Page Loading Overlay */}
               <div className="relative">
                 {pageLoading && (
@@ -486,7 +675,7 @@ export default function OperatorEventAttendees() {
                             <th className="py-3 px-6">Department</th>
                             <th className="py-3 px-6 text-center">Batch</th>
                             <th className="py-3 px-6">Registered On</th>
-                            <th className="py-3 px-6 text-right">Status</th>
+                            <th className="py-3 px-6 text-right">Attended</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle/70 text-xs">
@@ -542,9 +731,12 @@ export default function OperatorEventAttendees() {
                                 </td>
 
                                 <td className="py-3.5 px-6 text-right">
-                                  <Badge variant="success" size="sm" dot>
-                                    Registered
-                                  </Badge>
+                                  <AttendanceControl
+                                    checked={draftAttended.has(attendee.id)}
+                                    editable={canMarkAttendance && !attendanceSaving}
+                                    name={attendee.name}
+                                    onToggle={() => toggleAttended(attendee.id)}
+                                  />
                                 </td>
                               </tr>
                             );
@@ -579,9 +771,12 @@ export default function OperatorEventAttendees() {
                                 </div>
                               </div>
 
-                              <Badge variant="success" size="sm" dot>
-                                Registered
-                              </Badge>
+                              <AttendanceControl
+                                checked={draftAttended.has(attendee.id)}
+                                editable={canMarkAttendance && !attendanceSaving}
+                                name={attendee.name}
+                                onToggle={() => toggleAttended(attendee.id)}
+                              />
                             </div>
 
                             <div className="grid grid-cols-2 gap-2 text-[11px] bg-surface-lavender/30 p-2.5 rounded-xl border border-border-subtle/50">

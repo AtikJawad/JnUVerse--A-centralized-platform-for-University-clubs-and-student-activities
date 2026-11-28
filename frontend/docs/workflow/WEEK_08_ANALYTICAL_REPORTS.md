@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stage 1 Completed (API Services Foundation Verified)**  
+**Status:** **In Progress — Stages 1–2 Completed (Stage 2 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -44,9 +44,12 @@
    - `utils/format.js`: `formatPercent` (66.7 → "66.7%", `null` → "—"), `formatRating`, `formatCount`, `formatMonth` ("2026-11" → "Nov 2026"), `formatDhakaDate`.
    - Validated against ESLint, Vite build and read-only API smoke tests (Section 10).
 
-2. [ ] **Stage 2: Attendance Marking (`OperatorEventAttendees.jsx`)**
-   - Load all registration pages (now include `attended`); checkbox per row, "Mark all / Clear all", Save sends the **full** attended set; "N of M attended" summary from the `{ registered, attended }` response.
-   - Disabled with a reason for drafts, cancelled events and events that have not started (`409` rules); `400` unknown-id errors shown.
+2. [x] **Stage 2: Attendance Marking (`OperatorEventAttendees.jsx`)**
+   - All registration pages are loaded once (`fetchAllPages`) to build the saved attended set; a draft set is edited across the paginated roster, so Save always sends the **full** attended set as the backend requires.
+   - The "Status" column (always "Registered") became an **Attended** column: a DESIGN.md checkbox (20px, primary fill) with "Attended" / "Absent" label on desktop and mobile; a read-only "Attended" badge / "Not marked" text when attendance cannot be marked.
+   - Attendance toolbar: "N of M attended" pill, "Unsaved changes" hint, **Mark all**, **Clear all**, **Discard**, **Save Attendance** (enabled only when the draft differs); success message uses the `{ registered, attended }` response.
+   - Locked with a reason for drafts, cancelled events and events that have not started yet (mirrors the backend `409` rules); `409` `detail` and `400` `registration_ids` messages are shown, and a `400` reloads the attendance set.
+   - No Stitch screen exists for attendance; the existing roster layout (Week 4, Stitch member-management style) is kept.
 
 3. [ ] **Stage 3: Chart Components**
    - `components/charts/`: horizontal `BarChart` (departments, clubs), `ColumnChart` (rating distribution 1–5), `LineChart` (monthly trend), `MetricRow` (Stitch hairline metrics).
@@ -183,8 +186,41 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 
 ---
 
-## 12. Week 8 Readiness Classification
+## 12. Stage 2 Verification Results
 
-* **Implementation:** Stage 1 of 7 complete (API services foundation).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests). Remaining stages pending.
+| Verification Check | Command / Method | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `OperatorEventAttendees.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
+| **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
+| **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 14). |
+
+---
+
+## 13. Acceptance Criteria (Stage 2)
+
+- [x] Operators can tick attendance per student across all roster pages and save the full set.
+- [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
+- [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Manual browser QA of saving attendance (Section 14).
+
+---
+
+## 14. Manual Interactive Browser QA Checklist
+
+### Attendance (democlub1@demo.jnuverse.test)
+- [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
+- [ ] Tick two students, see "Unsaved changes", click **Save Attendance** → "Attendance saved: 2 of 4 …"; reload and the ticks persist.
+- [ ] **Discard** restores the saved ticks; **Mark all** / **Clear all** affect every registration, not only the visible page.
+- [ ] Open a draft, cancelled or not-yet-started event's attendees: checkboxes are replaced by read-only text and the lock reason is shown.
+- [ ] After marking attendance, `/api/analytics/my-club/` attendance figures change (verified in Stage 4).
+
+---
+
+## 15. Week 8 Readiness Classification
+
+* **Implementation:** Stages 1–2 of 7 complete (API services foundation; attendance marking).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.
