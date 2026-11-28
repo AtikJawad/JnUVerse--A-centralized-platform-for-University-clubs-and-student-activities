@@ -61,10 +61,13 @@ class LoginView(APIView):
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
         refresh["role"] = user.role
+        data = UserSerializer(user).data
+        if hasattr(user, "club"):  # operators get their club too, saving a /me call
+            data["club"] = ClubSerializer(user.club).data
         return Response({
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-            "user": UserSerializer(user).data,
+            "user": data,
         })
 
 

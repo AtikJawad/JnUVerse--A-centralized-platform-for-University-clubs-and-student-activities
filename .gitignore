@@ -8,6 +8,7 @@
 !.env.example
 backend/.env
 backend/media/
+backend/media_local/
 frontend/.env
 
 # --- Python / Django ---
