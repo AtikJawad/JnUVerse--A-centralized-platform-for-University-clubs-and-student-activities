@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api, { extractErrorMessage } from "../services/api";
+import api, { extractErrorMessage, fetchAllPages } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
 
@@ -28,16 +28,10 @@ export default function OperatorMembers() {
     setError("");
 
     try {
-      const response = await api.get("/api/clubs/?page_size=50");
-      const list = response.data?.results || response.data || [];
+      // The operator's own club comes from /api/auth/me/ (user.club)
+      const myClub = user?.club;
 
-      // Operator's user.name equals the club name in DRF
-      let myClub = list.find((c) => c.name === user?.name);
-      if (!myClub && list.length > 0) {
-        myClub = list[0];
-      }
-
-      if (!myClub) {
+      if (!myClub?.slug) {
         setError("No chartered club profile found for this operator account.");
         setLoading(false);
         return;
@@ -45,14 +39,14 @@ export default function OperatorMembers() {
 
       setClub(myClub);
 
-      // Fetch pending requests and approved members
-      const [reqRes, memRes] = await Promise.all([
-        api.get(`/api/clubs/${myClub.slug}/membership-requests/`),
-        api.get(`/api/clubs/${myClub.slug}/members/`),
+      // Fetch all pages of pending requests and approved members
+      const [requests, members] = await Promise.all([
+        fetchAllPages(`/api/clubs/${myClub.slug}/membership-requests/`),
+        fetchAllPages(`/api/clubs/${myClub.slug}/members/`),
       ]);
 
-      setPendingRequests(reqRes.data?.results || reqRes.data || []);
-      setApprovedMembers(memRes.data?.results || memRes.data || []);
+      setPendingRequests(requests);
+      setApprovedMembers(members);
     } catch (err) {
       setError(extractErrorMessage(err, "Failed to load club membership roster."));
     } finally {

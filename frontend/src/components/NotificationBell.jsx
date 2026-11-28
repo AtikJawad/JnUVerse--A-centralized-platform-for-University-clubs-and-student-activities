@@ -102,6 +102,11 @@ async function resolveNotificationTarget(notif, userRole) {
         pathname: userRole === "club_operator" ? "/operator/members" : "/my-clubs",
       };
 
+    case "collaboration_update":
+      return {
+        pathname: userRole === "club_operator" ? "/operator/collaborations" : "/notifications",
+      };
+
     case "notice": {
       const noticeId = typeof notif.notice === "object" ? notif.notice?.id : notif.notice;
       if (noticeId) {

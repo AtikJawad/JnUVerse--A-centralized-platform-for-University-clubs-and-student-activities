@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import api, { extractErrorMessage } from "../services/api";
+import api, { extractErrorMessage, fetchAllPages } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
 
@@ -41,8 +41,9 @@ export default function MyClubs() {
     setError("");
 
     try {
-      const response = await api.get("/api/clubs/?page_size=50");
-      const results = response.data?.results || response.data || [];
+      // Load every page: pending requests have no server-side filter, so the
+      // full list (annotated with my_membership / is_following) is needed.
+      const results = await fetchAllPages("/api/clubs/");
       setClubs(results);
     } catch (err) {
       setError(extractErrorMessage(err, "Failed to load your club memberships."));

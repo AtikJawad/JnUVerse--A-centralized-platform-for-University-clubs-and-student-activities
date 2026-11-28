@@ -335,7 +335,9 @@ export default function Notifications() {
     }
 
     if (notif.type === "collaboration_update") {
-      return { pathname: "/notifications" };
+      return {
+        pathname: user?.role === "club_operator" ? "/operator/collaborations" : "/notifications",
+      };
     }
 
     return { pathname: "/notifications" };

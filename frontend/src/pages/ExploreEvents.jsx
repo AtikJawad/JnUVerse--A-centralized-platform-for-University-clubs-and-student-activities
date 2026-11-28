@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { eventsAPI, extractErrorMessage } from "../services/api";
@@ -161,12 +161,16 @@ async function fetchAllActiveEvents(query = "") {
 
 export default function ExploreEvents() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const isStudent = user?.role === "student";
   const [events, setEvents] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const pageSize = 12;
 
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState(
+    searchParams.get("tab") === "registered" ? "registered" : "all"
+  );
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -249,6 +253,11 @@ export default function ExploreEvents() {
             params.upcoming = "false";
           }
 
+          if (currentFilter === "registered") {
+            // Student's own current registrations (GET /api/events/?registered=true)
+            params.registered = "true";
+          }
+
           const res = await eventsAPI.getAll(params);
           const data = res.data;
 
@@ -275,9 +284,12 @@ export default function ExploreEvents() {
     [getActiveEvents, pageSize]
   );
 
+  // "My Registrations" is student-only; anyone else falls back to all events
+  const effectiveFilter = activeFilter === "registered" && !isStudent ? "all" : activeFilter;
+
   useEffect(() => {
-    fetchEvents(page, activeFilter, searchQuery);
-  }, [fetchEvents, page, activeFilter, searchQuery]);
+    fetchEvents(page, effectiveFilter, searchQuery);
+  }, [fetchEvents, page, effectiveFilter, searchQuery]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -568,6 +580,7 @@ export default function ExploreEvents() {
                       { key: "upcoming", label: "Upcoming" },
                       { key: "ongoing", label: "Ongoing" },
                       { key: "past", label: "Past" },
+                      ...(isStudent ? [{ key: "registered", label: "My Registrations" }] : []),
                     ].map((tab) => {
                       const isActive = activeFilter === tab.key;
                       return (
@@ -652,7 +665,7 @@ export default function ExploreEvents() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => fetchEvents(page, activeFilter, searchQuery, true)}
+                    onClick={() => fetchEvents(page, effectiveFilter, searchQuery, true)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-xs transition-colors"
                   >
                     <span className="material-symbols-outlined text-[18px]">refresh</span>
@@ -671,11 +684,14 @@ export default function ExploreEvents() {
                   </div>
                   <div className="space-y-1 max-w-md">
                     <h3 className="text-lg sm:text-xl font-bold text-on-surface">
-                      No campus events found
+                      {activeFilter === "registered"
+                        ? "You haven't registered for any events yet"
+                        : "No campus events found"}
                     </h3>
                     <p className="text-xs sm:text-sm text-text-muted">
-                      No events match your current filter or search criteria. Explore other
-                      categories or check back later!
+                      {activeFilter === "registered"
+                        ? "Events you register for will appear here. Browse all events to find one you like."
+                        : "No events match your current filter or search criteria. Explore other categories or check back later!"}
                     </p>
                   </div>
                   <button

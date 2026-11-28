@@ -501,7 +501,8 @@ export default function ClubDetail() {
     }
   };
 
-  const isOperatorOfThisClub = user?.role === "club_operator" && user?.name === club?.name;
+  const isOperatorOfThisClub =
+    user?.role === "club_operator" && Boolean(club?.slug) && user?.club?.slug === club.slug;
 
   return (
     <div className="min-h-screen bg-canvas-base text-on-surface antialiased flex flex-col justify-between selection:bg-surface-variant selection:text-primary">
@@ -1073,6 +1074,14 @@ export default function ClubDetail() {
                             </button>
                           </div>
                         ) : (
+                          <>
+                          {(membershipStatus === "rejected" || membershipStatus === "removed") && (
+                            <p className="text-[11px] leading-relaxed text-text-muted px-1">
+                              {membershipStatus === "rejected"
+                                ? "Your previous membership request was not approved. You can send a new request."
+                                : "You were removed from this club. You can request to join again."}
+                            </p>
+                          )}
                           <button
                             type="button"
                             onClick={handleRequestMembership}
@@ -1082,6 +1091,7 @@ export default function ClubDetail() {
                             <span className="material-symbols-outlined text-[16px]">person_add</span>
                             <span>{membershipLoading ? "Submitting..." : "Request Membership"}</span>
                           </button>
+                          </>
                         )}
                       </div>
                     </div>

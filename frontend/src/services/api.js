@@ -168,6 +168,23 @@ export function extractErrorMessage(error, defaultMessage = "An error occurred."
 }
 
 /**
+ * Fetches every page of a paginated DRF list endpoint and returns the combined results.
+ * Uses page_size=50 (the backend maximum). `maxPages` is a safety ceiling.
+ */
+export async function fetchAllPages(url, params = {}, maxPages = 40) {
+  let results = [];
+  for (let page = 1; page <= maxPages; page += 1) {
+    const res = await api.get(url, { params: { ...params, page, page_size: 50 } });
+    const data = res.data;
+    if (Array.isArray(data)) return data;
+    const pageResults = data?.results || [];
+    results = results.concat(pageResults);
+    if (!data?.next || pageResults.length === 0) break;
+  }
+  return results;
+}
+
+/**
  * Clubs API Service — Centralized club discovery and lookup endpoints
  */
 export const clubsAPI = {
