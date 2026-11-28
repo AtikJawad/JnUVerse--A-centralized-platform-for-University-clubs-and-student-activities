@@ -169,6 +169,13 @@ export default function OperatorDashboard() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Link
+                to="/operator/analytics"
+                className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-surface-white text-slate-700 hover:text-slate-900 hover:border-slate-300 text-[12px] font-medium transition-all inline-flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[14px] text-slate-400">insights</span>
+                <span>Analytics</span>
+              </Link>
+              <Link
                 to={publicPath}
                 className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-surface-white text-slate-700 hover:text-slate-900 hover:border-slate-300 text-[12px] font-medium transition-all inline-flex items-center gap-1.5"
               >
@@ -442,6 +449,7 @@ export default function OperatorDashboard() {
                       ["/operator/members", "Manage Members Roster", `${counts.members ?? 0} enrolled →`],
                       [publicPath, "Update Club Profile", "Logo, interests & contact →"],
                       ["/operator/events", "Manage Events", `${counts.upcoming_events ?? 0} upcoming · ${counts.draft_events ?? 0} drafts →`],
+                      ["/operator/analytics", "View Analytics", "Reports & trends →"],
                       ["/operator/notices", "Post a Notice", "Announcements →"],
                       ["/operator/collaborations", "Collaborations", `${counts.pending_collaboration_requests ?? 0} pending →`],
                     ].map(([to, label, meta]) => (

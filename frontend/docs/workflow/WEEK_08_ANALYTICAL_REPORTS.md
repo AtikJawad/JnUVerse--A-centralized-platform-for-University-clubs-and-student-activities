@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stages 1–3 Completed (Stages 2–3 Source & Build Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–4 Completed (Stages 2–4 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -62,10 +62,12 @@
      - `useChartWidth.js`: measures the card so SVG charts draw at real pixel size (labels stay 11px).
    - App is light-only, so only the light palette is defined.
 
-4. [ ] **Stage 4: Operator Analytics Hub (`/operator/analytics`)**
-   - **My Club report (report 5):** summary metrics (events launched / cancelled / completed, registrations, registration rate, attended, attendance rate, average rating, followers, members), monthly trend line chart, per-event comparison table (fill rate, attendance rate, rating; links to per-event reports), best-rated event.
-   - **Club vs club (report 3):** table of all clubs with the operator's own row highlighted (`is_mine`), most events first; optional bar chart of attendance rate.
-   - Shared date filter (`date_from` / `date_to`, start-date based) with `400` error display; Navbar "Analytics" link for operators.
+4. [x] **Stage 4: Operator Analytics Hub (`/operator/analytics`)** — `OperatorAnalytics.jsx`
+   - Layout follows the Stitch operator-dashboard style (editorial headline, `max-w-6xl`, hairline metric row, white `rounded-xl` cards) and the Stitch reports-interface table.
+   - **One date filter row above everything** (data-viz rule): presets All time / Last 30 days / Last 90 days / This year (Asia/Dhaka dates) and a custom From–To with a browser check for reversed ranges; `400` messages from the backend shown under the row; "Showing: …" states the period (event start date). The filter scopes both reports so their numbers agree; refetches keep the previous render at reduced opacity (no skeleton flash); stale responses are ignored.
+   - **Report 5 — your club:** `MetricRow` (events launched with completed/cancelled, registrations with registration rate, attendance rate with attended, average rating with count); `LineChart` of registrations vs attended by month (one axis, same unit; average rating stays in the table — no dual axis) with table view (month, events, registrations, attended, average rating); best-rated event card linking to its event report; per-event table (fill rate, attended, attendance rate, rating) with titles linking to `/operator/events/:id/analytics`.
+   - **Report 3 — club vs club:** ranked `BarChart` in **emphasis** mode (your club in slot 1, others gray) with a measure switch (Registrations / Attendance rate / Average rating; clubs without a value show "—" and sort last) and a full table view of every column with "(you)" on your row.
+   - Navigation: `/operator/analytics` route (club operators only); Navbar "Analytics" link (pill from `xl`, mobile menu always — the operator pill would overflow at `lg`); operator dashboard header button and "View Analytics" quick action.
 
 5. [ ] **Stage 5: Per-Event Reports (`/operator/events/:id/analytics`)**
    - **Department participation (report 1):** totals (registered, attended, attendance rate) and a bar chart of `attended` per department with a table (registered, attended, attendance rate, share of attended). Available only for ended, published events — `409` shown as "Available after the event ends".
@@ -120,7 +122,7 @@ All endpoints are `GET` with JWT unless noted. Percentages have one decimal or a
 ### Planned New Files
 - `frontend/src/components/charts/` *(created, Stage 3)*: `chartTheme.js`, `ChartFrame.jsx`, `BarChart.jsx`, `ColumnChart.jsx`, `LineChart.jsx`, `Figures.jsx` (MetricRow, HeroFigure, SegmentedBar), `useChartWidth.js`, `index.js`
 - `frontend/src/utils/format.js` (percent / rating / month formatters) *(created, Stage 1)*
-- `frontend/src/pages/OperatorAnalytics.jsx`
+- `frontend/src/pages/OperatorAnalytics.jsx` *(created, Stage 4)*
 - `frontend/src/pages/OperatorEventAnalytics.jsx`
 - `frontend/src/pages/MyActivity.jsx`
 
@@ -201,7 +203,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 | **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
 | **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
 | **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
-| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 16). |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 18). |
 
 ---
 
@@ -211,7 +213,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 - [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
 - [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving attendance (Section 16).
+- [ ] Manual browser QA of saving attendance (Section 18).
 
 ---
 
@@ -249,7 +251,29 @@ The components were rendered with demo report data (React server rendering + the
 
 ---
 
-## 16. Manual Interactive Browser QA Checklist
+## 16. Stage 4 Verification Results
+
+| Verification Check | Command / Method | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `OperatorAnalytics.jsx`, `App.jsx`, `Navbar.jsx`, `OperatorDashboard.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.17s)** | Bundle-size warning only (carried to Week 9). |
+| **Endpoints & date filters** | Stage 1 smoke tests | **PASS** | `my-club` / `club-comparison` 200, invalid ranges 400 with messages, student 403. |
+| **Page render** | — | **PENDING (browser)** | The page loads data in effects, so a static render cannot show it; chart components were render-checked in Stage 3. |
+
+---
+
+## 17. Acceptance Criteria (Stage 4)
+
+- [x] Report 5 shows summary metrics, a monthly trend, the best-rated event and a per-event table.
+- [x] Report 3 lists every club with the operator's club highlighted and a measure switch.
+- [x] One date filter scopes both reports; invalid ranges show the backend message.
+- [x] Every chart has a table view; `null` values show "—".
+- [x] Reachable from the Navbar and the operator dashboard; operators only.
+- [ ] Browser QA of the page with real data (Section 18).
+
+---
+
+## 18. Manual Interactive Browser QA Checklist
 
 ### Attendance (democlub1@demo.jnuverse.test)
 - [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
@@ -258,10 +282,18 @@ The components were rendered with demo report data (React server rendering + the
 - [ ] Open a draft, cancelled or not-yet-started event's attendees: checkboxes are replaced by read-only text and the lock reason is shown.
 - [ ] After marking attendance, `/api/analytics/my-club/` attendance figures change (verified in Stage 4).
 
+### Operator Analytics (democlub1@demo.jnuverse.test)
+- [ ] Navbar "Analytics" (wide screen or mobile menu) or the dashboard "Analytics" button opens `/operator/analytics`.
+- [ ] Metrics show 5 launched (5 completed · 0 cancelled), 9 registrations (6.4% of capacity), attendance "0.0%" before marking, ★ 4.2 from 5 ratings.
+- [ ] Monthly chart shows Oct 2026 and Nov 2026 lines with a legend; hovering or ←/→ shows one tooltip with both values; the Table view lists the same numbers.
+- [ ] Best rated event: [DEMO] Rated Workshop ★ 4.3 (3) with a working "Event report" link.
+- [ ] Club vs club: Robotics bar highlighted; switching measure re-ranks the bars; clubs without values show "—".
+- [ ] Presets and a custom range update both reports; From later than To shows an error; the page dims instead of flashing while loading.
+
 ---
 
-## 17. Week 8 Readiness Classification
+## 19. Week 8 Readiness Classification
 
-* **Implementation:** Stages 1–3 of 7 complete (API services foundation; attendance marking; chart components).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build. Remaining stages pending.
+* **Implementation:** Stages 1–4 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stage 4 verified at source and build level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.
