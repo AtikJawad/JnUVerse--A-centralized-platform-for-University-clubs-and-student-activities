@@ -7,6 +7,7 @@ import { bannerStyle } from "../utils/banner";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
 import StarRating, { RATING_LABELS } from "../components/StarRating";
+import ReportModal from "../components/ReportModal";
 
 /**
  * Date and Time Formatting Helpers using strict Asia/Dhaka Timezone.
@@ -150,6 +151,7 @@ export default function EventDetail() {
   const { user, isAuthenticated } = useAuth();
 
   const [event, setEvent] = useState(null);
+  const [showReport, setShowReport] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -493,7 +495,20 @@ export default function EventDetail() {
                 <span>Back to Events Discovery</span>
               </Link>
 
-              <div className="inline-flex items-center gap-2 text-xs text-text-muted">
+              <div className="inline-flex items-center gap-3 text-xs text-text-muted">
+                {/* Report (published/cancelled events; not the organizing club's operator) */}
+                {isAuthenticated &&
+                  (event.status === "published" || event.status === "cancelled") &&
+                  !(user?.role === "club_operator" && user?.club?.slug === event.club?.slug) && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReport(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border-subtle bg-surface-white text-text-muted hover:text-error hover:border-error/30 font-semibold text-xs transition-colors shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">flag</span>
+                      <span>Report</span>
+                    </button>
+                  )}
                 <Link to="/events" className="hover:text-primary transition-colors">
                   Events
                 </Link>
@@ -503,6 +518,15 @@ export default function EventDetail() {
                 </span>
               </div>
             </nav>
+
+            {showReport && (
+              <ReportModal
+                targetType="event"
+                target={event.id}
+                targetName={event.title}
+                onClose={() => setShowReport(false)}
+              />
+            )}
 
             {/* Top Feedback Banner */}
             {actionSuccess && (

@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stages 1–5 Completed (Stages 2–5 Source, Build & API Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–6 Completed (Stages 2–6 Source, Build & API Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -92,14 +92,14 @@
    - Routing: `App.jsx` `RoleDashboard` renders `OperatorDashboard` for club operators and the Student Dashboard for students on `/` and `/dashboard`; the temporary operator card was removed from `Dashboard.jsx`.
    - Deviations: the Stitch sidebar is replaced by the shared top Navbar used on all operator pages; the Stitch "State Inspector" switcher is prototype-only and not implemented; unread notifications stay on the navbar bell.
 
-6. [ ] **Stage 6: Content Reports (`ReportModal`, `/my-reports`)**
-   - `ReportModal.jsx`: reason selector, details textarea (required for `other`, 1000-character counter), focus trap, Escape to close.
-   - "Report" action on ClubDetail and EventDetail for logged-in users; hidden for the operator's own club and its events.
-   - `409` shown as "You have already reported this."; `400` field errors shown next to their fields.
-   - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
+6. [x] **Stage 6: Content Reports (`ReportModal`, `/my-reports`)**
+   - `MyReports.jsx` at `/my-reports` (students and club operators), built against Stitch `jnuverse_reports_interface/code.html`: "Reporting" metadata strip with scope pill, editorial header with context banner ("How reports work"), summary quick-strip (Total Filed / In Review / Resolved / Dismissed), "Activity Log" table (report code `REP-XXXXXXXX` from the id, reported club/event linked with reason and details, status pill, filed date, Club/Event type pill), notice footnote, plus the Stitch skeleton, empty ("No reports to display.") and error (HTTP status + Retry) views. Data from `GET /api/reports/` (all pages). Status labels: open → Received, under_review → Under review, resolved → Resolved, dismissed → Dismissed.
+   - `ReportModal.jsx`: Stitch has no report dialog, so it reuses the project's confirmation-modal pattern (OperatorEvents / ProposeCollaborationModal). Reason radio list (Inappropriate content, Spam, Misleading information, Harassment, Other), details textarea with 1000-character counter (required for "Other", checked in the browser and by the server), Escape to close, focus moves to the first option, field errors under their fields, `target` / own-club errors as a form message, `409` shown as "You have already reported this", success view with a link to My Reports.
+   - "Report" button: ClubDetail header for logged-in users except the club's own operator; EventDetail breadcrumb row for published or cancelled events, hidden for the organizing club's operator.
+   - Navbar: flag icon next to the notification bell and a "My Reports" link in the mobile menu.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 19).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 21).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -224,13 +224,13 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - `frontend/src/components/InterestTags.jsx` *(created, Stage 2)*
 - `frontend/src/components/ImageUploadField.jsx` *(created, Stage 2)*
 - `frontend/src/utils/banner.js` *(created, Stage 2)*
-- `frontend/src/components/ReportModal.jsx`
+- `frontend/src/components/ReportModal.jsx` *(created, Stage 6)*
 - `frontend/src/components/dashboard/StudentDashboardSections.jsx` *(created, Stage 4)*
 - `frontend/src/utils/clubTheme.js` *(created, Stage 4)*
 - `frontend/src/pages/OperatorDashboard.jsx` *(created, Stage 5)*
 - `frontend/src/pages/Profile.jsx` *(created, Stage 3)*
 - `frontend/src/components/InterestsPrompt.jsx` *(created, Stage 3)*
-- `frontend/src/pages/MyReports.jsx`
+- `frontend/src/pages/MyReports.jsx` *(created, Stage 6)*
 
 ### Planned Modified Files
 - `frontend/src/services/api.js`
@@ -248,7 +248,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 19 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 21 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
@@ -312,7 +312,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
 - [x] Operators can reach their own club profile from the navbar, immediately after login.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of uploads and interest saving (Section 19).
+- [ ] Manual browser QA of uploads and interest saving (Section 21).
 
 ---
 
@@ -325,7 +325,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 | **Prompt Trigger Data** | `GET /api/dashboard/student/` (demo1–demo5) | **PASS (200 OK)** | `has_interests: false` for demo2 and demo4 (prompt shown); `true` for demo1, demo3, demo5. |
 | **Suggestions from Interests** | same request | **PASS** | demo3 → Sports Club; demo5 → Robotics Club, Cultural Forum, Debate Society; demo1 → none ("all caught up"). |
 | **Interests RBAC** | `GET /api/auth/me/interests/` (operator / anonymous) | **PASS (403 / 401)** | `/profile` is student-only in the router as well. |
-| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 19). |
+| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 21). |
 
 ---
 
@@ -335,7 +335,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] The dashboard shows a skippable interests prompt only when `has_interests` is `false`.
 - [x] Students reach `/profile` from the navbar (desktop and mobile).
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving and clearing interests (Section 19).
+- [ ] Manual browser QA of saving and clearing interests (Section 21).
 
 ---
 
@@ -359,7 +359,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Next events, suggested clubs (with Follow) and both suggestion empty states implemented.
 - [x] Static Week 3 roadmap and profile placeholders removed.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with re-seeded demo data (Section 19).
+- [ ] Browser QA with re-seeded demo data (Section 21).
 
 ---
 
@@ -389,7 +389,31 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 
 ---
 
-## 18. Stitch Design Fidelity Review (Stages 2–5)
+## 18. Stage 6 Verification Results
+
+| Verification Check | Command / Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `ReportModal.jsx`, `MyReports.jsx`, `ClubDetail.jsx`, `EventDetail.jsx`, `Navbar.jsx`, `App.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.31s)** | Bundle-size warning only (unchanged). |
+| **My Reports Data** | `GET /api/reports/` (demo1 / demo2 / democlub1) | **PASS (200 OK)** | demo1: 3 reports (resolved, under_review, open — club and event targets); demo2: 1 dismissed; democlub1: 0 (empty state). |
+| **Own-Club Guard** | `POST /api/reports/` (democlub1 → own club), Stage 1 | **PASS (400)** | The UI also hides the button for the owning operator. |
+| **Duplicate Guard** | `POST /api/reports/` (demo1 → Sports Club), Stage 1 | **PASS (409)** | Shown as "You have already reported this". |
+| **Submitting a New Report from the UI** | — | **NOT RUN** | Creates data in the shared Supabase database (reports cannot be deleted); covered by manual QA. |
+
+---
+
+## 19. Acceptance Criteria (Stage 6)
+
+- [x] Logged-in users can report a club or a published/cancelled event; the button is hidden for the user's own club and its events.
+- [x] "Other" requires details; details are limited to 1000 characters; server field errors are shown next to the fields.
+- [x] Duplicate reports show a clear message instead of an error.
+- [x] `/my-reports` lists the user's own reports with the correct status labels, following the Stitch reports interface.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Browser QA of report submission (Section 21).
+
+---
+
+## 20. Stitch Design Fidelity Review (Stages 2–6)
 
 After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/` and `jnuverse/DESIGN.md`, following the Week 3 approach.
 
@@ -397,6 +421,7 @@ After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui
 - `jnuverse_student_dashboard_living_campus_experience/code.html` + `screen.png` — Student Dashboard (Stage 4).
 - `jnuverse_club_profile_management/code.html` + `screen.png` — Club Insignia & Logo upload section (Stage 2).
 - `jnuverse_club_operator_dashboard_minimal_redesign/code.html` + `screen.png` — Club Operator Dashboard (Stage 5; built against Stitch from the start).
+- `jnuverse_reports_interface/code.html` — My Reports page (Stage 6; the export's `screen.png` is not a valid image, so the HTML is the reference). The report dialog has no Stitch screen and reuses the project's modal pattern.
 - `jnuverse/DESIGN.md` — tokens, card/shadow/radius rules, empty states, feed lists (rating prompts and the Profile page, which have no dedicated Stitch screen).
 
 ### Corrections Made
@@ -418,7 +443,7 @@ After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui
 
 ---
 
-## 19. Manual Interactive Browser QA Checklist
+## 21. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -446,9 +471,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 20. Week 7 Readiness Classification
+## 22. Week 7 Readiness Classification
 
-* **Implementation:** Stages 1–5 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard; club operator dashboard).
+* **Implementation:** Stages 1–6 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard; club operator dashboard; content reports).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–5 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–6 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.

@@ -259,6 +259,20 @@ export default function Navbar() {
                 </Link>
               )}
 
+              {/* My Reports (Week 7) */}
+              <Link
+                to="/my-reports"
+                aria-label="My Reports"
+                title="My Reports"
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+                  isActive("/my-reports")
+                    ? "bg-surface-lavender text-primary"
+                    : "text-text-muted hover:bg-surface-lavender hover:text-primary"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[20px]">flag</span>
+              </Link>
+
               {/* Notification Bell with Dropdown Popover & Poller */}
               <NotificationBell />
 
@@ -375,6 +389,17 @@ export default function Navbar() {
           >
             Explore Clubs
           </Link>
+          {isAuthenticated && (
+            <Link
+              to="/my-reports"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                isActive("/my-reports") ? "bg-primary text-white" : "text-on-surface hover:bg-surface-lavender"
+              }`}
+            >
+              My Reports
+            </Link>
+          )}
           {user?.role === "club_operator" ? (
             <>
               {ownClubPath && (

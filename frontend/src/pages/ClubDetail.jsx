@@ -9,6 +9,7 @@ import ClubLogo from "../components/ClubLogo";
 import InterestTags from "../components/InterestTags";
 import InterestPicker from "../components/InterestPicker";
 import ImageUploadField from "../components/ImageUploadField";
+import ReportModal from "../components/ReportModal";
 
 const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 
@@ -163,6 +164,7 @@ export default function ClubDetail() {
 
   // Operator Edit State
   const [isEditing, setIsEditing] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [editFormData, setEditFormData] = useState(toEditForm(null));
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
@@ -607,6 +609,17 @@ export default function ClubDetail() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
+                  {/* Report (any logged-in user except this club's own operator) */}
+                  {isAuthenticated && !isOperatorOfThisClub && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReport(true)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-border-subtle bg-surface-white text-text-muted hover:text-error hover:border-error/30 font-semibold text-xs transition-colors shadow-xs"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">flag</span>
+                      <span>Report</span>
+                    </button>
+                  )}
                   <Link
                     to="/clubs"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-lavender hover:bg-surface-variant text-primary font-semibold text-xs transition-all shadow-xs"
@@ -616,6 +629,15 @@ export default function ClubDetail() {
                   </Link>
                 </div>
               </header>
+
+              {showReport && (
+                <ReportModal
+                  targetType="club"
+                  target={club.slug}
+                  targetName={club.name}
+                  onClose={() => setShowReport(false)}
+                />
+              )}
 
               {/* Asymmetrical 2-Column Content Layout (Direct from Stitch) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
