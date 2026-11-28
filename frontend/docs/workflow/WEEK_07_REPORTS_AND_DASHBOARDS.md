@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stages 1–4 Completed (Stages 2–4 Source, Build & API Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–5 Completed (Stages 2–5 Source, Build & API Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -82,11 +82,15 @@
    - The Stage 3 interests prompt reads `has_interests` from the same response; saving interests reloads the dashboard so suggestions update immediately.
    - Club operators temporarily see the hero plus quick links to their tools until Stage 5.
 
-5. [ ] **Stage 5: Club Operator Dashboard (`OperatorDashboard.jsx`)**
-   - Built on `GET /api/dashboard/club/` following the Stitch operator dashboard design.
-   - Count cards linking to management screens: members and pending requests → `/operator/members`; upcoming and draft events → `/operator/events`; pending collaborations → `/operator/collaborations`; followers; unread notifications.
-   - Club rating (average + count), registrations in the last 7 days, next events and recent ended events with ratings.
-   - `/` and `/dashboard` render the student or operator dashboard by role.
+5. [x] **Stage 5: Club Operator Dashboard (`OperatorDashboard.jsx`)**
+   - Built against Stitch `jnuverse_club_operator_dashboard_minimal_redesign/code.html` (minimal slate/indigo style, hairline borders, `rounded-xl`, `max-w-6xl`). Data from `dashboardAPI.club()`, `clubsAPI.getBySlug(slug)` (description, interests, logo) and `GET /api/clubs/:slug/membership-requests/`, loaded in parallel with the Stitch shimmer skeleton and an error state with Retry.
+   - **Club editorial headline:** logo (`ClubLogo`), name with verified icon, "Chartered Guild · @slug", "Public Page" and "Edit Profile" actions (both open the club profile, where the Stage 2 edit form lives).
+   - **Metric hairline rows** (Stitch row extended to two rows of three): Approved Members and Pending Requests (→ `/operator/members`, "Action needed" dot), Campus Followers; Upcoming Events with drafts and a green "+N registrations this week" note (→ `/operator/events`), Collaboration Requests (→ `/operator/collaborations`), Club Rating (★ average and count, "—" when none).
+   - **Membership Requests:** "N Pending" badge, search by name / department / Student ID, privacy notice, up to 5 rows (name · Student ID, batch · department · "Applied N days ago") with inline **Approve** / **Reject** (same endpoints as the Members page), toast feedback and a counts refresh; Stitch zero state; "View all" → `/operator/members`.
+   - **Next Events / Recent Events** (not in Stitch; same minimal list style): `next_events` with registered/capacity, `recent_events` with ★ average (count) or "No ratings yet".
+   - **Public Snapshot** (description, interest tags, followers · members, "View live") and **Quick Actions** (Members, Club Profile, Events, Notices, Collaborations with live counts).
+   - Routing: `App.jsx` `RoleDashboard` renders `OperatorDashboard` for club operators and the Student Dashboard for students on `/` and `/dashboard`; the temporary operator card was removed from `Dashboard.jsx`.
+   - Deviations: the Stitch sidebar is replaced by the shared top Navbar used on all operator pages; the Stitch "State Inspector" switcher is prototype-only and not implemented; unread notifications stay on the navbar bell.
 
 6. [ ] **Stage 6: Content Reports (`ReportModal`, `/my-reports`)**
    - `ReportModal.jsx`: reason selector, details textarea (required for `other`, 1000-character counter), focus trap, Escape to close.
@@ -95,7 +99,7 @@
    - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 17).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 19).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -223,7 +227,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - `frontend/src/components/ReportModal.jsx`
 - `frontend/src/components/dashboard/StudentDashboardSections.jsx` *(created, Stage 4)*
 - `frontend/src/utils/clubTheme.js` *(created, Stage 4)*
-- `frontend/src/pages/OperatorDashboard.jsx`
+- `frontend/src/pages/OperatorDashboard.jsx` *(created, Stage 5)*
 - `frontend/src/pages/Profile.jsx` *(created, Stage 3)*
 - `frontend/src/components/InterestsPrompt.jsx` *(created, Stage 3)*
 - `frontend/src/pages/MyReports.jsx`
@@ -244,7 +248,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 17 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 19 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
@@ -308,7 +312,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
 - [x] Operators can reach their own club profile from the navbar, immediately after login.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of uploads and interest saving (Section 17).
+- [ ] Manual browser QA of uploads and interest saving (Section 19).
 
 ---
 
@@ -321,7 +325,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 | **Prompt Trigger Data** | `GET /api/dashboard/student/` (demo1–demo5) | **PASS (200 OK)** | `has_interests: false` for demo2 and demo4 (prompt shown); `true` for demo1, demo3, demo5. |
 | **Suggestions from Interests** | same request | **PASS** | demo3 → Sports Club; demo5 → Robotics Club, Cultural Forum, Debate Society; demo1 → none ("all caught up"). |
 | **Interests RBAC** | `GET /api/auth/me/interests/` (operator / anonymous) | **PASS (403 / 401)** | `/profile` is student-only in the router as well. |
-| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 17). |
+| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 19). |
 
 ---
 
@@ -331,7 +335,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] The dashboard shows a skippable interests prompt only when `has_interests` is `false`.
 - [x] Students reach `/profile` from the navbar (desktop and mobile).
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving and clearing interests (Section 17).
+- [ ] Manual browser QA of saving and clearing interests (Section 19).
 
 ---
 
@@ -355,17 +359,44 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Next events, suggested clubs (with Follow) and both suggestion empty states implemented.
 - [x] Static Week 3 roadmap and profile placeholders removed.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with re-seeded demo data (Section 17).
+- [ ] Browser QA with re-seeded demo data (Section 19).
 
 ---
 
-## 16. Stitch Design Fidelity Review (Stages 2–4)
+## 16. Stage 5 Verification Results
+
+| Verification Check | Command / Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `OperatorDashboard.jsx`, `App.jsx`, `Dashboard.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
+| **Club Dashboard** | `GET /api/dashboard/club/` (democlub1) | **PASS (200 OK)** | followers 2, members 2, pending 1, upcoming 0, drafts 0, collab pending 1, unread 4; rating 4.2 (5); 5 recent events (Rated Workshop 4.3 (3), Closed Rating Event 4.0 (2)). |
+| **Club Snapshot** | `GET /api/clubs/demo-robotics-club/` | **PASS (200 OK)** | Description and interests available for the Public Snapshot. |
+| **Membership Requests** | `GET /api/clubs/demo-robotics-club/membership-requests/` | **PASS (200 OK)** | 1 pending (Demo Student 3, DEMO0003, Batch 22, Bangla). |
+| **Next Events / Registrations (populated)** | — | **BLOCKED (demo data expired)** | `next_events` empty and `registrations_last_7_days` 0 until re-seed (handoff: 2 upcoming, 9 registrations). |
+| **Approve / Reject from the dashboard** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA. |
+
+---
+
+## 17. Acceptance Criteria (Stage 5)
+
+- [x] Club Operator Dashboard built on `GET /api/dashboard/club/` following the Stitch operator dashboard.
+- [x] All counts shown and linked to Members, Events and Collaborations; club rating and weekly registrations shown.
+- [x] Pending membership requests can be approved or rejected from the dashboard.
+- [x] Next and recent events listed with registrations and ratings.
+- [x] `/` and `/dashboard` render the correct dashboard per role.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Browser QA with re-seeded demo data.
+
+---
+
+## 18. Stitch Design Fidelity Review (Stages 2–5)
 
 After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/` and `jnuverse/DESIGN.md`, following the Week 3 approach.
 
 ### Stitch References Used
 - `jnuverse_student_dashboard_living_campus_experience/code.html` + `screen.png` — Student Dashboard (Stage 4).
 - `jnuverse_club_profile_management/code.html` + `screen.png` — Club Insignia & Logo upload section (Stage 2).
+- `jnuverse_club_operator_dashboard_minimal_redesign/code.html` + `screen.png` — Club Operator Dashboard (Stage 5; built against Stitch from the start).
 - `jnuverse/DESIGN.md` — tokens, card/shadow/radius rules, empty states, feed lists (rating prompts and the Profile page, which have no dedicated Stitch screen).
 
 ### Corrections Made
@@ -387,7 +418,7 @@ After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui
 
 ---
 
-## 17. Manual Interactive Browser QA Checklist
+## 19. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -415,9 +446,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 18. Week 7 Readiness Classification
+## 20. Week 7 Readiness Classification
 
-* **Implementation:** Stages 1–4 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard).
+* **Implementation:** Stages 1–5 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard; club operator dashboard).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–4 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–5 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.

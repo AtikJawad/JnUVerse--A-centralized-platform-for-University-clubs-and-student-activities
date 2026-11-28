@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import OperatorLogin from "./pages/OperatorLogin";
@@ -19,6 +19,13 @@ import OperatorNotices from "./pages/OperatorNotices";
 import OperatorCollaborations from "./pages/OperatorCollaborations";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import OperatorDashboard from "./pages/OperatorDashboard";
+
+// "/" and "/dashboard": club operators get the Club Operator Dashboard, students the Student Dashboard
+function RoleDashboard() {
+  const { user } = useAuth();
+  return user?.role === "club_operator" ? <OperatorDashboard /> : <Dashboard />;
+}
 
 function App() {
   return (
@@ -150,7 +157,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <RoleDashboard />
               </ProtectedRoute>
             }
           />
@@ -158,7 +165,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <RoleDashboard />
               </ProtectedRoute>
             }
           />

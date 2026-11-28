@@ -18,7 +18,7 @@ import { dashboardAPI, extractErrorMessage } from "../services/api";
  * Students: data from GET /api/dashboard/student/, laid out like Stitch
  * `jnuverse_student_dashboard_living_campus_experience`: hero → rating prompts (when any) →
  * "Find your community." → "Your communities." → upcoming events, plus the Stage 3 interests prompt.
- * Club operators: hero only until the Club Operator Dashboard (Stage 5).
+ * Club operators are routed to OperatorDashboard (Stage 5) by RoleDashboard in App.jsx.
  */
 // Decorative hero "constellation" tiles (Stitch copy and colors, anim-float-1/2/3 in index.css)
 const HERO_TILES_LEFT = [
@@ -253,34 +253,6 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* Club operators: their dashboard arrives in Stage 5 */}
-          {user?.role === "club_operator" && (
-            <div className="p-6 rounded-2xl bg-surface-white border border-border-subtle shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-primary text-[24px]">dashboard</span>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-on-surface">Club operator tools</span>
-                  <span className="text-xs text-text-muted">Manage your members, events, notices and collaborations.</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  ["/operator/members", "Members"],
-                  ["/operator/events", "Events"],
-                  ["/operator/notices", "Notices"],
-                  ["/operator/collaborations", "Collaborations"],
-                ].map(([to, label]) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    className="px-4 py-2 rounded-full bg-surface-lavender hover:bg-surface-variant text-primary text-xs font-semibold transition-colors"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
