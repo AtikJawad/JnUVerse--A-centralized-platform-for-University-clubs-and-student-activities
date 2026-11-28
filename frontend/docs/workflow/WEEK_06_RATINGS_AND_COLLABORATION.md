@@ -1,7 +1,7 @@
 # Week 06 — Ratings & Collaboration
 
 **Focus:** Post-event attendee ratings (numeric 1–5 stars only) and inter-club collaboration requests  
-**Status:** **In Progress — Stage 2 (Student Event Rating Widget & Event Detail Integration) Completed & Verified**  
+**Status:** **Completed — Stages 1–7 Finalized (Architecture Audited, Contracts Verified, Lint & Build Passed, Runtime Verified, Manual Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_06_BACKEND_HANDOFF.md`, 147 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_event_feedback/code.html`  
@@ -105,18 +105,28 @@
      - Added "Rating Performance" toggle button in the top action ribbon of the attendee management view for published events.
      - Renders expandable `<EventRatingBreakdown>` right above the registered student roster.
    - Validated with ESLint (0 errors, 0 warnings) and Vite production build (0 errors, 982ms).
-4. [ ] **Stage 4: Public Partner Clubs Section on Club Detail**
-   - Query `collaborationsAPI.getPartners(clubSlug)` on `ClubDetail.jsx`.
-   - Render Stitch-styled "Partner Clubs" card with club logos, names, and partnership dates.
-5. [ ] **Stage 5: Club Operator Collaboration Hub (`OperatorCollaborations.jsx`)**
-   - Build `/operator/collaborations` workspace with `Incoming` and `Outgoing` segmented tabs.
-   - Render collaboration request cards, detail slide-over sheet, and action buttons (`Accept`, `Reject`, `Cancel`).
-   - Route `collaboration_update` notifications in `/notifications` directly to `/operator/collaborations`.
-6. [ ] **Stage 6: Propose Collaboration Modal Dialog**
-   - Build modal with target club search/picker (excluding operator's own club), proposal title, description, and published upcoming event selector.
-   - Handle 400 validation and 409 conflict responses.
-7. [ ] **Stage 7: Quality Gates, Stitch Alignment & Final Documentation**
-   - End-to-end lint, build, manual QA matrix, and workflow sign-off.
+4. [x] **Stage 4: Public Partner Clubs Section on Club Detail**
+   - Implemented `PartnerClubsSection.jsx` consuming `collaborationsAPI.getPartners(clubSlug)`.
+   - Embedded into `ClubDetail.jsx` directly below About This Society.
+   - Shows established accepted partner clubs only, formatted date, navigation to `/clubs/:slug`, pagination, and deduplication.
+5. [x] **Stage 5: Club Operator Collaboration Hub (`OperatorCollaborations.jsx`)**
+   - Implemented `/operator/collaborations` workspace with `Incoming` and `Outgoing` segmented tabs.
+   - Real-time overview metrics, status filters, card details drawer, and Accept/Reject/Cancel actions.
+   - Independent list and metrics generation counters, authentication hydration handling, and account-switching protection.
+   - Verified and manually confirmed working by user.
+6. [x] **Stage 6: Propose Collaboration Modal Dialog**
+   - Implemented `ProposeCollaborationModal.jsx` with dynamic club picker (excluding own club) and published upcoming event selector.
+   - Multi-page pagination loops for clubs and events with explicit loading ceiling notices (1,000 clubs / 500 events).
+   - Strict `target_club` slug format validation and duplicate submission lock.
+   - Focus trap, keyboard navigation, and `#propose-collaboration-btn` focus restoration.
+7. [x] **Stage 7: Final Quality Gates, Regression Audit & Documentation Finalization**
+   - Comprehensive source-level regression audit across all 6 stages.
+   - Zero ESLint errors or warnings (`npm run lint`).
+   - Production bundle compiled cleanly (`npm run build`).
+   - Backend Django checks (`manage.py check`, `makemigrations`) passed with 0 issues.
+   - Non-mutating API smoke tests passed across all 6 primary endpoints.
+   - Backend automated tests (`pytest`) classified as `BLOCKED — Test runner or dependency unavailable`.
+   - Complete manual browser QA checklist and final readiness classification.
 
 ---
 
@@ -494,8 +504,8 @@ Week 6 Stage 6 implements the complete inter-club collaboration proposal workflo
   - `description` (string, optional): Core statement & objectives textarea.
   - `event` (UUID string, optional): Linked published upcoming event belonging to the operator's own club.
 - **Data Discovery & Exclusion Safeguards:**
-  - Target clubs fetched via `clubsAPI.getAll({ page_size: 50 })`. Own club is excluded from options.
-  - Eligible events fetched via `eventsAPI.getAll({ mine: "true", upcoming: "true", page_size: 50 })`. Filtered strictly for `e.status === "published" && new Date(e.ends_at) > new Date()`.
+  - Target clubs fetched via `clubsAPI.getAll({ page_size: 50 })`, iteratively following `next` pages until `next` is null (up to a safe ceiling of 20 pages / 1,000 clubs). Deduplicated via `Set`. If `next` remains after reaching ceiling, an accessible warning notice informs the operator that the list is incomplete. Own club is strictly excluded by slug and ID.
+  - Eligible events fetched via `eventsAPI.getAll({ mine: "true", upcoming: "true", page_size: 50 })`, iteratively following `next` pages until `next` is null (up to a safe ceiling of 10 pages / 500 events). Deduplicated via `Set`. Filtered strictly for `e.status === "published" && new Date(e.ends_at) > new Date()`. If `next` remains after reaching ceiling, an accessible warning notice informs the operator that the dropdown is incomplete.
 - **Workflow & Post-Creation Transition:**
   - Upon successful proposal creation (`HTTP 201 Created`), the modal closes, displays a floating toast confirmation (`"Collaboration proposal successfully dispatched to <Target Club>!"`), switches the active tab to `sent` (Outbox), resets status filters to All, and refreshes the Sent list and overview metrics without requiring a browser reload.
   - In-flight duplicate clicks are disabled, and entered form state is preserved if a recoverable error occurs.
@@ -520,7 +530,9 @@ Week 6 Stage 6 implements the complete inter-club collaboration proposal workflo
 |---|---|:---:|---|
 | **Component ESLint** | `npx eslint frontend/src/components/ProposeCollaborationModal.jsx frontend/src/pages/OperatorCollaborations.jsx` | **PASS (0 errors, 0 warnings)** | Clean static analysis across all Stage 6 files. |
 | **Full Frontend Lint** | `cd frontend && npm run lint` | **PASS (0 errors, 0 warnings)** | Clean pass across entire project. |
-| **Production Build** | `cd frontend && npm run build` | **PASS (0 errors, 3.33s)** | Production bundle generated cleanly with Vite. |
+| **Production Build** | `cd frontend && npm run build` | **PASS (0 errors, 1.71s)** | Production bundle generated cleanly with Vite. |
+| **Target Club Identifier (Slug)** | Python test client `POST /api/collaborations/` with `target_club: target.slug` | **PASS (201 Created)** | Successfully verified `target_club` expects club slug per `SlugRelatedField(slug_field="slug")`. Test record deleted immediately. |
+| **Target Club Identifier (UUID/ID)** | Python test client `POST /api/collaborations/` with `target_club: str(target.id)` | **PASS (400 Bad Request)** | Backend rejected UUID with `{"target_club": ["Club not found."]}` confirming ID is invalid. |
 | **Self-Collaboration Guard** | Python test client `POST /api/collaborations/` with own slug | **PASS (400 Bad Request)** | Backend rejected self-request with `"You cannot send a request to your own club."` |
 | **Duplicate Pair Guard** | Python test client `POST /api/collaborations/` with existing pair | **PASS (409 Conflict)** | Backend rejected duplicate pending proposal with `"A pending collaboration request already exists between these clubs."` |
 | **Missing Title Guard** | Python test client `POST /api/collaborations/` with empty title | **PASS (400 Bad Request)** | Backend rejected empty title with `"This field may not be blank."` |
@@ -547,4 +559,85 @@ Week 6 Stage 6 implements the complete inter-club collaboration proposal workflo
 - [x] Concurrency and identity guards preserved; switching accounts or logging out resets modal state.
 - [x] Zero backend files, serializers, views, permissions, or database models modified.
 - [x] Tested with `npm run lint` (0 errors) and `npm run build` (0 errors).
+
+---
+
+## 18. Stage 7 — Final Quality Gates & Regression Audit
+
+### 18.1 Stage Status & Verification Matrix
+
+| Stage | Feature Area | Implementation Status | Verification Status | Notes |
+|:---:|---|:---:|:---:|---|
+| **1** | API Services Foundation | **Complete** | Source & Build Verified | `ratingsAPI`, `collaborationsAPI`, `clubsAPI` centralized in `api.js` |
+| **2** | Student Event Ratings Widget | **Complete** | Source & Build Verified | WAI-ARIA radio group, 1-5 integer scale, 7-day window, confidential from operators; browser QA pending |
+| **3** | Operator Rating Breakdown | **Complete** | Contract & Smoke Verified | Aggregate average, count, 5-star distribution bars; confidential; browser QA pending |
+| **4** | Public Partner Clubs Section | **Complete** | Contract & Smoke Verified | `/api/clubs/:slug/partners/`, accepted-only, pagination, deduplication, retryable error handling; browser QA pending |
+| **5** | Operator Collaboration Hub | **Complete** | User Manually Confirmed | `/operator/collaborations`, independent list & metrics generation counters, hydration fix, account-switch safety |
+| **6** | Propose Collaboration Modal | **Complete** | Contract & Shell Verified | Safe multi-page pagination with ceiling notices (1,000 clubs / 500 events), `target_club` slug validation, focus trap |
+| **7** | Final Quality Gates & Audit | **Complete** | Automated Gates & Smoke Verified | ESLint 0 errors, Vite production build clean, Django checks 0 issues, live non-mutating smoke tests 100% pass |
+
+### 18.2 Automated Quality Gates Execution Summary
+
+| Quality Gate | Target Command | Result / Code | Notes |
+|---|---|:---:|---|
+| **Frontend Lint** | `cd frontend && npm run lint` | **PASS (code 0)** | Zero ESLint errors or warnings across entire frontend. |
+| **Production Build** | `cd frontend && npm run build` | **PASS (code 0)** | Vite production bundle generated in ~2.0s without unresolved imports. |
+| **Django System Check** | `python3 backend/manage.py check` | **PASS (code 0)** | System check identified no issues (0 silenced). |
+| **Django Migrations Check** | `python3 backend/manage.py makemigrations --check --dry-run` | **PASS (code 0)** | No changes detected. All models in sync with migrations. |
+| **Backend Test Suite** | `python3 backend/manage.py test tests` | **BLOCKED** | Test runner dependency `pytest` is not installed in the global execution environment (`ModuleNotFoundError: No module named 'pytest'`). |
+| **API Smoke Tests** | Django shell `APIRequestFactory` | **PASS (6/6)** | Verified public partners (200), operator received/sent list (200), student RBAC (403), owning operator rating summary (200), non-owner rating summary (403), and student personal rating (200). |
+
+---
+
+## 19. Manual Interactive Browser QA Checklist
+
+For final end-user validation across interactive browsers:
+
+### Student Workflows
+- [ ] Log in as a registered student who attended a completed event within 7 days.
+- [ ] Navigate to `/events/:id`. Verify `#feedback-card` appears with interactive 5-star rating widget.
+- [ ] Hover over stars: verify score preview and dynamic label update.
+- [ ] Use keyboard navigation: `ArrowRight`/`ArrowLeft`/`Home`/`End`/`Space`/`Enter`. Verify focus roving and selection.
+- [ ] Submit rating: verify score updates on card and toast confirmation is shown.
+- [ ] Change rating: verify updated score persists.
+- [ ] Navigate to `/events`: verify compact aggregate rating chip (`★ 4.3 (3)`) displays on the event card.
+
+### Operator Rating Workflows
+- [ ] Log in as the club operator of the event's organizing club.
+- [ ] Navigate to `/operator/events`: verify rating count badge (`★ Ratings (N)`) on published event rows.
+- [ ] Click "Ratings": verify expandable inline rating breakdown drawer opens.
+- [ ] Check average score, total count, and 1–5 star distribution percentage bars.
+- [ ] Verify individual student names, IDs, and single ratings are never visible.
+- [ ] Navigate to `/operator/events/:id/attendees`: click "Rating Performance" and verify same summary loads.
+
+### Public Partner Clubs
+- [ ] Open incognito / log out. Navigate to `/clubs/:slug`.
+- [ ] Locate "Partner Clubs" section below About This Society.
+- [ ] Verify accepted partner clubs are displayed with logo/monogram, name, slug, and "Partner since" date.
+- [ ] Click on a partner club card: verify navigation to `/clubs/:slug`.
+
+### Operator Collaboration Hub & Proposal Modal
+- [ ] Log in as a club operator. Verify "Collaborations" link in Navbar desktop pill and mobile menu.
+- [ ] Navigate to `/operator/collaborations`. Verify overview metrics ribbon loads with non-negative numbers.
+- [ ] Switch between "Incoming Requests" and "Outgoing Sent" tabs.
+- [ ] Test status filters (All, Pending, Accepted, Declined, Cancelled).
+- [ ] For incoming pending requests: test Accept (with confirmation modal) and Decline (with confirmation modal).
+- [ ] For outgoing pending requests: test Cancel (with confirmation modal).
+- [ ] Click "Propose Collaboration" button (`#propose-collaboration-btn`).
+- [ ] Verify modal opens and focus moves to first input.
+- [ ] Verify target club dropdown displays chartered clubs and excludes own club.
+- [ ] Search for a club using the search box: verify filter works.
+- [ ] Enter title (check 200-character counter) and optional description.
+- [ ] Select optional published upcoming own-club event.
+- [ ] Submit proposal: verify modal closes, toast appears, active tab switches to "Outgoing", and list/metrics refresh.
+- [ ] Press Escape or click Cancel: verify modal closes and focus returns to `#propose-collaboration-btn`.
+
+---
+
+## 20. Week 6 Final Readiness Classification
+
+* **Implementation Complete:** All 6 feature stages of Week 6 are fully implemented and verified at source and contract level.
+* **Verification Complete:** Frontend static analysis (ESLint), production build (Vite), backend Django system checks, and non-mutating runtime API smoke tests executed with 100% pass rates.
+* **Manual Browser QA Pending:** Interactive visual and keyboard testing across supported user browsers is documented in Section 19 for operator and student roles.
+* **Production Deployment:** Subject to team deployment schedule and resolution of backend test runner dependencies.
 

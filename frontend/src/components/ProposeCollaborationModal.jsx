@@ -65,11 +65,13 @@ export default function ProposeCollaborationModal({
   const [availableClubs, setAvailableClubs] = useState([]);
   const [clubsLoading, setClubsLoading] = useState(false);
   const [clubsError, setClubsError] = useState("");
+  const [clubsIncomplete, setClubsIncomplete] = useState(false);
   const [clubSearchQuery, setClubSearchQuery] = useState("");
 
   // Own Eligible Events State
   const [eligibleEvents, setEligibleEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsIncomplete, setEventsIncomplete] = useState(false);
 
   // Submission State
   const [submitting, setSubmitting] = useState(false);
@@ -87,24 +89,55 @@ export default function ProposeCollaborationModal({
     };
   }, []);
 
-  // Fetch available target clubs (excluding own club)
+  // Fetch available target clubs with full pagination and deduplication
   const fetchClubs = useCallback(async () => {
     setClubsLoading(true);
     setClubsError("");
+    setClubsIncomplete(false);
     try {
       const response = await clubsAPI.getAll({ page_size: 50 });
       if (!isMountedRef.current) return;
 
-      const rawClubs = Array.isArray(response.data)
+      let rawClubs = Array.isArray(response.data)
         ? response.data
         : Array.isArray(response.data?.results)
         ? response.data.results
         : [];
 
+      // Continue fetching remaining pages safely until next is null (or safe ceiling of 20 pages = 1,000 clubs)
+      let nextUrl = response.data?.next;
+      let pageNum = 2;
+      const MAX_CLUB_PAGES = 20;
+      while (nextUrl && pageNum <= MAX_CLUB_PAGES) {
+        const nextRes = await clubsAPI.getAll({ page: pageNum, page_size: 50 });
+        if (!isMountedRef.current) return;
+        const pageItems = Array.isArray(nextRes.data?.results)
+          ? nextRes.data.results
+          : [];
+        rawClubs = [...rawClubs, ...pageItems];
+        nextUrl = nextRes.data?.next;
+        pageNum++;
+      }
+
+      // If nextUrl is still non-null after reaching the safety ceiling, flag list as incomplete
+      if (nextUrl) {
+        setClubsIncomplete(true);
+      }
+
+      // Deduplicate clubs by unique id and slug
+      const seen = new Set();
+      const uniqueClubs = [];
+      for (const club of rawClubs) {
+        const key = club.id || club.slug;
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        uniqueClubs.push(club);
+      }
+
       // Filter out operator's own club
       const ownSlug = currentClub?.slug?.toLowerCase();
       const ownId = currentClub?.id;
-      const filtered = rawClubs.filter((c) => {
+      const filtered = uniqueClubs.filter((c) => {
         if (!c.slug) return false;
         if (ownSlug && c.slug.toLowerCase() === ownSlug) return false;
         if (ownId && c.id === ownId) return false;
@@ -123,9 +156,10 @@ export default function ProposeCollaborationModal({
     }
   }, [currentClub?.slug, currentClub?.id]);
 
-  // Fetch operator's own published upcoming events that can be linked
+  // Fetch operator's own published upcoming events with full pagination and deduplication
   const fetchOwnEvents = useCallback(async () => {
     setEventsLoading(true);
+    setEventsIncomplete(false);
     try {
       const response = await eventsAPI.getAll({
         mine: "true",
@@ -134,15 +168,49 @@ export default function ProposeCollaborationModal({
       });
       if (!isMountedRef.current) return;
 
-      const rawEvents = Array.isArray(response.data)
+      let rawEvents = Array.isArray(response.data)
         ? response.data
         : Array.isArray(response.data?.results)
         ? response.data.results
         : [];
 
+      // Continue fetching remaining pages safely until next is null (or safe ceiling of 10 pages = 500 events)
+      let nextUrl = response.data?.next;
+      let pageNum = 2;
+      const MAX_EVENT_PAGES = 10;
+      while (nextUrl && pageNum <= MAX_EVENT_PAGES) {
+        const nextRes = await eventsAPI.getAll({
+          mine: "true",
+          upcoming: "true",
+          page: pageNum,
+          page_size: 50,
+        });
+        if (!isMountedRef.current) return;
+        const pageItems = Array.isArray(nextRes.data?.results)
+          ? nextRes.data.results
+          : [];
+        rawEvents = [...rawEvents, ...pageItems];
+        nextUrl = nextRes.data?.next;
+        pageNum++;
+      }
+
+      // If nextUrl is still non-null after reaching the safety ceiling, flag list as incomplete
+      if (nextUrl) {
+        setEventsIncomplete(true);
+      }
+
+      // Deduplicate events by id
+      const seen = new Set();
+      const uniqueEvents = [];
+      for (const evt of rawEvents) {
+        if (!evt.id || seen.has(evt.id)) continue;
+        seen.add(evt.id);
+        uniqueEvents.push(evt);
+      }
+
       // Only published events that have not ended can be linked per backend contract
       const now = new Date();
-      const valid = rawEvents.filter((e) => {
+      const valid = uniqueEvents.filter((e) => {
         if (e.status !== "published") return false;
         const endsAt = new Date(e.ends_at);
         return endsAt > now;
@@ -181,6 +249,60 @@ export default function ProposeCollaborationModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, submitting, onClose]);
+
+  // Focus Trap & Initial Focus on Open / Return Focus to Trigger on Close
+  useEffect(() => {
+    if (!isOpen) {
+      // Restore focus to trigger when closing
+      const triggerBtn = document.getElementById("propose-collaboration-btn");
+      triggerBtn?.focus();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const focusable = modalContentRef.current?.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) {
+        const firstInput = modalContentRef.current?.querySelector("select, input");
+        if (firstInput) {
+          firstInput.focus();
+        } else {
+          focusable[0]?.focus();
+        }
+      }
+    }, 50);
+
+    const handleTabKey = (e) => {
+      if (e.key !== "Tab" || !modalContentRef.current) return;
+
+      const focusable = modalContentRef.current.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const firstElement = focusable[0];
+      const lastElement = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleTabKey);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", handleTabKey);
+    };
+  }, [isOpen]);
 
   // Filtered target clubs based on search query
   const filteredClubs = useMemo(() => {
@@ -330,11 +452,11 @@ export default function ProposeCollaborationModal({
     >
       <div
         ref={modalContentRef}
-        className="bg-surface-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-border-subtle flex flex-col gap-5 max-h-[90vh] overflow-y-auto transform scale-100 transition-all duration-200"
+        className="bg-surface-white rounded-3xl max-w-xl w-full shadow-2xl border border-border-subtle flex flex-col max-h-[90dvh] transform scale-100 transition-all duration-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-border-subtle">
+        {/* Modal Header (Fixed at top) */}
+        <div className="flex items-start justify-between p-6 sm:p-8 pb-4 border-b border-border-subtle shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center shrink-0 shadow-xs">
               <span className="material-symbols-outlined text-[24px]">
@@ -364,250 +486,299 @@ export default function ProposeCollaborationModal({
           </button>
         </div>
 
-        {/* Informational Policy Strip (Direct from Stitch Protocol) */}
-        <div className="p-3.5 rounded-2xl bg-surface-lavender/60 border border-border-subtle text-xs text-text-muted flex items-start gap-2.5 leading-relaxed">
-          <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">
-            verified_user
-          </span>
-          <div>
-            <span className="font-bold text-on-surface">Institutional Charter:</span>{" "}
-            Submitting this proposal sends an official dispatch to the target club operator. Only one active pending request is permitted between any two clubs.
-          </div>
-        </div>
-
-        {/* Global Error Alert */}
-        {submitError && (
-          <div className="p-4 rounded-2xl bg-error-container/30 border border-error/30 text-xs text-error flex items-start gap-2.5 leading-relaxed">
-            <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">
-              error
-            </span>
-            <div className="flex-1 font-semibold">{submitError}</div>
-          </div>
-        )}
-
-        {/* Proposal Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Field 1: Target Club Selector */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="target-club-select"
-              className="text-xs font-bold text-on-surface flex items-center justify-between"
-            >
-              <span>
-                Target Partner Club <span className="text-error">*</span>
+        {/* Scrollable Form Body Container (Scrolls cleanly on mobile without clipping actions) */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-4 flex flex-col gap-4">
+            {/* Informational Policy Strip (Direct from Stitch Protocol) */}
+            <div className="p-3.5 rounded-2xl bg-surface-lavender/60 border border-border-subtle text-xs text-text-muted flex items-start gap-2.5 leading-relaxed shrink-0">
+              <span className="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">
+                verified_user
               </span>
-              {availableClubs.length > 0 && (
-                <span className="text-[11px] text-text-muted font-normal">
-                  {availableClubs.length} societies eligible
-                </span>
-              )}
-            </label>
+              <div>
+                <span className="font-bold text-on-surface">Institutional Charter:</span>{" "}
+                Submitting this proposal sends an official dispatch to the target club operator. Only one active pending request is permitted between any two clubs.
+              </div>
+            </div>
 
-            {/* Club Selection Dropdown */}
-            {clubsLoading ? (
-              <div className="h-11 px-3 rounded-xl bg-canvas-base border border-border-subtle flex items-center gap-2 text-xs text-text-muted">
-                <span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Loading university clubs...</span>
+            {/* Global Error Alert */}
+            {submitError && (
+              <div
+                role="alert"
+                className="p-4 rounded-2xl bg-error-container/30 border border-error/30 text-xs text-error flex items-start gap-2.5 leading-relaxed shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">
+                  error
+                </span>
+                <div className="flex-1 font-semibold">{submitError}</div>
               </div>
-            ) : clubsError ? (
-              <div className="p-3 rounded-xl bg-error-container/20 border border-error/20 text-xs text-error flex items-center justify-between">
-                <span>{clubsError}</span>
-                <button
-                  type="button"
-                  onClick={fetchClubs}
-                  className="font-bold underline text-xs ml-2"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div className="relative">
-                <select
-                  id="target-club-select"
-                  value={targetClubSlug}
-                  onChange={(e) => {
-                    setTargetClubSlug(e.target.value);
-                    if (validationErrors.target_club) {
-                      setValidationErrors((prev) => ({ ...prev, target_club: "" }));
+            )}
+
+            {/* Field 1: Target Club Selector */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="target-club-select"
+                className="text-xs font-bold text-on-surface flex items-center justify-between"
+              >
+                <span>
+                  Target Partner Club <span className="text-error">*</span>
+                </span>
+                {availableClubs.length > 0 && (
+                  <span className="text-[11px] text-text-muted font-normal">
+                    {availableClubs.length} societies eligible
+                  </span>
+                )}
+              </label>
+
+              {/* Club Selection Dropdown */}
+              {clubsLoading ? (
+                <div className="h-11 px-3 rounded-xl bg-canvas-base border border-border-subtle flex items-center gap-2 text-xs text-text-muted">
+                  <span className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Loading university clubs...</span>
+                </div>
+              ) : clubsError ? (
+                <div className="p-3 rounded-xl bg-error-container/20 border border-error/20 text-xs text-error flex items-center justify-between">
+                  <span>{clubsError}</span>
+                  <button
+                    type="button"
+                    onClick={fetchClubs}
+                    className="font-bold underline text-xs ml-2"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <select
+                    id="target-club-select"
+                    value={targetClubSlug}
+                    onChange={(e) => {
+                      setTargetClubSlug(e.target.value);
+                      if (validationErrors.target_club) {
+                        setValidationErrors((prev) => ({ ...prev, target_club: "" }));
+                      }
+                    }}
+                    required
+                    aria-invalid={Boolean(validationErrors.target_club)}
+                    aria-describedby={
+                      validationErrors.target_club ? "target-club-error" : undefined
                     }
-                  }}
-                  required
-                  className={`w-full h-11 px-3.5 pr-10 rounded-xl bg-surface-white text-xs font-semibold text-on-surface border transition-all appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                    validationErrors.target_club
-                      ? "border-error focus:border-error"
-                      : "border-border-subtle focus:border-primary"
-                  }`}
+                    className={`w-full h-11 px-3.5 pr-10 rounded-xl bg-surface-white text-xs font-semibold text-on-surface border transition-all appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                      validationErrors.target_club
+                        ? "border-error focus:border-error"
+                        : "border-border-subtle focus:border-primary"
+                    }`}
+                  >
+                    <option value="">-- Select a Chartered Club --</option>
+                    {filteredClubs.map((club) => (
+                      <option key={club.id || club.slug} value={club.slug}>
+                        {club.name} (@{club.slug})
+                      </option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined text-text-muted text-[20px] absolute right-3 top-2.5 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+              )}
+
+              {validationErrors.target_club && (
+                <span
+                  id="target-club-error"
+                  role="alert"
+                  className="text-[11px] text-error font-semibold"
                 >
-                  <option value="">-- Select a Chartered Club --</option>
-                  {filteredClubs.map((club) => (
-                    <option key={club.id || club.slug} value={club.slug}>
-                      {club.name} (@{club.slug})
-                    </option>
-                  ))}
-                </select>
-                <span className="material-symbols-outlined text-text-muted text-[20px] absolute right-3 top-2.5 pointer-events-none">
-                  expand_more
-                </span>
-              </div>
-            )}
-
-            {validationErrors.target_club && (
-              <span className="text-[11px] text-error font-semibold">
-                {validationErrors.target_club}
-              </span>
-            )}
-
-            {/* Selected Club Preview Strip */}
-            {selectedClub && (
-              <div className="flex items-center gap-3 p-3 bg-surface-lavender/50 rounded-xl border border-border-subtle mt-1 animate-in fade-in duration-150">
-                <div className="w-10 h-10 rounded-lg bg-surface-white flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-border-subtle shadow-xs">
-                  {selectedClub.logo ? (
-                    <img
-                      src={selectedClub.logo}
-                      alt={selectedClub.name}
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    getClubMonogram(selectedClub.name)
-                  )}
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-bold text-on-surface truncate">
-                    {selectedClub.name}
-                  </span>
-                  <span className="text-[11px] text-text-muted">
-                    @{selectedClub.slug} · Verified Campus Society
-                  </span>
-                </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-white text-primary text-[10px] font-bold border border-border-subtle">
-                  Recipient
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Field 2: Proposal Title / Initiative Scope */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="propose-title"
-                className="text-xs font-bold text-on-surface"
-              >
-                Proposal Title / Initiative Scope <span className="text-error">*</span>
-              </label>
-              <span className="text-[11px] text-text-muted font-mono">
-                {title.length} / 200
-              </span>
-            </div>
-            <input
-              id="propose-title"
-              type="text"
-              maxLength={200}
-              required
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (validationErrors.title) {
-                  setValidationErrors((prev) => ({ ...prev, title: "" }));
-                }
-              }}
-              placeholder="e.g. Joint Tech-Debate Gala 2026: AI Ethics & National Policy"
-              className={`w-full h-11 px-3.5 rounded-xl bg-surface-white text-xs text-on-surface placeholder:text-text-muted border transition-all font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                validationErrors.title
-                  ? "border-error focus:border-error"
-                  : "border-border-subtle focus:border-primary"
-              }`}
-            />
-            {validationErrors.title && (
-              <span className="text-[11px] text-error font-semibold">
-                {validationErrors.title}
-              </span>
-            )}
-          </div>
-
-          {/* Field 3: Core Statement & Objectives (Optional Description) */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="propose-description"
-                className="text-xs font-bold text-on-surface"
-              >
-                Core Statement &amp; Objectives{" "}
-                <span className="text-text-muted font-normal text-[11px]">
-                  (Optional)
-                </span>
-              </label>
-            </div>
-            <textarea
-              id="propose-description"
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Explain the proposed collaborative initiative, joint workshop format, technical judges, co-branding, or venue clearance goals..."
-              className="w-full p-3.5 rounded-xl bg-surface-white text-xs text-on-surface placeholder:text-text-muted border border-border-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-normal leading-relaxed resize-y min-h-[90px]"
-            />
-          </div>
-
-          {/* Field 4: Associated Campus Event (Optional) */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="propose-event"
-              className="text-xs font-bold text-on-surface flex items-center justify-between"
-            >
-              <span className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-primary text-[15px]">
-                  calendar_month
-                </span>
-                <span>Link Published Event</span>
-                <span className="text-text-muted font-normal text-[11px]">
-                  (Optional)
-                </span>
-              </span>
-              {eligibleEvents.length > 0 && (
-                <span className="text-[11px] text-text-muted font-normal">
-                  {eligibleEvents.length} upcoming events
+                  {validationErrors.target_club}
                 </span>
               )}
-            </label>
 
-            {eventsLoading ? (
-              <div className="h-10 px-3 rounded-xl bg-canvas-base border border-border-subtle flex items-center gap-2 text-xs text-text-muted">
-                <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Checking eligible club events...</span>
-              </div>
-            ) : (
-              <div className="relative">
-                <select
-                  id="propose-event"
-                  value={selectedEventId}
-                  onChange={(e) => setSelectedEventId(e.target.value)}
-                  className="w-full h-11 px-3.5 pr-10 rounded-xl bg-surface-white text-xs font-medium text-on-surface border border-border-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
+              {clubsIncomplete && (
+                <p
+                  role="note"
+                  className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl px-3 py-2 mt-1 flex items-center gap-1.5"
                 >
-                  <option value="">
-                    No specific event (General joint initiative / alliance)
-                  </option>
-                  {eligibleEvents.map((evt) => (
-                    <option key={evt.id} value={evt.id}>
-                      {evt.title} ({formatDhakaDate(evt.starts_at)})
-                    </option>
-                  ))}
-                </select>
-                <span className="material-symbols-outlined text-text-muted text-[20px] absolute right-3 top-2.5 pointer-events-none">
-                  expand_more
+                  <span className="material-symbols-outlined text-[15px] shrink-0 text-amber-600">
+                    info
+                  </span>
+                  <span>
+                    Loading limit reached (1,000 clubs). The selection list may be incomplete; use search to find specific chartered clubs.
+                  </span>
+                </p>
+              )}
+
+              {/* Selected Club Preview Strip */}
+              {selectedClub && (
+                <div className="flex items-center gap-3 p-3 bg-surface-lavender/50 rounded-xl border border-border-subtle mt-1 animate-in fade-in duration-150">
+                  <div className="w-10 h-10 rounded-lg bg-surface-white flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-border-subtle shadow-xs">
+                    {selectedClub.logo ? (
+                      <img
+                        src={selectedClub.logo}
+                        alt={selectedClub.name}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      getClubMonogram(selectedClub.name)
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-xs font-bold text-on-surface truncate">
+                      {selectedClub.name}
+                    </span>
+                    <span className="text-[11px] text-text-muted">
+                      @{selectedClub.slug} · Verified Campus Society
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-white text-primary text-[10px] font-bold border border-border-subtle">
+                    Recipient
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Field 2: Proposal Title / Initiative Scope */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="propose-title"
+                  className="text-xs font-bold text-on-surface"
+                >
+                  Proposal Title / Initiative Scope <span className="text-error">*</span>
+                </label>
+                <span className="text-[11px] text-text-muted font-mono">
+                  {title.length} / 200
                 </span>
               </div>
-            )}
-            <span className="text-[11px] text-text-muted">
-              Only published, upcoming events belonging to your own club can be formally linked per university charter.
-            </span>
+              <input
+                id="propose-title"
+                type="text"
+                maxLength={200}
+                required
+                aria-invalid={Boolean(validationErrors.title)}
+                aria-describedby={
+                  validationErrors.title ? "propose-title-error" : undefined
+                }
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (validationErrors.title) {
+                    setValidationErrors((prev) => ({ ...prev, title: "" }));
+                  }
+                }}
+                placeholder="e.g. Joint Tech-Debate Gala 2026: AI Ethics & National Policy"
+                className={`w-full h-11 px-3.5 rounded-xl bg-surface-white text-xs text-on-surface placeholder:text-text-muted border transition-all font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                  validationErrors.title
+                    ? "border-error focus:border-error"
+                    : "border-border-subtle focus:border-primary"
+                }`}
+              />
+              {validationErrors.title && (
+                <span
+                  id="propose-title-error"
+                  role="alert"
+                  className="text-[11px] text-error font-semibold"
+                >
+                  {validationErrors.title}
+                </span>
+              )}
+            </div>
+
+            {/* Field 3: Core Statement & Objectives (Optional Description) */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="propose-description"
+                  className="text-xs font-bold text-on-surface"
+                >
+                  Core Statement &amp; Objectives{" "}
+                  <span className="text-text-muted font-normal text-[11px]">
+                    (Optional)
+                  </span>
+                </label>
+              </div>
+              <textarea
+                id="propose-description"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Explain the proposed collaborative initiative, joint workshop format, technical judges, co-branding, or venue clearance goals..."
+                className="w-full p-3.5 rounded-xl bg-surface-white text-xs text-on-surface placeholder:text-text-muted border border-border-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-normal leading-relaxed resize-y min-h-[90px]"
+              />
+            </div>
+
+            {/* Field 4: Associated Campus Event (Optional) */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="propose-event"
+                className="text-xs font-bold text-on-surface flex items-center justify-between"
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-primary text-[15px]">
+                    calendar_month
+                  </span>
+                  <span>Link Published Event</span>
+                  <span className="text-text-muted font-normal text-[11px]">
+                    (Optional)
+                  </span>
+                </span>
+                {eligibleEvents.length > 0 && (
+                  <span className="text-[11px] text-text-muted font-normal">
+                    {eligibleEvents.length} upcoming events
+                  </span>
+                )}
+              </label>
+
+              {eventsLoading ? (
+                <div className="h-10 px-3 rounded-xl bg-canvas-base border border-border-subtle flex items-center gap-2 text-xs text-text-muted">
+                  <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Checking eligible club events...</span>
+                </div>
+              ) : (
+                <div className="relative">
+                  <select
+                    id="propose-event"
+                    value={selectedEventId}
+                    onChange={(e) => setSelectedEventId(e.target.value)}
+                    className="w-full h-11 px-3.5 pr-10 rounded-xl bg-surface-white text-xs font-medium text-on-surface border border-border-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">
+                      No specific event (General joint initiative / alliance)
+                    </option>
+                    {eligibleEvents.map((evt) => (
+                      <option key={evt.id} value={evt.id}>
+                        {evt.title} ({formatDhakaDate(evt.starts_at)})
+                      </option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined text-text-muted text-[20px] absolute right-3 top-2.5 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+              )}
+              <span className="text-[11px] text-text-muted">
+                Only published, upcoming events belonging to your own club can be formally linked per university charter.
+              </span>
+
+              {eventsIncomplete && (
+                <p
+                  role="note"
+                  className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl px-3 py-2 mt-1 flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[15px] shrink-0 text-amber-600">
+                    info
+                  </span>
+                  <span>
+                    Loading limit reached (500 events). Some eligible upcoming events may not be displayed in the dropdown.
+                  </span>
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Modal Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-border-subtle mt-2">
+          {/* Modal Action Buttons (Fixed at bottom - never clipped on mobile) */}
+          <div className="flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-border-subtle bg-surface-white shrink-0">
             <button
               type="button"
               disabled={submitting}
@@ -641,4 +812,3 @@ export default function ProposeCollaborationModal({
     </div>
   );
 }
-
