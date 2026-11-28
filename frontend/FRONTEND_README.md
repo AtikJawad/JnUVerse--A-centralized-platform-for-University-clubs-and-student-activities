@@ -58,6 +58,14 @@ frontend/
 │   │   ├── InterestTags.jsx         # Week 7: read-only interest chips
 │   │   ├── InterestsPrompt.jsx      # Week 7: skippable "Choose your interests" dashboard card
 │   │   ├── ReportModal.jsx          # Week 7: report a club or event (reason + details)
+│   │   ├── charts/                       # Week 8: hand-built SVG charts (no chart library)
+│   │   │   ├── chartTheme.js                # Validated palette, tokens, niceTicks()
+│   │   │   ├── ChartFrame.jsx               # Chart card: title, legend, Chart/Table switch, tooltip
+│   │   │   ├── BarChart.jsx                 # Ranked horizontal bars (emphasis mode)
+│   │   │   ├── ColumnChart.jsx              # Columns (rating distribution, ordinal ramp)
+│   │   │   ├── LineChart.jsx                # One-axis line chart with crosshair tooltip
+│   │   │   ├── Figures.jsx                  # MetricRow, HeroFigure, SegmentedBar
+│   │   │   └── useChartWidth.js             # Real-width SVG sizing
 │   │   ├── dashboard/
 │   │   │   └── StudentDashboardSections.jsx  # Week 7: Stitch student dashboard sections
 │   │   ├── EmptyState.jsx           # Empty list and search state presentation
@@ -79,8 +87,11 @@ frontend/
 │   │   ├── ExploreEvents.jsx        # Campus events discovery, filters, search, featured spotlight & pagination
 │   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
 │   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
+│   │   ├── MyActivity.jsx           # Week 8: report 4 — student activity score and figures
 │   │   ├── MyReports.jsx            # Week 7: Stitch reports interface — the user's own reports
+│   │   ├── OperatorAnalytics.jsx    # Week 8: reports 5 (own club) and 3 (club vs club) with date filter
 │   │   ├── OperatorDashboard.jsx    # Week 7: Stitch club operator dashboard (GET /api/dashboard/club/)
+│   │   ├── OperatorEventAnalytics.jsx # Week 8: reports 1 (departments) and 2 (ratings) for one event
 │   │   ├── OperatorEventForm.jsx    # Club operator event creation & editing with live preview & Dhaka timezone
 │   │   ├── OperatorMembers.jsx      # Operator portal: pending request approval/rejection & member list
 │   │   ├── Profile.jsx              # Week 7: student account details and interests
@@ -90,7 +101,8 @@ frontend/
 │   │   └── api.js                   # Axios client with JWT request & 401 refresh interceptors
 │   ├── utils/                       # Shared utility functions and formatting helpers
 │   │   ├── banner.js                # Week 7: event banner background style with readability tint
-│   │   └── clubTheme.js             # Week 7: Stitch dashboard club palette (icon, tint, pill)
+│   │   ├── clubTheme.js             # Week 7: Stitch dashboard club palette (icon, tint, pill)
+│   │   └── format.js                # Week 8: percent / rating / count / month formatters ("—" for null)
 │   ├── App.jsx                      # App root with React Router route declarations
 │   ├── index.css                    # Tailwind directives, base font, and custom keyframe animations
 │   └── main.jsx                     # Application bootstrap mounting into #root
@@ -513,6 +525,17 @@ Built against the Week 7 backend handoff and the Stitch exports (`jnuverse_stude
 - **Fixes found during Week 7 QA:** operators now load `/api/auth/me/` after login so `user.club` is available immediately; operators can open their club profile from the navbar.
 - **Quality gates:** ESLint 0 errors / 0 warnings, Vite production build passes, 21/21 role-permission API checks pass. Manual browser QA and populated dashboard checks are pending a demo-data re-seed.
 
+### 10. Week 8 Five Analytical Reports (Stages 1–7 Completed)
+Built against `WEEK_08_BACKEND_HANDOFF.md`. No Stitch analytics screens exist, so the pages reuse the Stitch operator-dashboard, reports-interface and student-dashboard patterns. Full details: [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md).
+
+- **API services:** `analyticsAPI` (five reports; empty date filters dropped) and `eventsAPI.setAttendance`; shared formatters in `utils/format.js` ("—" for `null`).
+- **Attendance marking:** checkboxes on the attendee roster across all pages; Save sends the full attended set; locked with a reason for drafts, cancelled and not-yet-started events.
+- **Charts (`components/charts/`):** hand-built SVG/HTML following the data-viz method — palette validated with the method's script (brand `#2B34B9` fails the lightness band, so marks use `#444ED0`, `#E8692A`, `#00A383` and an indigo ordinal ramp), one axis only, thin marks, hover + keyboard tooltips, and a Chart/Table switch on every chart; render-checked.
+- **Operator analytics (`/operator/analytics`):** one date filter row scoping report 5 (metrics, monthly registrations vs attended, best-rated event, per-event table) and report 3 (club vs club, own club highlighted, measure switch, full table).
+- **Per-event reports (`/operator/events/:id/analytics`):** department participation and post-event rating, each showing the backend's `409` message when not yet available; linked from events, attendees, dashboard and analytics.
+- **Student activity (`/my-activity`):** activity score hero, segmented breakdown and six stat cards with links.
+- **Quality gates:** ESLint 0 / 0, Vite build passes, 31/31 role-permission checks. Browser QA pending; attendance is not seeded, so attendance-based figures stay 0 until attendance is marked.
+
 ---
 
 ## 9. Implementation Status Matrix
@@ -526,7 +549,7 @@ Built against the Week 7 backend handoff and the Stitch exports (`jnuverse_stude
 | **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | **Completed** (Stages 1–7 Finalized: Implementation & verification complete; manual browser QA pending) | **Completed & Verified** (Contracts verified via source inspection & live API smoke tests; pytest runner blocked locally) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | **Completed** (Stages 1–7; lint, build and API checks passed; browser QA pending demo re-seed) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
-| **Five Analytical Reports** | Week 8 | Not Started | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
+| **Five Analytical Reports** | Week 8 | **Completed** (Stages 1–7; lint, build and 31-check API matrix passed; browser QA pending) | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
 | **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
 | **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 

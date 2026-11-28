@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stages 1–6 Completed (Stages 2–6 Source & Build Verified; Browser QA Pending)**  
+**Status:** **Completed — Stages 1–7 Finalized (Lint, Build, Palette Validation & 31-Check API Matrix Passed; Manual Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -83,8 +83,8 @@
    - Loading skeleton, error with Retry.
    - Navigation: `/my-activity` route (students only); student Navbar "Activity" pill link and "My Activity" in the mobile menu; "Your campus activity" card on the Profile page.
 
-7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, read-only API role matrix, demo-data verification (Section 7), README and readiness updates.
+7. [x] **Stage 7: Final Quality Gates & Regression Audit**
+   - `npm run lint`, `npm run build`, a read-only 31-check role-permission matrix (Section 22), regression review of shared files, `FRONTEND_README.md` Week 8 section, directory tree and status row.
 
 ---
 
@@ -157,12 +157,12 @@ The seed does not mark attendance, so attendance-based figures stay at 0 until a
 
 ## 8. Acceptance Criteria (Week 8)
 
-- [ ] Operators can mark attendance for started, published events; the attended set is replaced as a whole and counts update.
-- [ ] All five reports render from the backend with charts and tables; `null` percentages show "—".
-- [ ] Date filters work for reports 3 and 5 and show the `400` message for invalid ranges.
-- [ ] Per-event reports show a friendly message for `409` (event not ended / not published).
-- [ ] Each report is reachable from navigation and the relevant management screens; role restrictions match the backend.
-- [ ] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Operators can mark attendance for started, published events; the attended set is replaced as a whole and counts update. *(Implemented; owner save pending browser QA — refusals verified.)*
+- [x] All five reports render from the backend with charts and tables; `null` percentages show "—". *(Charts render-checked with demo data; full pages pending browser QA.)*
+- [x] Date filters work for reports 3 and 5 and show the `400` message for invalid ranges.
+- [x] Per-event reports show a friendly message for `409` (event not ended / not published).
+- [x] Each report is reachable from navigation and the relevant management screens; role restrictions match the backend (31/31 checks).
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
 
 ---
 
@@ -209,7 +209,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 | **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
 | **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
 | **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
-| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 22). |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 23). |
 
 ---
 
@@ -219,7 +219,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 - [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
 - [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving attendance (Section 22).
+- [ ] Manual browser QA of saving attendance (Section 23).
 
 ---
 
@@ -275,7 +275,7 @@ The components were rendered with demo report data (React server rendering + the
 - [x] One date filter scopes both reports; invalid ranges show the backend message.
 - [x] Every chart has a table view; `null` values show "—".
 - [x] Reachable from the Navbar and the operator dashboard; operators only.
-- [ ] Browser QA of the page with real data (Section 22).
+- [ ] Browser QA of the page with real data (Section 23).
 
 ---
 
@@ -297,7 +297,7 @@ The components were rendered with demo report data (React server rendering + the
 - [x] Each report independently shows a clear message when the backend returns `409`.
 - [x] Reachable from the events list, attendees page, operator dashboard and My Club table; operators only.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with real data (Section 22).
+- [ ] Browser QA with real data (Section 23).
 
 ---
 
@@ -319,11 +319,42 @@ The components were rendered with demo report data (React server rendering + the
 - [x] Each figure links to where the student can improve it.
 - [x] Reachable from the Navbar, mobile menu and Profile page; students only.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with real data (Section 22).
+- [ ] Browser QA with real data (Section 23).
 
 ---
 
-## 22. Manual Interactive Browser QA Checklist
+## 22. Stage 7 — Final Quality Gates & Regression Audit
+
+### 22.1 Stage Status & Verification Matrix
+
+| Stage | Feature Area | Implementation | Verification | Notes |
+|:---:|---|:---:|:---:|---|
+| **1** | API services | **Complete** | Live API verified | Date filters, 400 messages, role refusals |
+| **2** | Attendance marking | **Complete** | Source & build; refusals verified | Owner save pending browser QA (shared database) |
+| **3** | Chart components | **Complete** | Palette validated; render-checked | 4 render issues fixed |
+| **4** | Operator analytics hub | **Complete** | Source & build; endpoints verified | Page render pending browser QA |
+| **5** | Per-event reports | **Complete** | Source & build; endpoints and 409 texts verified | Page render pending browser QA |
+| **6** | Student activity | **Complete** | Source & build; endpoint verified | Page render pending browser QA |
+| **7** | Final quality gates | **Complete** | Automated gates & role matrix passed | See 22.2 |
+
+### 22.2 Automated Quality Gates
+
+| Quality Gate | Target Command | Result | Notes |
+|---|---|:---:|---|
+| **Frontend Lint** | `cd frontend && npm run lint` | **PASS (0 errors, 0 warnings)** | Entire frontend. |
+| **Production Build** | `cd frontend && npm run build` | **PASS (157 modules, built in 1.16s)** | JS bundle 846 kB (199 kB gzip) — the >500 kB warning is carried to Week 9 code splitting. |
+| **API Role Matrix** | Python `urllib` (read-only) — anonymous / demo1 / democlub1 (owner) / democlub2 (other operator) | **PASS (31/31)** | `my-club` 401/403/200/200; bad range 401/403/400/400; `club-comparison` 401/403/200/200; `student-activity` 401/200/403/403; department participation, ratings report and registrations for a Robotics event 401/403/200/403; attendance `PUT` refusals 401 (anon) / 403 (student) / 403 (other operator). The owner `PUT` was not sent (it would write). |
+| **Palette Validation** | `dataviz/scripts/validate_palette.js` | **PASS** | Categorical and ordinal palettes (Section 14.1). |
+
+### 22.3 Regression Review
+
+- Week 8 changes are additive (2,032 lines added, 10 changed): three new protected routes (`/my-activity` students; `/operator/analytics`, `/operator/events/:id/analytics` operators) with no path conflicts.
+- Shared-file edits: Navbar (Activity / Analytics links), OperatorDashboard (Analytics button, quick action, recent events → event report), OperatorEvents (Report button for launched events), OperatorEventAttendees (attendance column and toolbar; "Status" column replaced), Profile (activity link).
+- Data writes during Week 8 verification: none (only reads and requests the backend refuses before writing).
+
+---
+
+## 23. Manual Interactive Browser QA Checklist
 
 ### Attendance (democlub1@demo.jnuverse.test)
 - [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
@@ -355,8 +386,10 @@ The components were rendered with demo report data (React server rendering + the
 
 ---
 
-## 23. Week 8 Readiness Classification
+## 24. Week 8 Final Readiness Classification
 
-* **Implementation:** Stages 1–6 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub; per-event reports; student activity).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stages 4–6 verified at source and build level, browser QA pending. Remaining stages pending.
-* **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.
+* **Implementation Complete:** All 7 stages: API services, attendance marking, chart components, operator analytics hub (reports 3 and 5), per-event reports (reports 1 and 2), student activity (report 4), final quality gates.
+* **Verification Complete (automated):** ESLint, Vite build, palette validation, chart render check and the 31-check read-only API role matrix.
+* **Manual Browser QA Pending:** full-page checks with live data and the owner attendance save (Section 23); the save writes to the shared Supabase database.
+* **Demo Data:** attendance is not seeded and all demo students are in one department; ask the backend developer to extend `seed_demo_events` with attendance and varied departments so the reports show meaningful figures in the demo.
+* **Carried to Week 9:** bundle code splitting (846 kB JS chunk).
