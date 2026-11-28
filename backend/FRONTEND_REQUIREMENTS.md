@@ -20,22 +20,25 @@ This document formally specifies the API contracts, response payloads, role perm
 
 ---
 
-## Current Status at a Glance (2026-11-28)
+## Current Status at a Glance (2026-11-28, after reviewing backend commit `d0cc389`)
 
-- **Backend:** Weeks 1–8 delivered (see `frontend/docs/backend-handoff/`). **Frontend:** Weeks 1–8 integrated; Week 9 integration and testing in progress (Stages 1–3 done).
-- **Contract:** every frontend API call matches `docs/api/openapi.yml`, and **all 64 backend operations are used by the frontend** (`npm run audit:api`, Week 9 Stage 1). The committed spec matches a spec regenerated from the current code.
-- **What the frontend needs from the backend now:** the open requests below.
+- **Backend:** Weeks 1–9 delivered (Week 9: local test stack, login returns `club` for operators, demo data re-seeded with attendance and three departments, three new test files — see `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md`). **Frontend:** Weeks 1–8 integrated; Week 9 Stages 1–3 done.
+- **Contract:** still clean after the Week 9 backend changes — `npm run audit:api` 64/64 operations, 0 mismatches; `npm run test:resilience` 9/9.
+- **What the frontend needs from the backend now:** open requests 7–9 below.
 
 ## Open Requests for the Backend (consolidated)
 
-| # | Request | Why | Priority | Details |
+| # | Request | Why | Priority | Status |
 |:---:|---|---|:---:|---|
-| 1 | **Test database for Week 9** (local PostgreSQL or a separate Supabase project) | `backend/.env` points at the shared Supabase database used by the deployed app, so the frontend's automated tests are limited to read-only checks. | High | [Week 9 handoff §4.2](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) |
-| 2 | **Re-seed the demo data** (`seed_demo_events --reset --allow-remote`, then `seed_demo_events --allow-remote`) | Time-based figures expired (dashboards show 0 upcoming / 0 to rate / 0 weekly registrations); also restores demo data changed during frontend QA (see below). | High — before the demo | [Week 7 follow-ups](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
-| 3 | **Seed attendance** for ended `[DEMO]` events | Attendance is never seeded, so reports 1, 3, 4 and 5 show 0 % attendance and "—" response rates. | High — before the demo | [Week 8 follow-ups](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) |
-| 4 | **Spread demo students across several departments** | All five demo students are in Bangla; the department chart shows one bar. | Medium | [Week 8 follow-ups](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) |
-| 5 | *(Cosmetic)* Regenerate the committed `docs/api/openapi.yml` | It uses `api_`-prefixed `operationId`s and one `api` tag; the current code generates per-app tags, which group Swagger UI better. | Low | [Week 9 handoff §4.2](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) |
-| 6 | *(Optional)* Include `club` in the `user` object returned by `POST /api/auth/login/` for operators | Only `/api/auth/me/` has `club`; the frontend makes one extra `/me` call after operator login. | Low | [Week 7 follow-ups](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+| 1 | Test database for Week 9 | Shared Supabase database must not receive automated writes. | High | **Resolved** — local stack (`backend/docs/LOCAL_TEST_STACK.md`, `config.settings_local`). Not yet set up on the frontend developer's Mac (no PostgreSQL installed there). |
+| 2 | Re-seed the demo data | Expired time-based figures. | High | **Resolved & verified** — demo1: 4 upcoming, 3 to rate; democlub1: 2 upcoming, 9 registrations in 7 days; Robotics interests restored. |
+| 3 | Seed attendance | Reports looked empty. | High | **Resolved & verified** — Robotics attendance 77.8 %; Rated Workshop 4/4 attended, response rate 75 %; six clubs have comparison data. |
+| 4 | Spread demo students across departments | One-bar chart. | Medium | **Resolved & verified** — Bangla, English, History. |
+| 5 | *(Cosmetic)* Regenerate `docs/api/openapi.yml` | Per-app Swagger tags. | Low | Answered (command documented); not regenerated yet. Either developer can run it. |
+| 6 | *(Optional)* `club` in the operator login response | Saves a `/me` call. | Low | **Resolved & verified** — same fields as `/api/auth/me/`; students unchanged. Frontend will drop the extra call (Week 9). |
+| 7 | **Fix `attendance_rate` in `GET /api/analytics/student-activity/`** | It can exceed 100 % (demo1 shows **116.7 %**): the numerator counts every attended registration, including events that started but have not ended, while the denominator counts only ended events (`apps/analytics/views.py`, `StudentActivityView`). Suggested fix: count attended registrations of ended published events in the numerator (keep `events_attended` as the total if wanted). | **High** | **New** |
+| 8 | **Fix the logins in `LOCAL_TEST_STACK.md`** | It says all logins use `Str0ng-Pass-123`, but only `club1@example.com` does: `bootstrap_local_demo` calls `seed_demo_events` without `--password`, so `demo1…demo5` (and the `democlub1…5` operators, not listed) get the default `Demo-Pass-12345`. Either pass `--password Str0ng-Pass-123` in `bootstrap_local_demo` or document both passwords and the operator accounts. | Medium | **New** |
+| 9 | macOS steps in `LOCAL_TEST_STACK.md` | The guide is Windows PowerShell only (`E:\…`, `venv\Scripts\activate`, `$env:`); the frontend developer uses macOS. A short macOS/zsh variant (Homebrew PostgreSQL, `source venv/bin/activate`, `export VAR=…`) would let both run the local stack. | Low | **New** |
 
 ## Checking Frontend Compatibility After an API Change
 
@@ -48,6 +51,7 @@ This document formally specifies the API contracts, response payloads, role perm
 The frontend keeps automated checks read-only. Known writes so far (all on `[DEMO]` data, restored by a re-seed):
 - 2026-11-28, Week 7 Stage 1: a test logo was uploaded to `[DEMO] Robotics Club` and removed immediately (logo back to `null`).
 - Week 7 manual QA by the frontend developer: `[DEMO] Robotics Club` interests now include Entrepreneurship and Environment (seed: Technology, Programming, Robotics). Other manual QA steps (uploads, approvals, reports, attendance) may also have changed `[DEMO]` data.
+- 2026-11-28: the backend developer re-seeded the shared database (`d488455`), which reset all `[DEMO]` data including the changes above. Frontend checks since then have been read-only.
 
 ---
 
@@ -63,7 +67,7 @@ Phase-by-phase requirements, acceptance criteria, and specific endpoint contract
 - [Week 6: Ratings (1–5 Stars Only) & Collaborations](docs/frontend-handoff/WEEK_06_RATINGS_AND_COLLABORATION.md) (Status: **Delivered & Integrated**)
 - [Week 7: Content Reports & Dashboards](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) (Status: **Delivered & Integrated**)
 - [Week 8: Five Analytical Reports](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) (Status: **Delivered & Integrated**)
-- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **In Progress — frontend Stages 1–3 done; see §4 for findings and requests**)
+- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **Backend delivered (`d0cc389`); frontend Stages 1–3 done — see §4–5**)
 - [Week 10: Finalization & Delivery](docs/frontend-handoff/WEEK_10_FINALIZATION_AND_DELIVERY.md) (Status: **Pending**)
 
 ---
@@ -361,7 +365,7 @@ Current settings as used by the frontend (updated 2026-11-28):
 | **Week 6** | `feedback` ratings and `collaborations` | **Completed & Integrated** | Week 6 handoff |
 | **Week 7** | `reports`, dashboards, interests, logo/banner uploads | **Completed & Integrated** | Week 7 handoff + addendum |
 | **Week 8** | Attendance and the five analytical reports | **Completed & Integrated** | Week 8 handoff |
-| **Week 9** | Integration defect fixes & validation | **In Progress** | Open Requests 1–6 above |
+| **Week 9** | Integration defect fixes & validation | **Delivered** (`d0cc389`) | Requests 1–6 resolved; new requests 7–9 above |
 | **Week 10** | Final documentation, deployment & security review | **Scheduled** | [Week 10 handoff](docs/frontend-handoff/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 
 ---
@@ -370,3 +374,4 @@ Current settings as used by the frontend (updated 2026-11-28):
 
 - **2026-10-24 (Step 1 Foundation):** Initial creation of `FRONTEND_REQUIREMENTS.md`. Audited all 7 apps, recorded 20 verified endpoints from Week 1–3, documented privacy rules, and prioritized upcoming requirements for Weeks 4–10.
 - **2026-11-28 (Week 9):** Added "Current Status", consolidated "Open Requests", "Checking Frontend Compatibility", and "Changes Made on the Shared Database"; marked Weeks 3–8 delivered and integrated; updated the club `PATCH` row (no `logo`), CORS/JWT/database/seed settings, and the task checklist.
+- **2026-11-28 (Week 9 review of `d0cc389`):** Marked requests 1–6 resolved with verification results; added request 7 (student `attendance_rate` > 100 %), 8 (local stack password) and 9 (macOS steps); noted the shared-database re-seed.

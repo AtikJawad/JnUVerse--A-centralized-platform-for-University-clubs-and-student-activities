@@ -82,9 +82,9 @@
 | Item | From | Owner | Status |
 |---|---|---|---|
 | Browser QA of Weeks 6–8 write flows (uploads, interests, approvals, reports, attendance) | Weeks 6–8 | Anik + Nabil | Open — Stage 5 |
-| Re-seed demo data (time-based figures expired) | Week 7 | Atik | Open |
-| Seed attendance and varied departments for the Week 8 reports | Week 8 | Atik | Requested |
-| Restore Robotics Club interests to Technology, Programming, Robotics | Week 7 QA | Anik | Open |
+| Re-seed demo data (time-based figures expired) | Week 7 | Atik | **Done** (`d488455`, verified) |
+| Seed attendance and varied departments for the Week 8 reports | Week 8 | Atik | **Done** (`d488455`, verified) |
+| Restore Robotics Club interests to Technology, Programming, Robotics | Week 7 QA | Anik | **Done** (by the re-seed) |
 | Bundle code splitting (846 kB) | Weeks 7–8 | Anik | **Done** — Stage 3 (255 kB) |
 
 ---
@@ -190,9 +190,25 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 
 ---
 
-## 14. Week 9 Readiness Classification
+## 14. Backend Week 9 Delivery Check (2026-11-28)
+
+Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md` and `backend/docs/LOCAL_TEST_STACK.md`.
+
+| Item | Result |
+|---|---|
+| Operator login now returns `club` | Verified (same shape as `/me`); frontend follow-up: use it and keep `/me` as fallback. |
+| Re-seed, attendance, departments | Verified — dashboards back to handoff figures; attendance-based reports populated; three departments. |
+| Contract and resilience | `npm run audit:api` 64/64 clean; `npm run test:resilience` 9/9. |
+| Local test stack | Available (`config.settings_local`); not yet usable on this Mac (PostgreSQL not installed). |
+| New backend tests | Concurrency, journeys, no-500 sweep — reported passing by the backend; not run here (needs local PostgreSQL). |
+
+**Issues reported to the backend** (`backend/FRONTEND_REQUIREMENTS.md` requests 7–9, Week 9 frontend handoff §5): student `attendance_rate` can exceed 100 % (demo1 116.7 %); local-stack doc gives the wrong demo password; no macOS steps.
+
+---
+
+## 15. Week 9 Readiness Classification
 
 * **Implementation:** Stages 1–3 of 7 complete (API contract audit; resilience and error handling; code splitting).
 * **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
-* **Open:** test-database question and carried-over items (Section 4).
+* **Open:** backend requests 7–9 (Section 14); local stack setup on the frontend machine for write-flow QA.
 

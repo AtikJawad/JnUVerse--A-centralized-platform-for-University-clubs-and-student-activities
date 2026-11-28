@@ -3,7 +3,7 @@
 **To:** Atik Jawad (Backend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** End-to-End User Journey Contracts & Automated Test Validation  
-**Status:** **In Progress — Frontend Stages 1–3 Done** (updated 2026-11-28)  
+**Status:** **Backend Delivered (`d0cc389`) — Frontend Stages 1–3 Done; 3 New Requests** (updated 2026-11-28)  
 
 ---
 
@@ -53,4 +53,32 @@ Frontend progress: [`frontend/docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md`]
 | 2. Club engagement | Implemented; read-only API checks pass; browser QA pending. |
 | 3. Operator lifecycle | Implemented (Members page and inline approvals on the dashboard; no student emails shown); browser QA pending. |
 | 4. Event lifecycle (incl. rating) | Implemented; ratings and attendance verified at API level; write steps pending a test database or manual QA. |
+
+---
+
+## 5. Review of the Week 9 Backend Delivery (2026-11-28, Anik)
+
+Pulled `d488455` ("ReSeeded demo data") and `d0cc389` ("Week 9 Backend Complete…") and checked them against the running backend with read-only requests.
+
+### 5.1 Verified
+| Item | Result |
+|---|---|
+| Operator login includes `club` | **OK** — `user.club` present (democlub1 → `demo-robotics-club`), same keys as `/api/auth/me/`; student login unchanged. |
+| Re-seed (dashboards) | **OK** — demo1: 4 upcoming, 3 to rate, 4 next events, 3 rating prompts; democlub1: 2 upcoming, 1 pending request, 1 pending collaboration, rating 4.2 (5), 9 registrations in 7 days. |
+| Attendance seeded | **OK** — my-club: 7 attended, 77.8 %; Rated Workshop: 4/4 attended, response rate 75 %; club comparison has attendance and ratings for 6 clubs. |
+| Departments spread | **OK** — Rated Workshop: Bangla 2, English 1, History 1. |
+| Robotics interests restored | **OK** — Technology, Programming, Robotics. |
+| Frontend compatibility | **OK** — `npm run audit:api` 64/64, 0 mismatches; `npm run test:resilience` 9/9. |
+| Backend tests (`pytest`) | **Not run on the frontend machine** — no local PostgreSQL installed on the macOS machine yet. |
+
+### 5.2 New requests
+| # | Request | Priority |
+|:---:|---|:---:|
+| 7 | **`attendance_rate` in `GET /api/analytics/student-activity/` exceeds 100 %** (demo1: 116.7 %, `events_attended` 7). `StudentActivityView` divides *all* attended registrations by registrations of *ended* events; attended registrations of started-but-not-ended events inflate the numerator. Count attended registrations of ended published events in the numerator. | High |
+| 8 | **`LOCAL_TEST_STACK.md` logins:** only `club1@example.com` gets `Str0ng-Pass-123`; `demo1…demo5` and `democlub1…5` get `Demo-Pass-12345` because `bootstrap_local_demo` does not pass `--password` to `seed_demo_events`. Fix the command or the doc. | Medium |
+| 9 | **macOS variant of `LOCAL_TEST_STACK.md`** (Homebrew PostgreSQL, `source venv/bin/activate`, `export` instead of `$env:`). | Low |
+
+### 5.3 Frontend follow-ups from this delivery
+- Use `user.club` from the login response and keep `/api/auth/me/` only as a fallback (Week 9).
+- Run the local stack for the write-flow QA once PostgreSQL is installed on the frontend machine.
 
