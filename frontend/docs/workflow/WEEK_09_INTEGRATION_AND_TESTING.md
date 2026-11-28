@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **Planned — Stage 0 (Plan Documented; Implementation Not Started)**  
+**Status:** **In Progress — Stage 1 Completed (API Contract Audit Clean)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -38,9 +38,11 @@
 
 ## 3. Implementation Stages & Progress
 
-1. [ ] **Stage 1: API Contract Integration Audit**
-   - Script that lists every endpoint the frontend calls (method + path) and compares it with `docs/api/openapi.yml`; report calls the backend does not define, wrong methods, missing trailing slashes, and backend endpoints no screen uses.
-   - Fix frontend mismatches; send backend issues to the backend developer as a list.
+1. [x] **Stage 1: API Contract Integration Audit**
+   - `frontend/scripts/audit-api-contract.mjs` (`npm run audit:api`, no dependencies): reads `docs/api/openapi.yml`, finds every API call in `frontend/src` (`api.*`, the refresh `axios.post`, `fetchAllPages`, `putImage`), and reports calls to unknown paths, disallowed methods, missing trailing slashes and spec operations no code calls; exits 1 on any mismatch.
+   - First run: 1 flag — `OperatorDashboard.jsx` built the approve/reject URL from a variable (`…/${action}/`), correct at runtime but not verifiable. Rewritten as two explicit calls. Second run: clean.
+   - Coverage: **all 64 backend operations are used by the frontend** (every backend feature is reachable from the UI); 81 call sites.
+   - Spec freshness: the spec was regenerated from the backend code (`manage.py spectacular` into a scratch file) and compared — identical operations and schemas; only `operationId` prefixes and tag names differ (cosmetic, reported to the backend developer).
 
 2. [ ] **Stage 2: Resilience & Error Handling**
    - Global `ErrorBoundary` with a recoverable fallback (reload / go home) instead of a blank page.
@@ -104,3 +106,37 @@ The local backend (`backend/.env`) connects to the **shared Supabase database** 
 - **Frontend test framework:** adding Vitest + React Testing Library would give automated component tests but adds dependencies late in the project. **Recommendation:** not this week; use the scripted contract audit, scripted journeys and the screenshot audit, and record manual results in the report.
 - **Test database for write tests:** the shared Supabase database should not receive automated writes. **Question for Atik:** can a local PostgreSQL (or a separate Supabase project) be provided for Week 9 testing? Otherwise write tests stay manual on `[DEMO]` data.
 - **Headless screenshots** use the installed Google Chrome through the DevTools Protocol from a Node script (no new project dependency).
+
+---
+
+## 8. Stage 1 Verification Results
+
+| Verification Check | Command | Result | Notes |
+|---|---|:---:|---|
+| **Contract audit (before fix)** | `npm run audit:api` | **1 flag** | Variable approve/reject URL in `OperatorDashboard.jsx:115`. |
+| **Contract audit (after fix)** | `npm run audit:api` | **PASS (exit 0)** | 0 unknown paths, 0 wrong methods, 0 missing slashes, 0 unused operations; 64/64 operations used, 81 call sites. |
+| **Non-literal URLs** | `grep` for `api.*(variable)` | **PASS** | Only the `fetchAllPages` and `putImage` helpers, whose call sites the audit checks. |
+| **Spec freshness** | `manage.py spectacular --file <scratch>` + diff | **PASS** | Same 64 operations and schemas; only `operationId` prefixes / tags differ. |
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | — |
+| **Production Build** | `npm run build` | **PASS** | — |
+
+### Issues for the backend developer
+- *(Cosmetic)* The committed `docs/api/openapi.yml` uses `operationId`s prefixed with `api_` and a single `api` tag, while the current backend generates per-app tags (`analytics`, `auth`, …). Regenerating the committed file would group Swagger UI by app.
+
+---
+
+## 9. Acceptance Criteria (Stage 1)
+
+- [x] Every frontend API call matches a spec path and method, with trailing slashes.
+- [x] Every backend operation is reachable from the UI (64/64).
+- [x] The audit is repeatable (`npm run audit:api`) and needs no new dependencies.
+- [x] ESLint and Vite build pass; no backend files modified.
+
+---
+
+## 10. Week 9 Readiness Classification
+
+* **Implementation:** Stage 1 of 7 complete (API contract audit).
+* **Verification:** contract audit clean; spec confirmed current.
+* **Open:** test-database question and carried-over items (Section 4).
+

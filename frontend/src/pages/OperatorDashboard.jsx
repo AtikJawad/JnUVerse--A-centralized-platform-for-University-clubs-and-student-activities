@@ -112,7 +112,12 @@ export default function OperatorDashboard() {
   const decide = async (request, action) => {
     setRowBusy((prev) => ({ ...prev, [request.id]: action }));
     try {
-      await api.post(`/api/clubs/${slug}/memberships/${request.id}/${action}/`);
+      // Explicit endpoints (auditable against openapi.yml)
+      if (action === "approve") {
+        await api.post(`/api/clubs/${slug}/memberships/${request.id}/approve/`);
+      } else {
+        await api.post(`/api/clubs/${slug}/memberships/${request.id}/reject/`);
+      }
       setRequests((prev) => prev.filter((r) => r.id !== request.id));
       setToast({
         type: "success",
