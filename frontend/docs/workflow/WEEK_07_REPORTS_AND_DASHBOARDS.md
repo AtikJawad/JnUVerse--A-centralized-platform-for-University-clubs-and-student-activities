@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **Planned — Stage 0 (Plan Documented; Implementation Not Started)**  
+**Status:** **In Progress — Stage 1 Completed (API Services Foundation Verified)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -39,13 +39,15 @@
 
 ## 3. Implementation Stages & Progress
 
-1. [ ] **Stage 1: API Services Foundation (`interestsAPI`, `dashboardAPI`, `reportsAPI`, image uploads)**
+1. [x] **Stage 1: API Services Foundation (`interestsAPI`, `dashboardAPI`, `reportsAPI`, image uploads)**
    - `interestsAPI.getAll()` → `GET /api/auth/interests/`; `getMine()` / `setMine(ids)` → `GET` / `PUT /api/auth/me/interests/`.
    - `clubsAPI.update(slug, payload)` → `PATCH /api/clubs/:slug/`; `uploadLogo(slug, file)` / `deleteLogo(slug)` → `PUT` / `DELETE /api/clubs/:slug/logo/`.
    - `eventsAPI.uploadBanner(id, file)` / `deleteBanner(id)` → `PUT` / `DELETE /api/events/:id/banner/`.
    - `reportsAPI.create(payload)` / `getMine(params)` → `POST` / `GET /api/reports/`.
    - `dashboardAPI.student()` / `club()` → `GET /api/dashboard/student/` and `/api/dashboard/club/`.
-   - Upload methods send `FormData` with `headers: { "Content-Type": "multipart/form-data" }` (see §5.2).
+   - Upload methods send `FormData` with `headers: { "Content-Type": "multipart/form-data" }` through a private `putImage(url, field, file)` helper (see §5.2).
+   - Shared constants `REPORT_REASONS` (value/label pairs) and `REPORT_STATUS_LABELS` (`open` → "Received", etc.) for report UI.
+   - Validated against ESLint (0 errors, 0 warnings), Vite production build and live API smoke tests (Section 8).
 
 2. [ ] **Stage 2: Club Logos, Event Banners & Club Interests**
    - `ClubLogo.jsx`: square logo with `object-cover`, initials placeholder when `logo` is `null`; used in ExploreClubs, ClubDetail, MyClubs, PartnerClubsSection, OperatorCollaborations, ProposeCollaborationModal and OperatorMembers.
@@ -78,7 +80,7 @@
    - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 8).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 10).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -221,14 +223,48 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 8 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 10 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
 
 ---
 
-## 8. Manual Interactive Browser QA Checklist
+## 8. Stage 1 Verification Results
+
+Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and the same default `Content-Type: application/json` header as the shared instance, against the local backend (`http://127.0.0.1:8000`).
+
+| Verification Check | Command / Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | Clean across `api.js`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
+| **Interest List** | `GET /api/auth/interests/` | **PASS (200 OK)** | 13 interests. |
+| **Student Interests** | `GET /api/auth/me/interests/` (demo1 / democlub1) | **PASS (200 / 403)** | demo1: Cultural, Photography; operator correctly refused. |
+| **Student Dashboard** | `GET /api/dashboard/student/` (demo1 / democlub1) | **PASS (200 / 403)** | Structure matches contract; see demo-data note below. |
+| **Club Dashboard** | `GET /api/dashboard/club/` (democlub1) | **PASS (200 OK)** | followers 2, members 2, pending 1, collab pending 1, rating 4.2 (5). |
+| **My Reports** | `GET /api/reports/` (demo1 / anonymous) | **PASS (200 / 401)** | 3 reports: open, under_review, resolved. |
+| **Own-Club Report Guard** | `POST /api/reports/` (democlub1 → own club) | **PASS (400)** | "You cannot report your own club or its events." |
+| **Duplicate Report Guard** | `POST /api/reports/` (demo1 → Sports Club again) | **PASS (409)** | Already reported. |
+| **Upload without override** | `PUT /api/clubs/demo-robotics-club/logo/` with default JSON header | **415 (expected failure)** | Confirms Axios converts `FormData` to JSON; override is required. |
+| **Upload with override (`putImage`)** | same request with `multipart/form-data` | **PASS (200 OK)** | Club object returned with new `logo` URL. |
+| **Logo Removal (restore)** | `DELETE /api/clubs/demo-robotics-club/logo/` | **PASS (204)** | Logo back to `null`; demo data unchanged. |
+
+**Demo-data drift:** time-based figures have expired in the local database (student `events_registered_upcoming` 0 and `events_to_rate` 0, club `upcoming_events` 0 and `registrations_last_7_days` 0, versus 4 / 2 / 2 / 9 in the handoff). Re-seed before browser QA of Stages 4–5.
+
+---
+
+## 9. Acceptance Criteria (Stage 1)
+
+- [x] `interestsAPI`, `reportsAPI` and `dashboardAPI` implemented in `frontend/src/services/api.js` matching the Week 7 handoff.
+- [x] `clubsAPI.update / uploadLogo / deleteLogo` and `eventsAPI.uploadBanner / deleteBanner` implemented.
+- [x] Image uploads override the JSON default header; verified live (415 without, 200 with).
+- [x] Uses the shared Axios instance with Bearer token injection and 401 refresh queue; trailing-slash URLs respected.
+- [x] No backend files modified; no new dependencies.
+- [x] ESLint and Vite production build pass.
+
+---
+
+## 10. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -256,8 +292,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 9. Week 7 Readiness Classification
+## 11. Week 7 Readiness Classification
 
-* **Implementation:** Not started (Stage 0 — plan documented).
+* **Implementation:** Stage 1 of 7 complete (API services foundation).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Pending; stage verification results will be appended to this document as each stage completes.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests). Remaining stages pending.
+* **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.

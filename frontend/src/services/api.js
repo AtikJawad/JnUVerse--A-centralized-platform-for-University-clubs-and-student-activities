@@ -185,6 +185,23 @@ export async function fetchAllPages(url, params = {}, maxPages = 40) {
 }
 
 /**
+ * Sends a single file as multipart/form-data with PUT.
+ * The shared instance defaults to Content-Type: application/json, and Axios
+ * converts FormData to JSON when that header is set, so the header must be
+ * overridden here (the browser adds the multipart boundary).
+ * @param {string} url - Endpoint URL
+ * @param {string} field - Form field name expected by the backend ("logo" | "banner")
+ * @param {File} file - Image file selected by the user
+ */
+function putImage(url, field, file) {
+  const formData = new FormData();
+  formData.append(field, file);
+  return api.put(url, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}
+
+/**
  * Clubs API Service — Centralized club discovery and lookup endpoints
  */
 export const clubsAPI = {
@@ -201,6 +218,31 @@ export const clubsAPI = {
    * @param {string} slug - Club slug
    */
   getBySlug: (slug) => api.get(`/api/clubs/${slug}/`),
+
+  /**
+   * Update the club profile (owning Club Operator only).
+   * Endpoint: PATCH /api/clubs/:slug/
+   * `interests` replaces the whole selection ([] clears). `logo` is ignored — use uploadLogo.
+   * @param {string} slug - Club slug
+   * @param {Object} payload - { description, contact_email, interests: [uuid] }
+   */
+  update: (slug, payload) => api.patch(`/api/clubs/${slug}/`, payload),
+
+  /**
+   * Upload or replace the club logo (owning Club Operator only).
+   * Endpoint: PUT /api/clubs/:slug/logo/ (multipart field `logo`; JPEG/PNG/WebP, max 2 MB)
+   * Returns the full Club object with the new `logo` URL.
+   * @param {string} slug - Club slug
+   * @param {File} file - Image file
+   */
+  uploadLogo: (slug, file) => putImage(`/api/clubs/${slug}/logo/`, "logo", file),
+
+  /**
+   * Remove the club logo (owning Club Operator only). Idempotent, 204 No Content.
+   * Endpoint: DELETE /api/clubs/:slug/logo/
+   * @param {string} slug - Club slug
+   */
+  deleteLogo: (slug) => api.delete(`/api/clubs/${slug}/logo/`),
 };
 
 /**
@@ -274,6 +316,22 @@ export const eventsAPI = {
    */
   getRegistrations: (id, params) =>
     api.get(`/api/events/${id}/registrations/`, { params }),
+
+  /**
+   * Upload or replace the event banner (owning Club Operator only).
+   * Endpoint: PUT /api/events/:id/banner/ (multipart field `banner`; JPEG/PNG/WebP, max 5 MB)
+   * Returns the full Event object. 409 for cancelled or ended events.
+   * @param {string} id - Event UUID
+   * @param {File} file - Image file
+   */
+  uploadBanner: (id, file) => putImage(`/api/events/${id}/banner/`, "banner", file),
+
+  /**
+   * Remove the event banner (owning Club Operator only). 204 No Content.
+   * Endpoint: DELETE /api/events/:id/banner/
+   * @param {string} id - Event UUID
+   */
+  deleteBanner: (id) => api.delete(`/api/events/${id}/banner/`),
 };
 
 /**
@@ -486,6 +544,91 @@ export const collaborationsAPI = {
    */
   getPartners: (clubSlug, params) =>
     api.get(`/api/clubs/${clubSlug}/partners/`, { params }),
+};
+
+/**
+ * Interests API Service — Week 7 Backend Integration
+ * Fixed list of 13 interests shared by students and clubs.
+ */
+export const interestsAPI = {
+  /**
+   * List all interests (public), sorted by name.
+   * Endpoint: GET /api/auth/interests/ → { interests: [{ id, name }] }
+   */
+  getAll: () => api.get("/api/auth/interests/"),
+
+  /**
+   * Retrieve the logged-in student's interests (Student only).
+   * Endpoint: GET /api/auth/me/interests/ → { interests: [{ id, name }] }
+   */
+  getMine: () => api.get("/api/auth/me/interests/"),
+
+  /**
+   * Replace the logged-in student's interests (Student only). [] clears them.
+   * Endpoint: PUT /api/auth/me/interests/
+   * @param {string[]} interestIds - Interest UUIDs
+   */
+  setMine: (interestIds) => api.put("/api/auth/me/interests/", { interests: interestIds }),
+};
+
+/**
+ * Content Reports API Service — Week 7 Backend Integration
+ * Report an inappropriate club or event; view own reports and their status.
+ */
+export const reportsAPI = {
+  /**
+   * Submit a report (any logged-in user).
+   * Endpoint: POST /api/reports/
+   * 400 for own club/event, drafts or validation errors; 409 if already reported.
+   * @param {Object} payload - { target_type: "club"|"event", target: slug|eventId,
+   *   reason: "inappropriate"|"spam"|"misleading"|"harassment"|"other", details?: string }
+   */
+  create: (payload) => api.post("/api/reports/", payload),
+
+  /**
+   * List the user's own reports, newest first (paginated).
+   * Endpoint: GET /api/reports/
+   * @param {Object} [params] - { page, page_size }
+   */
+  getMine: (params) => api.get("/api/reports/", { params }),
+};
+
+/**
+ * Dashboard API Service — Week 7 Backend Integration
+ * Each dashboard is returned in a single call.
+ */
+export const dashboardAPI = {
+  /**
+   * Student dashboard (Student only).
+   * Endpoint: GET /api/dashboard/student/
+   * → { has_interests, counts, next_events, rating_prompts, suggested_clubs }
+   */
+  student: () => api.get("/api/dashboard/student/"),
+
+  /**
+   * Club operator dashboard (Club Operator only).
+   * Endpoint: GET /api/dashboard/club/
+   * → { club, counts, ratings, next_events, recent_events, registrations_last_7_days }
+   */
+  club: () => api.get("/api/dashboard/club/"),
+};
+
+/**
+ * Report reason options and status labels shared by report UI components.
+ */
+export const REPORT_REASONS = [
+  { value: "inappropriate", label: "Inappropriate content" },
+  { value: "spam", label: "Spam" },
+  { value: "misleading", label: "Misleading information" },
+  { value: "harassment", label: "Harassment" },
+  { value: "other", label: "Other" },
+];
+
+export const REPORT_STATUS_LABELS = {
+  open: "Received",
+  under_review: "Under review",
+  resolved: "Resolved",
+  dismissed: "Dismissed",
 };
 
 export default api;
