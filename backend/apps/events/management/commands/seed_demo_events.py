@@ -50,30 +50,37 @@ class Command(BaseCommand):
             self.seed(o)
 
     def reset(self):
-        events = Event.objects.filter(title__startswith=PREFIX)
+        demo_domain = "@" + DEMO_EMAIL_DOMAIN
+        events = Event.objects.filter(Q(title__startswith=PREFIX) | Q(club__name__startswith=PREFIX))
         ContentReport.objects.filter(
-            Q(reporter__email__endswith="@" + DEMO_EMAIL_DOMAIN)
-            | Q(club__name__startswith=PREFIX) | Q(event__title__startswith=PREFIX)
+            Q(reporter__email__endswith=demo_domain)
+            | Q(club__name__startswith=PREFIX) | Q(event__in=events)
         ).delete()
-        CollaborationRequest.objects.filter(title__startswith=PREFIX).delete()
-        EventRating.objects.filter(event__in=events).delete()
-        EventRegistration.objects.filter(event__in=events).delete()
+        CollaborationRequest.objects.filter(
+            Q(title__startswith=PREFIX) | Q(requesting_club__name__startswith=PREFIX)
+            | Q(target_club__name__startswith=PREFIX) | Q(event__in=events)
+        ).delete()
+        EventRating.objects.filter(
+            Q(event__in=events) | Q(student__user__email__endswith=demo_domain)).delete()
+        EventRegistration.objects.filter(
+            Q(event__in=events) | Q(student__user__email__endswith=demo_domain)).delete()
         n_events = events.count()
         events.delete()
         demo_clubs = Club.objects.filter(name__startswith=PREFIX)
         Notice.objects.filter(club__in=demo_clubs).delete()  # their notifications cascade
-        ClubMembership.objects.filter(club__in=demo_clubs).delete()
-        ClubFollow.objects.filter(club__in=demo_clubs).delete()
+        ClubMembership.objects.filter(
+            Q(club__in=demo_clubs) | Q(student__user__email__endswith=demo_domain)).delete()
+        ClubFollow.objects.filter(
+            Q(club__in=demo_clubs) | Q(student__user__email__endswith=demo_domain)).delete()
         n_clubs = demo_clubs.count()
         demo_clubs.delete()
-        users = User.objects.filter(email__endswith="@" + DEMO_EMAIL_DOMAIN)
+        users = User.objects.filter(email__endswith=demo_domain)
         n_users = users.count()
         users.delete()  # StudentProfile cascades
         ValidStudentRecord.objects.filter(student_id__in=DEMO_IDS).delete()
         self.stdout.write(self.style.SUCCESS(
             f"Removed {n_events} demo events, {n_clubs} demo clubs, {n_users} demo users."
         ))
-
     def seed(self, o):
         try:
             club = Club.objects.get(slug=o["club_slug"])
@@ -81,7 +88,8 @@ class Command(BaseCommand):
         except (Club.DoesNotExist, User.DoesNotExist) as e:
             raise CommandError(f"Club/operator not found: {e}")
 
-        dept = DEPARTMENT_CHOICES[0][0]
+        # spread demo students over three departments so department reports are not one bar
+        depts = [DEPARTMENT_CHOICES[i][0] for i in (0, 0, 1, 2, 1)]
         profiles = []
         for i, sid in enumerate(DEMO_IDS, start=1):
             email = f"demo{i}@{DEMO_EMAIL_DOMAIN}"
@@ -94,7 +102,7 @@ class Command(BaseCommand):
                 user.save()
             profile, _ = StudentProfile.objects.get_or_create(
                 user=user,
-                defaults={"jnu_student_id": sid, "full_name": f"Demo Student {i}", "department": dept, "batch": 22},
+                defaults={"jnu_student_id": sid, "full_name": f"Demo Student {i}", "department": depts[i - 1], "batch": 22},
             )
             profiles.append(profile)
 
@@ -129,8 +137,11 @@ class Command(BaseCommand):
                 },
             )
             made += created
-            for p in profiles[:regs]:
-                EventRegistration.objects.get_or_create(event=event, student=p)
+            started = status == P and start <= now
+            for n, p in enumerate(profiles[:regs]):
+                # on events that have started, all registered students except the last one attended
+                EventRegistration.objects.get_or_create(
+                    event=event, student=p, defaults={"attended": started and n < max(regs - 1, 1)})
         # one cancelled registration, to exercise re-register / counts
         EventRegistration.objects.get_or_create(
             event=Event.objects.get(club=club, title=PREFIX + "Paper Reading Session"),
@@ -140,6 +151,7 @@ class Command(BaseCommand):
         made_clubs = self.seed_clubs(o, profiles, now)
         self.seed_notifications(profiles)
         self.seed_ratings(profiles, now)
+        self.seed_past_club_events(profiles, now)
         self.seed_collaborations()
         self.seed_interests(profiles)
         self.seed_reports(profiles)
@@ -236,13 +248,13 @@ class Command(BaseCommand):
 
     def seed_ratings(self, profiles, now):
         club = Club.objects.get(operator__email=f"democlub1@{DEMO_EMAIL_DOMAIN}")
-        # title, hours since it ended, registered student indexes, {student index: rating}
+        # title, hours since it ended, registered student indexes, attended indexes, {student index: rating}
         specs = [
-            ("Rated Workshop", 24, [0, 1, 2, 3], {1: 5, 2: 4, 3: 4}),   # rating open; demo1 has not rated yet
-            ("Closed Rating Event", 12 * 24, [0, 1, 2], {0: 3, 1: 5}),  # 7-day window already over
-            ("Just Ended Event", 2, [0, 1], {}),                        # rating open, no ratings yet
+            ("Rated Workshop", 24, [0, 1, 2, 3], [0, 1, 2, 3], {1: 5, 2: 4, 3: 4}),  # rating open; demo1 has not rated yet
+            ("Closed Rating Event", 12 * 24, [0, 1, 2], [0, 1], {0: 3, 1: 5}),       # 7-day window already over
+            ("Just Ended Event", 2, [0, 1], [0], {}),                                # rating open, no ratings yet
         ]
-        for title, hours_ago, regs, ratings in specs:
+        for title, hours_ago, regs, attended, ratings in specs:
             ends = now - timedelta(hours=hours_ago)
             event, _ = Event.objects.get_or_create(
                 club=club, title=PREFIX + title,
@@ -253,7 +265,37 @@ class Command(BaseCommand):
                 },
             )
             for i in regs:
-                EventRegistration.objects.get_or_create(event=event, student=profiles[i])
+                EventRegistration.objects.get_or_create(
+                    event=event, student=profiles[i], defaults={"attended": i in attended})
+            for i, value in ratings.items():
+                EventRating.objects.get_or_create(event=event, student=profiles[i], defaults={"rating": value})
+        past = Event.objects.filter(club=club, title=PREFIX + "Past Event Example").first()
+        if past:
+            for i, value in {1: 5, 2: 4}.items():  # students who attended it
+                EventRating.objects.get_or_create(event=past, student=profiles[i], defaults={"rating": value})
+
+    def seed_past_club_events(self, profiles, now):
+        """Finished events for other demo clubs, so club comparison and monthly trends have data."""
+        # club number, title, days ago it ended, capacity, registered indexes, attended indexes, {index: rating}
+        specs = [
+            (2, "Debate Society Past Debate", 10, 20, [0, 2, 4], [0, 2], {0: 4, 2: 5}),
+            (3, "Photography Club Photo Walk Recap", 20, 15, [1, 3], [1], {1: 3}),
+            (4, "Cultural Forum Night Recap", 15, 40, [0, 1, 2, 3, 4], [0, 1, 3, 4], {0: 5, 3: 4, 4: 4}),
+        ]
+        for num, title, days_ago, cap, regs, attended, ratings in specs:
+            club = Club.objects.get(operator__email=f"democlub{num}@{DEMO_EMAIL_DOMAIN}")
+            ends = now - timedelta(days=days_ago)
+            event, _ = Event.objects.get_or_create(
+                club=club, title=PREFIX + title,
+                defaults={
+                    "created_by": club.operator, "description": "Demo data for frontend development.",
+                    "venue": "Room 101", "starts_at": ends - timedelta(hours=2), "ends_at": ends,
+                    "capacity": cap, "status": Event.Status.PUBLISHED,
+                },
+            )
+            for i in regs:
+                EventRegistration.objects.get_or_create(
+                    event=event, student=profiles[i], defaults={"attended": i in attended})
             for i, value in ratings.items():
                 EventRating.objects.get_or_create(event=event, student=profiles[i], defaults={"rating": value})
 
