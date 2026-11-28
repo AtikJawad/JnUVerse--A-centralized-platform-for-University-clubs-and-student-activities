@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stages 1–3 Completed (Stages 2–3 Source, Build & API Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–4 Completed (Stages 2–4 Source, Build & API Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -53,7 +53,7 @@
    - `ClubLogo.jsx`: renders `club.logo` (`object-cover`) inside the caller's container, or the caller's existing fallback (category icon or initials) when the logo is `null` or fails to load. Used in ExploreClubs (featured club and cards), ClubDetail (profile card), MyClubs and OperatorMembers (club badge from `user.club`).
      - PartnerClubsSection and ProposeCollaborationModal already rendered `logo` with a fallback and were left unchanged.
      - Collaboration and event objects carry only `{ id, name, slug }` for clubs (no `logo`), so OperatorCollaborations and EventDetail keep their icons.
-   - `ImageUploadField.jsx`: reusable upload / replace / remove control with preview (square or 16:9), browser-side type (JPEG/PNG/WebP) and size checks, busy state and server error display.
+   - `ImageUploadField.jsx`: built on Stitch `jnuverse_club_profile_management` "Section A: Logo Upload Area" — title with "Editable" pill and "Public Asset" pill, framed preview, dashed drag & drop zone, "Change"/"Remove" buttons; square frame for logos, 16:9 frame for banners; browser-side type (JPEG/PNG/WebP) and size checks, busy state and server error display. On the club profile it is the first section of the edit card, as in Stitch.
    - `InterestPicker.jsx` (built here, reused for students in Stage 3): toggle chips over `GET /api/auth/interests/` with `aria-pressed`; `InterestTags.jsx`: read-only chips with optional `+N` overflow.
    - Club Detail edit form: removed the obsolete `logo` from the `PATCH` payload; logo upload/remove saves immediately via `clubsAPI.uploadLogo / deleteLogo`; club interests edited with `InterestPicker` and saved via `clubsAPI.update` (`description`, `contact_email`, `interests`); Cancel now resets unsaved edits.
    - Interest tags on Explore Clubs cards (max 3, `+N`) and in the Club Detail "About" view.
@@ -70,11 +70,17 @@
    - `InterestsPrompt.jsx`: skippable "Choose your interests" card. `Dashboard.jsx` calls `dashboardAPI.student()` for students and shows it when `has_interests` is `false`; "Skip for now" is remembered per student in `localStorage` (`jnuverse:interests-prompt-dismissed:<user id>`); saving shows a confirmation with a link back to the profile.
    - Navbar: a student's name/avatar links to `/profile` (highlighted there); mobile menu "My Profile" link. Operators keep the club profile link from Stage 2.
 
-4. [ ] **Stage 4: Student Dashboard (`Dashboard.jsx`)**
-   - Rebuilt on `GET /api/dashboard/student/` following the Stitch "Living Campus" design.
-   - Six count cards: clubs followed, clubs joined, pending membership requests, unread notifications, upcoming registered events, events to rate.
-   - Sections: "Your next events" (up to 5), "Rate your recent events" (opens the existing `StarRating` flow), "Suggested clubs" (with Follow).
-   - Empty states: interests prompt when `has_interests` is `false`; "You're all caught up" when there are interests but no suggestions.
+4. [x] **Stage 4: Student Dashboard (`Dashboard.jsx`)**
+   - Built against Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, with data from one `dashboardAPI.student()` call (loading state, error with Retry). Section order follows Stitch: hero → rating prompts (only when there is something to rate) → "Find your community." → "Your communities." → upcoming events. Container spacing follows Stitch (`gap-space-2xl` = 4rem, `margin`/`margin-tablet`/`margin-desktop` padding).
+   - New `components/dashboard/StudentDashboardSections.jsx`:
+     - `SuggestedClubs` ("Find your community.", `suggested_clubs`): Stitch club cards — `rounded-3xl` white card, tinted corner shape, themed icon squircle (or uploaded logo), "Chartered" pill, `@slug`, 3-line description, interest tags, metrics pill (followers • members), dual actions **Follow** (`POST /api/clubs/:slug/follow/`) and **Join** (`POST /api/clubs/:slug/membership/` → Pending pill); 4-column grid. Empty states "Tell us what you care about." (`has_interests: false`) and "You're all caught up." in the Stitch empty-state style.
+     - `YourCommunities` ("Your communities."): Stitch status list of the student's approved, pending and followed clubs (all club pages via `fetchAllPages`), status pills "Approved Member" / "Membership Pending" / "Following Updates", "N Active Subscriptions" badge, "View Society Profile" links, Stitch empty state "Your campus journey starts with a community.".
+     - `UpcomingEvents` (`next_events`): the first event uses the Stitch asymmetric event showcase card (banner thumbnail with floating date badge, club • venue, title, description, "View Event"); the rest use the DESIGN.md feed list (hairline dividers, lavender hover wash); "N registered" badge.
+     - `RatingPrompts` (`rating_prompts`): no Stitch dashboard block exists, so cards follow DESIGN.md (white `rounded-3xl` card, `StarRating` on a `canvas-base` strip, primary pill button); a rated event leaves the list and `events_to_rate` drops by one.
+   - Counts are shown as section badges (Stitch shows counts this way, e.g. "3 Active Subscriptions"); unread notifications stay on the navbar bell. The initial 6-tile stat row was removed because it is not part of the Stitch design.
+   - `utils/clubTheme.js`: Stitch dashboard palette (sky, purple, orange, pink, emerald) chosen from club interests, name and description.
+   - The Stage 3 interests prompt reads `has_interests` from the same response; saving interests reloads the dashboard so suggestions update immediately.
+   - Club operators temporarily see the hero plus quick links to their tools until Stage 5.
 
 5. [ ] **Stage 5: Club Operator Dashboard (`OperatorDashboard.jsx`)**
    - Built on `GET /api/dashboard/club/` following the Stitch operator dashboard design.
@@ -89,7 +95,7 @@
    - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 14).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 17).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -215,6 +221,8 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - `frontend/src/components/ImageUploadField.jsx` *(created, Stage 2)*
 - `frontend/src/utils/banner.js` *(created, Stage 2)*
 - `frontend/src/components/ReportModal.jsx`
+- `frontend/src/components/dashboard/StudentDashboardSections.jsx` *(created, Stage 4)*
+- `frontend/src/utils/clubTheme.js` *(created, Stage 4)*
 - `frontend/src/pages/OperatorDashboard.jsx`
 - `frontend/src/pages/Profile.jsx` *(created, Stage 3)*
 - `frontend/src/components/InterestsPrompt.jsx` *(created, Stage 3)*
@@ -236,7 +244,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 14 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 17 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
@@ -300,7 +308,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
 - [x] Operators can reach their own club profile from the navbar, immediately after login.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of uploads and interest saving (Section 14).
+- [ ] Manual browser QA of uploads and interest saving (Section 17).
 
 ---
 
@@ -313,7 +321,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 | **Prompt Trigger Data** | `GET /api/dashboard/student/` (demo1–demo5) | **PASS (200 OK)** | `has_interests: false` for demo2 and demo4 (prompt shown); `true` for demo1, demo3, demo5. |
 | **Suggestions from Interests** | same request | **PASS** | demo3 → Sports Club; demo5 → Robotics Club, Cultural Forum, Debate Society; demo1 → none ("all caught up"). |
 | **Interests RBAC** | `GET /api/auth/me/interests/` (operator / anonymous) | **PASS (403 / 401)** | `/profile` is student-only in the router as well. |
-| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 14). |
+| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 17). |
 
 ---
 
@@ -323,11 +331,63 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] The dashboard shows a skippable interests prompt only when `has_interests` is `false`.
 - [x] Students reach `/profile` from the navbar (desktop and mobile).
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving and clearing interests (Section 14).
+- [ ] Manual browser QA of saving and clearing interests (Section 17).
 
 ---
 
-## 14. Manual Interactive Browser QA Checklist
+## 14. Stage 4 Verification Results
+
+| Verification Check | Command / Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `Dashboard.jsx`, `StudentDashboardSections.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.26s)** | Bundle-size warning only (unchanged). |
+| **Dashboard Payload** | `GET /api/dashboard/student/` (demo1) | **PASS (200 OK)** | followed 3, joined 2, pending 1, unread 8, upcoming 0, to rate 0. |
+| **Suggestion States** | same request (demo1, demo3, demo4, demo5) | **PASS** | demo1 "all caught up"; demo3 one suggestion; demo4 choose-interests state; demo5 three suggestions in handoff order. |
+| **Next Events / Rating Prompts (populated)** | — | **BLOCKED (demo data expired)** | `next_events` and `rating_prompts` are empty until the demo data is re-seeded; empty states verified at source level. |
+| **Rating / Follow from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA after re-seeding. |
+
+---
+
+## 15. Acceptance Criteria (Stage 4)
+
+- [x] Student dashboard built on `GET /api/dashboard/student/` with all six counts linking to the right screens.
+- [x] Rating prompts submit 1–5 star ratings in place and update the count.
+- [x] Next events, suggested clubs (with Follow) and both suggestion empty states implemented.
+- [x] Static Week 3 roadmap and profile placeholders removed.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Browser QA with re-seeded demo data (Section 17).
+
+---
+
+## 16. Stitch Design Fidelity Review (Stages 2–4)
+
+After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/` and `jnuverse/DESIGN.md`, following the Week 3 approach.
+
+### Stitch References Used
+- `jnuverse_student_dashboard_living_campus_experience/code.html` + `screen.png` — Student Dashboard (Stage 4).
+- `jnuverse_club_profile_management/code.html` + `screen.png` — Club Insignia & Logo upload section (Stage 2).
+- `jnuverse/DESIGN.md` — tokens, card/shadow/radius rules, empty states, feed lists (rating prompts and the Profile page, which have no dedicated Stitch screen).
+
+### Corrections Made
+| Area | Before | After (Stitch) |
+|---|---|---|
+| Hero constellation tiles | Static tiles, 3 left / 2 right, small shadow | Stitch `anim-float-1/2/3` floating animation (`float-gentle-1/2` keyframes in `index.css`, disabled under `prefers-reduced-motion`), 3 left / 3 right (adds "Art & Design"), Stitch shadow and `gap-5`, gradient "Explore Clubs" CTA with glow, CTAs jump to `#discovery-section` / `#my-clubs-section` |
+| Dashboard layout | 6 stat tiles, then ratings, next events, suggestions | Hero → "Find your community." → "Your communities." → events; counts as section badges |
+| Suggested club cards | Bordered generic card, Follow + View | Stitch card: tinted corner, themed squircle, Chartered pill, metrics pill, Follow + Join |
+| "Your communities." | Missing | Stitch status list with membership pills and "View Society Profile" |
+| Upcoming events | Compact rows | Stitch event showcase card + DESIGN.md feed list |
+| Section spacing | `gap-8`, `px-4/6/12` | `gap-space-2xl` (4rem), `px-margin` / `margin-tablet` / `margin-desktop` |
+| Logo/banner upload | Plain preview + two buttons | Stitch "Section A" block: Editable / Public Asset pills, framed preview, dashed drag & drop zone, Change / Remove |
+
+### Notes
+- Prototype-only Stitch elements (the "DRF State Inspector" HUD and "Preview Clean Empty State" toggle) are not implemented; states come from real React state (same decision as Week 3).
+- Stitch typography tokens (`text-headline-md`, `font-title-lg`, …) are not in `tailwind.config.js`; they are mapped to the equivalent explicit sizes, as in earlier weeks.
+- `jnuverse_student_event_feedback/screen.png` and `jnuverse_reports_interface/screen.png` in the export are not valid images (text files); their `code.html` remains the reference.
+- Lint and production build re-run after the corrections: both pass.
+
+---
+
+## 17. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -355,9 +415,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 15. Week 7 Readiness Classification
+## 18. Week 7 Readiness Classification
 
-* **Implementation:** Stages 1–3 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt).
+* **Implementation:** Stages 1–4 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–3 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–4 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.

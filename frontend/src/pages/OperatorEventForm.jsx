@@ -624,7 +624,13 @@ export default function OperatorEventForm() {
                   {/* Event Banner (16:9) */}
                   <div className="pt-4 border-t border-border-subtle/80">
                     <ImageUploadField
-                      label="Event Banner (Optional)"
+                      label="Event Banner"
+                      description={
+                        isEditMode
+                          ? "Optional cover image shown on the event page and cards. Saved immediately."
+                          : "Optional cover image shown on the event page and cards. Uploaded when the draft is created."
+                      }
+                      itemName="Banner"
                       currentUrl={bannerPreviewUrl}
                       maxBytes={BANNER_MAX_BYTES}
                       shape="wide"

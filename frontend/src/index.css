@@ -174,3 +174,27 @@
   }
 }
 
+
+/* Student Dashboard hero constellation tiles — Stitch
+   jnuverse_student_dashboard_living_campus_experience (anim-float-1/2/3) */
+@keyframes float-gentle-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@keyframes float-gentle-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-3deg); }
+}
+
+.anim-float-1 { animation: float-gentle-1 5s ease-in-out infinite; }
+.anim-float-2 { animation: float-gentle-2 6.5s ease-in-out infinite; }
+.anim-float-3 { animation: float-gentle-1 7s ease-in-out infinite 1s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-float-1,
+  .anim-float-2,
+  .anim-float-3 {
+    animation: none !important;
+  }
+}

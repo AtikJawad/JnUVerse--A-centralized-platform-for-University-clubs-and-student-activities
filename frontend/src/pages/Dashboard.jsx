@@ -1,33 +1,105 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import LoadingState from "../components/LoadingState";
 import InterestsPrompt, { isInterestsPromptDismissed } from "../components/InterestsPrompt";
-import { dashboardAPI } from "../services/api";
+import {
+  RatingPrompts,
+  SuggestedClubs,
+  UpcomingEvents,
+  YourCommunities,
+} from "../components/dashboard/StudentDashboardSections";
+import { dashboardAPI, extractErrorMessage } from "../services/api";
+
+/**
+ * Dashboard — Week 7 Stage 4
+ *
+ * Students: data from GET /api/dashboard/student/, laid out like Stitch
+ * `jnuverse_student_dashboard_living_campus_experience`: hero → rating prompts (when any) →
+ * "Find your community." → "Your communities." → upcoming events, plus the Stage 3 interests prompt.
+ * Club operators: hero only until the Club Operator Dashboard (Stage 5).
+ */
+// Decorative hero "constellation" tiles (Stitch copy and colors, anim-float-1/2/3 in index.css)
+const HERO_TILES_LEFT = [
+  { title: "Tech & Code", subtitle: "4 Active Guilds", icon: "terminal", iconClass: "bg-sky-100 text-primary-container", anim: "anim-float-1" },
+  { title: "Debate & Eloquence", subtitle: "JnU DS Lead", icon: "record_voice_over", iconClass: "bg-purple-100 text-secondary", anim: "anim-float-2 ml-6" },
+  { title: "Sports & Athletics", subtitle: "Tournaments Live", icon: "sports_cricket", iconClass: "bg-emerald-100 text-emerald-800", anim: "anim-float-3" },
+];
+
+const HERO_TILES_RIGHT = [
+  { title: "Photography", subtitle: "Exhibition Open", icon: "photo_camera", iconClass: "bg-orange-100 text-orange-800", anim: "anim-float-2 mr-6" },
+  { title: "Music & Drama", subtitle: "Spring Fest Prep", icon: "theater_comedy", iconClass: "bg-pink-100 text-pink-800", anim: "anim-float-1" },
+  { title: "Art & Design", subtitle: "JnU Creators", icon: "palette", iconClass: "bg-amber-100 text-amber-800", anim: "anim-float-3 mr-4" },
+];
+
+function HeroTile({ tile }) {
+  return (
+    <div
+      className={`pointer-events-auto ${tile.anim} flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(43,52,185,0.08)]`}
+    >
+      <div className={`w-9 h-9 rounded-xl ${tile.iconClass} flex items-center justify-center hover:scale-105 transition-transform duration-300`}>
+        <span className="material-symbols-outlined text-[20px]">{tile.icon}</span>
+      </div>
+      <div className="flex flex-col pr-2">
+        <span className="text-xs text-on-surface font-bold">{tile.title}</span>
+        <span className="text-[11px] font-bold tracking-wide text-text-muted">{tile.subtitle}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
   const isStudent = user?.role === "student";
+  const firstName = user?.name ? user.name.split(" ")[0] : "Student";
+  const welcomeName =
+    isStudent && user?.batch ? `${firstName} (Batch ${user.batch}${user?.department ? ` • ${user.department}` : ""})` : user?.name || "Student";
 
-  // Week 7 Stage 3: show the interests prompt when the backend reports has_interests: false
-  const [showInterestsPrompt, setShowInterestsPrompt] = useState(false);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(isStudent);
+  const [error, setError] = useState("");
+  const [promptDismissed, setPromptDismissed] = useState(() => isInterestsPromptDismissed(user?.id));
   const [interestsSavedMessage, setInterestsSavedMessage] = useState("");
+  const [ratedMessage, setRatedMessage] = useState("");
+
+  const loadDashboard = useCallback(async () => {
+    if (!isStudent) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await dashboardAPI.student();
+      setDashboard(res.data);
+    } catch (err) {
+      setError(extractErrorMessage(err, "Failed to load your dashboard."));
+    } finally {
+      setLoading(false);
+    }
+  }, [isStudent]);
 
   useEffect(() => {
-    if (!isStudent || isInterestsPromptDismissed(user?.id)) return undefined;
-    let active = true;
-    dashboardAPI
-      .student()
-      .then((res) => {
-        if (active && res.data?.has_interests === false) setShowInterestsPrompt(true);
-      })
-      .catch(() => {
-        // The prompt is optional; the rest of the dashboard does not depend on it
-      });
-    return () => {
-      active = false;
-    };
-  }, [isStudent, user?.id]);
+    loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    setPromptDismissed(isInterestsPromptDismissed(user?.id));
+  }, [user?.id]);
+
+  const showInterestsPrompt = Boolean(dashboard) && dashboard.has_interests === false && !promptDismissed;
+
+  // A rated event leaves the prompt list; the count drops by one
+  const handleRated = (eventId, stars) => {
+    const rated = dashboard?.rating_prompts?.find((e) => e.id === eventId);
+    setRatedMessage(`Thanks! You rated "${rated?.title || "the event"}" ${stars} star${stars === 1 ? "" : "s"}.`);
+    setDashboard((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        rating_prompts: prev.rating_prompts.filter((e) => e.id !== eventId),
+        counts: { ...prev.counts, events_to_rate: Math.max((prev.counts?.events_to_rate || 1) - 1, 0) },
+      };
+    });
+  };
 
   return (
     <div className="min-h-screen bg-canvas-base text-on-surface antialiased flex flex-col justify-between selection:bg-surface-variant selection:text-primary">
@@ -35,17 +107,17 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="w-full pt-20 bg-canvas-base flex-1">
-        <div className="max-w-[1360px] w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col gap-8">
+        <div className="max-w-[1360px] w-full mx-auto px-5 md:px-10 lg:px-16 py-6 flex flex-col gap-16">
           {showInterestsPrompt && (
             <InterestsPrompt
               userId={user?.id}
               onSaved={(interests) => {
-                setShowInterestsPrompt(false);
                 setInterestsSavedMessage(
-                  `Saved ${interests.length} interest${interests.length === 1 ? "" : "s"}. You can change them any time from your profile.`
+                  `Saved ${interests.length} interest${interests.length === 1 ? "" : "s"}. Your club suggestions have been updated.`
                 );
+                loadDashboard();
               }}
-              onSkip={() => setShowInterestsPrompt(false)}
+              onSkip={() => setPromptDismissed(true)}
             />
           )}
           {interestsSavedMessage && (
@@ -64,113 +136,83 @@ export default function Dashboard() {
               </button>
             </div>
           )}
-          {/* 1. HERO SECTION (Living Campus Experience - Direct from Stitch) */}
-          <section className="relative w-full rounded-3xl bg-gradient-to-b from-surface-white via-surface-container-low/40 to-canvas-base p-6 sm:p-10 lg:p-12 overflow-hidden shadow-[0_4px_30px_rgba(43,52,185,0.04)] border border-border-subtle/60">
+
+          {/* 1. HERO SECTION — Stitch jnuverse_student_dashboard_living_campus_experience */}
+          <section className="relative w-full rounded-3xl bg-gradient-to-b from-surface-white via-surface-container-low/40 to-canvas-base p-6 sm:p-10 lg:p-12 overflow-hidden shadow-[0_4px_30px_rgba(43,52,185,0.04)]">
             {/* Ambient Glow Behind Hero */}
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[620px] h-[280px] bg-gradient-to-r from-tertiary-fixed/40 via-surface-lavender to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[620px] h-[280px] bg-gradient-to-r from-secondary-fixed/40 via-surface-lavender to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
-            {/* Left Flank Constellation Tiles */}
-            <div className="hidden xl:flex flex-col gap-4 absolute left-8 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-              <div className="pointer-events-auto flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-sm border border-border-subtle/50 hover:scale-105 transition-transform">
-                <div className="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[20px]">terminal</span>
-                </div>
-                <div className="flex flex-col pr-2">
-                  <span className="text-xs text-on-surface font-bold">Tech &amp; Code</span>
-                  <span className="text-[10px] text-text-muted">JnU IT Society</span>
-                </div>
-              </div>
-
-              <div className="pointer-events-auto ml-6 flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-sm border border-border-subtle/50 hover:scale-105 transition-transform">
-                <div className="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-secondary">
-                  <span className="material-symbols-outlined text-[20px]">record_voice_over</span>
-                </div>
-                <div className="flex flex-col pr-2">
-                  <span className="text-xs text-on-surface font-bold">Debate &amp; Eloquence</span>
-                  <span className="text-[10px] text-text-muted">JnU Debating Society</span>
-                </div>
-              </div>
-
-              <div className="pointer-events-auto flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-sm border border-border-subtle/50 hover:scale-105 transition-transform">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
-                  <span className="material-symbols-outlined text-[20px]">sports_soccer</span>
-                </div>
-                <div className="flex flex-col pr-2">
-                  <span className="text-xs text-on-surface font-bold">Sports &amp; Athletics</span>
-                  <span className="text-[10px] text-text-muted">Athletics Wing</span>
-                </div>
-              </div>
+            {/* Left Flank Constellation Tiles (never overlaps center content) */}
+            <div className="hidden xl:flex flex-col gap-5 absolute left-8 top-1/2 -translate-y-1/2 z-10 pointer-events-none" aria-hidden="true">
+              {HERO_TILES_LEFT.map((tile) => (
+                <HeroTile key={tile.title} tile={tile} />
+              ))}
             </div>
 
-            {/* Right Flank Constellation Tiles */}
-            <div className="hidden xl:flex flex-col gap-4 absolute right-8 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-              <div className="pointer-events-auto mr-6 flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-sm border border-border-subtle/50 hover:scale-105 transition-transform">
-                <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-800">
-                  <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-                </div>
-                <div className="flex flex-col pr-2">
-                  <span className="text-xs text-on-surface font-bold">Photography</span>
-                  <span className="text-[10px] text-text-muted">JnU Photo Club</span>
-                </div>
-              </div>
-
-              <div className="pointer-events-auto flex items-center gap-3 bg-surface-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-sm border border-border-subtle/50 hover:scale-105 transition-transform">
-                <div className="w-9 h-9 rounded-xl bg-pink-100 flex items-center justify-center text-pink-800">
-                  <span className="material-symbols-outlined text-[20px]">theater_comedy</span>
-                </div>
-                <div className="flex flex-col pr-2">
-                  <span className="text-xs text-on-surface font-bold">Music &amp; Drama</span>
-                  <span className="text-[10px] text-text-muted">Cultural Cell</span>
-                </div>
-              </div>
+            {/* Right Flank Constellation Tiles (never overlaps center content) */}
+            <div className="hidden xl:flex flex-col gap-5 absolute right-8 top-1/2 -translate-y-1/2 z-10 pointer-events-none" aria-hidden="true">
+              {HERO_TILES_RIGHT.map((tile) => (
+                <HeroTile key={tile.title} tile={tile} />
+              ))}
             </div>
 
-            {/* Hero Center Content */}
+            {/* Hero Center Core Content */}
             <div className="relative z-20 max-w-2xl mx-auto flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-lavender text-primary shadow-xs mb-4">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-xs uppercase tracking-wider font-bold">Your Campus, Your Community</span>
+              {/* Eyebrow Pill */}
+              <div className="inline-flex flex-wrap justify-center items-center gap-2 px-4 py-1.5 rounded-full bg-surface-lavender text-primary-container shadow-sm mb-4">
+                <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
+                <span className="text-[11px] uppercase tracking-wider font-bold">Your Campus, Your Community</span>
                 <span className="text-text-muted">|</span>
-                <span className="text-xs font-semibold text-on-surface">
-                  ✦ Welcome back, {user?.name || "Student"}
-                </span>
+                <span className="text-[11px] font-semibold text-on-surface">✦ Welcome back, {welcomeName}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight leading-tight mb-3">
+              {/* Main Headline (headline-lg) */}
+              <h1 className="text-[32px] leading-10 sm:text-[44px] sm:leading-[52px] font-bold text-on-surface tracking-tight mb-3">
                 Your campus life,{" "}
-                <span className="bg-gradient-to-r from-primary via-primary-container to-secondary bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary via-primary-container to-secondary-container bg-clip-text text-transparent">
                   all in one place.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg text-text-muted max-w-xl mx-auto mb-7 leading-relaxed">
+              {/* Supporting Editorial Copy (body-lg) */}
+              <p className="text-[17px] leading-7 text-text-muted max-w-xl mx-auto mb-7">
                 Discover student clubs, connect with like-minded peers, and find the communities that make university life unforgettable.
               </p>
 
-              {/* Action Buttons */}
+              {/* CTA Action Hub */}
               <div className="flex flex-wrap items-center justify-center gap-3.5">
-                <Link
-                  to="/clubs"
-                  className="inline-flex items-center gap-2.5 px-7 py-3 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md hover:shadow-lg transition-all"
-                >
-                  <span>Explore Clubs</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </Link>
-
-                {user?.role === "student" ? (
-                  <Link
-                    to="/my-clubs"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-white text-on-surface text-xs font-semibold shadow-xs hover:bg-surface-lavender border border-border-subtle transition-all"
+                {isStudent ? (
+                  <a
+                    href="#discovery-section"
+                    className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-primary-container to-primary-hover text-on-primary text-sm font-bold shadow-[0_8px_20px_-4px_rgba(43,52,185,0.35)] hover:shadow-[0_12px_28px_-4px_rgba(43,52,185,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-primary">groups</span>
-                    <span>My Communities</span>
+                    <span>Explore Clubs</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </a>
+                ) : (
+                  <Link
+                    to="/clubs"
+                    className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-primary-container to-primary-hover text-on-primary text-sm font-bold shadow-[0_8px_20px_-4px_rgba(43,52,185,0.35)] hover:shadow-[0_12px_28px_-4px_rgba(43,52,185,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                  >
+                    <span>Explore Clubs</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </Link>
+                )}
+
+                {isStudent ? (
+                  <a
+                    href="#my-clubs-section"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-surface-white text-on-surface text-sm font-semibold shadow-sm hover:shadow-md hover:bg-surface-lavender/50 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-primary-container">groups</span>
+                    <span>My Communities</span>
+                  </a>
                 ) : user?.role === "club_operator" ? (
                   <Link
                     to="/operator/members"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-white text-on-surface text-xs font-semibold shadow-xs hover:bg-surface-lavender border border-border-subtle transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-surface-white text-on-surface text-sm font-semibold shadow-sm hover:shadow-md hover:bg-surface-lavender/50 transition-all"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-primary">group</span>
+                    <span className="material-symbols-outlined text-[18px] text-primary-container">group</span>
                     <span>Manage Members</span>
                   </Link>
                 ) : null}
@@ -178,137 +220,67 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* 2. OVERVIEW PROFILE & ROADMAP TILES */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* User Profile Card */}
-            <div className="md:col-span-1 p-6 rounded-2xl bg-surface-white border border-border-subtle shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 pb-3 mb-4 border-b border-border-subtle">
-                  <span className="material-symbols-outlined text-primary text-[20px]">account_circle</span>
-                  <h2 className="text-sm font-bold text-on-surface">Verified Profile</h2>
+          {/* 2. STUDENT DASHBOARD DATA (GET /api/dashboard/student/) */}
+          {isStudent && loading && <LoadingState message="Loading your dashboard..." />}
+
+          {isStudent && !loading && error && (
+            <div className="p-5 rounded-2xl bg-error-container text-on-error-container text-xs flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={loadDashboard}
+                className="px-4 py-1.5 rounded-full bg-surface-white text-on-surface text-xs font-semibold shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {isStudent && !loading && !error && dashboard && (
+            <>
+              <RatingPrompts
+                events={dashboard.rating_prompts}
+                total={dashboard.counts?.events_to_rate || 0}
+                onRated={handleRated}
+                ratedMessage={ratedMessage}
+              />
+              <SuggestedClubs clubs={dashboard.suggested_clubs} hasInterests={dashboard.has_interests} />
+              <YourCommunities />
+              <UpcomingEvents
+                events={dashboard.next_events}
+                total={dashboard.counts?.events_registered_upcoming || 0}
+              />
+            </>
+          )}
+
+          {/* Club operators: their dashboard arrives in Stage 5 */}
+          {user?.role === "club_operator" && (
+            <div className="p-6 rounded-2xl bg-surface-white border border-border-subtle shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary text-[24px]">dashboard</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-on-surface">Club operator tools</span>
+                  <span className="text-xs text-text-muted">Manage your members, events, notices and collaborations.</span>
                 </div>
-
-                <dl className="space-y-3 text-xs">
-                  <div>
-                    <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                      System Role
-                    </dt>
-                    <dd className="mt-0.5 capitalize font-semibold text-on-surface">
-                      {user?.role ? user.role.replace("_", " ") : "N/A"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                      Email
-                    </dt>
-                    <dd className="mt-0.5 font-medium text-on-surface break-all">
-                      {user?.email || "N/A"}
-                    </dd>
-                  </div>
-                  {user?.student_id && (
-                    <div>
-                      <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                        Student ID
-                      </dt>
-                      <dd className="mt-0.5 font-mono font-medium text-on-surface">
-                        {user.student_id}
-                      </dd>
-                    </div>
-                  )}
-                  {user?.department && (
-                    <div>
-                      <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                        Department
-                      </dt>
-                      <dd className="mt-0.5 font-medium text-on-surface">{user.department}</dd>
-                    </div>
-                  )}
-                  {user?.batch && (
-                    <div>
-                      <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                        Batch
-                      </dt>
-                      <dd className="mt-0.5 font-medium text-on-surface">Batch {user.batch}</dd>
-                    </div>
-                  )}
-                  {user?.name && user?.role === "club_operator" && (
-                    <div>
-                      <dt className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                        Chartered Society
-                      </dt>
-                      <dd className="mt-0.5 font-semibold text-primary">{user.name}</dd>
-                    </div>
-                  )}
-                </dl>
               </div>
-
-              <div className="pt-4 mt-4 border-t border-border-subtle/80 flex items-center justify-between text-[11px] text-text-muted">
-                <span>Synchronized with DRF</span>
-                <span className="flex items-center gap-1 text-emerald-600 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
-                </span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ["/operator/members", "Members"],
+                  ["/operator/events", "Events"],
+                  ["/operator/notices", "Notices"],
+                  ["/operator/collaborations", "Collaborations"],
+                ].map(([to, label]) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="px-4 py-2 rounded-full bg-surface-lavender hover:bg-surface-variant text-primary text-xs font-semibold transition-colors"
+                  >
+                    {label}
+                  </Link>
+                ))}
               </div>
             </div>
-
-            {/* Development Roadmap Card */}
-            <div className="md:col-span-2 p-6 rounded-2xl bg-surface-white border border-border-subtle shadow-xs">
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-border-subtle">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">view_kanban</span>
-                  <h2 className="text-sm font-bold text-on-surface">
-                    JnUVerse 10-Week Development Roadmap
-                  </h2>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-surface-lavender text-primary text-[10px] font-bold">
-                  Week 3 Active
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-emerald-900">Week 1: Foundation &amp; Audit</span>
-                    <span className="material-symbols-outlined text-emerald-600 text-[16px]">check_circle</span>
-                  </div>
-                  <p className="text-text-muted text-[11px]">
-                    Design tokens, repository structure, and health API.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-emerald-900">Week 2: Authentication &amp; RBAC</span>
-                    <span className="material-symbols-outlined text-emerald-600 text-[16px]">check_circle</span>
-                  </div>
-                  <p className="text-text-muted text-[11px]">
-                    Student &amp; Operator registration, login, and orbital hub.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-indigo-50/70 border border-primary/20">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-primary">Week 3: Discovery &amp; Memberships</span>
-                    <span className="px-1.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold uppercase">
-                      Redesigned
-                    </span>
-                  </div>
-                  <p className="text-text-muted text-[11px]">
-                    Explore Clubs, detailed profile, student portal, and operator console.
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-surface-container-low border border-border-subtle opacity-70">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-on-surface">Week 4: Events &amp; Registration</span>
-                    <span className="text-[10px] text-text-muted">Upcoming</span>
-                  </div>
-                  <p className="text-text-muted text-[11px]">
-                    Event feed, schedule, and RSVP ticket management.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

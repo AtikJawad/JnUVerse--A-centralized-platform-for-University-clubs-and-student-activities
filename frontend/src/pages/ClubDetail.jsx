@@ -678,6 +678,18 @@ export default function ClubDetail() {
                           </div>
                         )}
 
+                        {/* Section A (Stitch): Club Insignia & Logo — saved immediately via PUT/DELETE /api/clubs/:slug/logo/ */}
+                        <ImageUploadField
+                          label="Club Insignia & Logo"
+                          description="Primary visual token displayed on campus directories and club feeds. Saved immediately."
+                          itemName="Logo"
+                          currentUrl={club.logo}
+                          maxBytes={LOGO_MAX_BYTES}
+                          shape="square"
+                          onUpload={handleLogoUpload}
+                          onRemove={handleLogoRemove}
+                        />
+
                         {/* Read-Only Club Name */}
                         <div className="flex flex-col gap-1.5">
                           <div className="flex items-center justify-between">
@@ -691,16 +703,6 @@ export default function ClubDetail() {
                             {club.name}
                           </div>
                         </div>
-
-                        {/* Club Logo (saved immediately via PUT/DELETE /api/clubs/:slug/logo/) */}
-                        <ImageUploadField
-                          label="Club Logo"
-                          currentUrl={club.logo}
-                          maxBytes={LOGO_MAX_BYTES}
-                          shape="square"
-                          onUpload={handleLogoUpload}
-                          onRemove={handleLogoRemove}
-                        />
 
                         {/* Club Description Textarea */}
                         <div className="flex flex-col gap-1.5">
