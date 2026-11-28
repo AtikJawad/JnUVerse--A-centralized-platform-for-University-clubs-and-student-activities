@@ -1,32 +1,35 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ServerStatusNotice from "./components/ServerStatusNotice";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import OperatorLogin from "./pages/OperatorLogin";
-import Register from "./pages/Register";
-import RegisterClub from "./pages/RegisterClub";
-import Dashboard from "./pages/Dashboard";
-import ExploreClubs from "./pages/ExploreClubs";
-import ClubDetail from "./pages/ClubDetail";
-import MyClubs from "./pages/MyClubs";
-import OperatorMembers from "./pages/OperatorMembers";
-import ExploreEvents from "./pages/ExploreEvents";
-import EventDetail from "./pages/EventDetail";
-import OperatorEventForm from "./pages/OperatorEventForm";
-import OperatorEvents from "./pages/OperatorEvents";
-import OperatorEventAttendees from "./pages/OperatorEventAttendees";
-import OperatorNotices from "./pages/OperatorNotices";
-import OperatorCollaborations from "./pages/OperatorCollaborations";
-import Notifications from "./pages/Notifications";
-import Profile from "./pages/Profile";
-import OperatorDashboard from "./pages/OperatorDashboard";
-import MyReports from "./pages/MyReports";
-import OperatorAnalytics from "./pages/OperatorAnalytics";
-import OperatorEventAnalytics from "./pages/OperatorEventAnalytics";
-import MyActivity from "./pages/MyActivity";
+import LoadingState from "./components/LoadingState";
+// Week 9 Stage 3: route-level code splitting — each page loads on first visit
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Login = lazy(() => import("./pages/Login"));
+const OperatorLogin = lazy(() => import("./pages/OperatorLogin"));
+const Register = lazy(() => import("./pages/Register"));
+const RegisterClub = lazy(() => import("./pages/RegisterClub"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ExploreClubs = lazy(() => import("./pages/ExploreClubs"));
+const ClubDetail = lazy(() => import("./pages/ClubDetail"));
+const MyClubs = lazy(() => import("./pages/MyClubs"));
+const OperatorMembers = lazy(() => import("./pages/OperatorMembers"));
+const ExploreEvents = lazy(() => import("./pages/ExploreEvents"));
+const EventDetail = lazy(() => import("./pages/EventDetail"));
+const OperatorEventForm = lazy(() => import("./pages/OperatorEventForm"));
+const OperatorEvents = lazy(() => import("./pages/OperatorEvents"));
+const OperatorEventAttendees = lazy(() => import("./pages/OperatorEventAttendees"));
+const OperatorNotices = lazy(() => import("./pages/OperatorNotices"));
+const OperatorCollaborations = lazy(() => import("./pages/OperatorCollaborations"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Profile = lazy(() => import("./pages/Profile"));
+const OperatorDashboard = lazy(() => import("./pages/OperatorDashboard"));
+const MyReports = lazy(() => import("./pages/MyReports"));
+const OperatorAnalytics = lazy(() => import("./pages/OperatorAnalytics"));
+const OperatorEventAnalytics = lazy(() => import("./pages/OperatorEventAnalytics"));
+const MyActivity = lazy(() => import("./pages/MyActivity"));
 
 // "/" and "/dashboard": club operators get the Club Operator Dashboard, students the Student Dashboard
 function RoleDashboard() {
@@ -46,6 +49,7 @@ function App() {
       <AuthProvider>
         <ServerStatusNotice />
         <RouteErrorBoundary>
+        <Suspense fallback={<LoadingState message="Loading page..." fullScreen />}>
         <Routes>
           {/* Public Authentication Routes */}
           <Route path="/login" element={<Login />} />
@@ -227,6 +231,7 @@ function App() {
           {/* Unknown URLs: Not Found page (Week 9; previously a silent redirect to /clubs) */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         </RouteErrorBoundary>
       </AuthProvider>
     </Router>

@@ -31,6 +31,11 @@ export default class ErrorBoundary extends Component {
   render() {
     if (!this.state.error) return this.props.children;
 
+    // A lazily loaded page file missing after a new deployment (stale tab) — a reload fixes it
+    const isStaleChunk = /dynamically imported module|Importing a module script failed|Loading chunk|ChunkLoadError/i.test(
+      String(this.state.error?.message || this.state.error)
+    );
+
     return (
       <div className="min-h-screen bg-canvas-base flex items-center justify-center p-6">
         <div
@@ -40,9 +45,13 @@ export default class ErrorBoundary extends Component {
           <div className="w-20 h-20 rounded-full bg-error-container text-error flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-[40px]">error</span>
           </div>
-          <h1 className="text-xl font-bold text-on-surface mb-2">Something went wrong on this page.</h1>
+          <h1 className="text-xl font-bold text-on-surface mb-2">
+            {isStaleChunk ? "JnUVerse was updated." : "Something went wrong on this page."}
+          </h1>
           <p className="text-[15px] leading-6 text-text-muted mb-6">
-            The rest of JnUVerse still works. Try again, reload the page, or go back to your dashboard.
+            {isStaleChunk
+              ? "A newer version is available. Reload the page to continue."
+              : "The rest of JnUVerse still works. Try again, reload the page, or go back to your dashboard."}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <button

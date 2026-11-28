@@ -58,9 +58,13 @@ try {
       (await page.eval("history.state?.usr?.from?.pathname")) === "/operator/analytics"
   );
 
-  // 5. Slow server notice
+  // 5. Slow server notice. Visit /events first so its lazily loaded page chunk is cached; the emulated
+  //    latency then delays only the API requests (otherwise the chunk download itself is delayed and the
+  //    app correctly shows the "Loading page..." fallback instead).
   await page.clearStorage();
-  await page.goto(`${APP}/clubs`, 4000);
+  await page.goto(`${APP}/events`, 4000);
+  await page.eval("history.pushState({}, '', '/clubs'); dispatchEvent(new PopStateEvent('popstate'))");
+  await sleep(4000);
   await page.send("Network.enable");
   await page.send("Network.emulateNetworkConditions", { offline: false, latency: 6000, downloadThroughput: -1, uploadThroughput: -1 });
   await page.eval("history.pushState({}, '', '/events'); dispatchEvent(new PopStateEvent('popstate'))");

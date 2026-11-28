@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **In Progress — Stages 1–2 Completed (Contract Audit Clean; Resilience Suite 9/9 in Headless Chrome)**  
+**Status:** **In Progress — Stages 1–3 Completed (Contract Audit Clean; Resilience 9/9; Main Chunk 846 kB → 255 kB)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -53,9 +53,11 @@
    - Defect found and fixed during testing: the session flag was read and removed inside a `useState` initializer, which React StrictMode runs twice, so the notice never showed in development; the initializer is now pure and the flag is cleared in an effect.
    - `scripts/lib/cdp.mjs` (Chrome DevTools Protocol driver using the installed Chrome and Node's built-in WebSocket) and `scripts/test-resilience.mjs` (`npm run test:resilience`, 9 read-only checks).
 
-3. [ ] **Stage 3: Performance — Code Splitting**
-   - Route-level `React.lazy` + `Suspense` with the existing loading state; keep the shared shell eager.
-   - Target: main chunk below 500 kB (currently 846 kB), verified from the build output.
+3. [x] **Stage 3: Performance — Code Splitting**
+   - All 24 page components in `App.jsx` are `React.lazy` imports inside one `Suspense` (fallback: the existing full-screen `LoadingState`, "Loading page..."); the shell (router, auth, error boundary, status notice, protected route) stays in the main bundle.
+   - `ErrorBoundary` recognises a failed page-chunk load (a tab left open across a new deployment) and shows "JnUVerse was updated. A newer version is available. Reload the page to continue." instead of the generic error.
+   - Result: main chunk **846 kB → 255 kB** (85 kB gzip); 40 JS files, largest page chunk 57.5 kB (OperatorCollaborations); Vite's >500 kB warning is gone.
+   - The resilience test now caches the `/events` chunk before emulating latency, so it measures API slowness rather than the (correct) "Loading page..." fallback during a slow chunk download.
 
 4. [ ] **Stage 4: Responsive & Accessibility Audit**
    - Headless-Chrome screenshots (Chrome DevTools Protocol, logged in with demo accounts) of every route at 375, 768, 1024 and 1440 px for public, student and operator views.
@@ -83,7 +85,7 @@
 | Re-seed demo data (time-based figures expired) | Week 7 | Atik | Open |
 | Seed attendance and varied departments for the Week 8 reports | Week 8 | Atik | Requested |
 | Restore Robotics Club interests to Technology, Programming, Robotics | Week 7 QA | Anik | Open |
-| Bundle code splitting (846 kB) | Weeks 7–8 | Anik | Stage 3 |
+| Bundle code splitting (846 kB) | Weeks 7–8 | Anik | **Done** — Stage 3 (255 kB) |
 
 ---
 
@@ -168,9 +170,29 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 
 ---
 
-## 12. Week 9 Readiness Classification
+## 12. Stage 3 Verification Results
 
-* **Implementation:** Stages 1–2 of 7 complete (API contract audit; resilience and error handling).
-* **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome.
+| Verification Check | Command / Method | Result | Notes |
+|---|---|:---:|---|
+| **Production Build** | `npm run build` | **PASS — no chunk-size warning** | Main `index` chunk 249 kB on disk / 255 kB reported (85 kB gzip), previously 846 kB; 40 JS files. |
+| **Largest page chunks** | `dist/assets` | — | OperatorCollaborations 57.5 kB, OperatorNotices 42.9 kB, EventDetail 40.6 kB, ClubDetail 40.3 kB, ExploreClubs 35.5 kB. |
+| **Production build in Chrome** | `vite preview` (port 4179) + headless Chrome | **PASS** | `/clubs` loads only `index`, `ExploreClubs`, `Navbar`, `InterestTags`; `/login` loads `Login`, `Input`, `ErrorAlert`; unknown URL renders the Not Found page. |
+| **Resilience suite** | `npm run test:resilience` | **PASS (9/9)** | After adjusting the slow-request check for lazy chunks (first re-run: 8/9). |
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | — |
+
+---
+
+## 13. Acceptance Criteria (Stage 3)
+
+- [x] Main JavaScript chunk below 500 kB (255 kB).
+- [x] Pages load on demand in the production build; a stale chunk after a deployment shows a reload message.
+- [x] No new dependencies; ESLint, build and the resilience suite pass.
+
+---
+
+## 14. Week 9 Readiness Classification
+
+* **Implementation:** Stages 1–3 of 7 complete (API contract audit; resilience and error handling; code splitting).
+* **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
 * **Open:** test-database question and carried-over items (Section 4).
 
