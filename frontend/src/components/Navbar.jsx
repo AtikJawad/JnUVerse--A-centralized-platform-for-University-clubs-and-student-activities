@@ -234,6 +234,16 @@ export default function Navbar() {
                 My Clubs
               </Link>
               <Link
+                to="/my-activity"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  isActive("/my-activity")
+                    ? "bg-primary text-white font-bold shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                Activity
+              </Link>
+              <Link
                 to="/events"
                 className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   isActive("/events")
@@ -520,6 +530,17 @@ export default function Navbar() {
                 }`}
               >
                 My Clubs
+              </Link>
+              <Link
+                to="/my-activity"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                  isActive("/my-activity")
+                    ? "bg-primary text-white"
+                    : "text-on-surface hover:bg-surface-lavender"
+                }`}
+              >
+                My Activity
               </Link>
               <Link
                 to="/events"

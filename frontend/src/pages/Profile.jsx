@@ -154,6 +154,22 @@ export default function Profile() {
                   </div>
                 ))}
               </dl>
+
+              <Link
+                to="/my-activity"
+                className="p-3.5 rounded-xl bg-surface-lavender/60 hover:bg-surface-lavender border border-border-subtle/80 flex items-center justify-between gap-3 transition-colors"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-surface-white flex items-center justify-center text-primary shrink-0">
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">insights</span>
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-xs font-bold text-on-surface">Your campus activity</span>
+                    <span className="text-[11px] text-text-muted">Activity score, events attended and ratings given</span>
+                  </span>
+                </span>
+                <span className="material-symbols-outlined text-[18px] text-primary">arrow_forward</span>
+              </Link>
             </section>
 
             {/* RIGHT: Interests (editable) */}

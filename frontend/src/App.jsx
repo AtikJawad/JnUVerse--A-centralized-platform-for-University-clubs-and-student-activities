@@ -23,6 +23,7 @@ import OperatorDashboard from "./pages/OperatorDashboard";
 import MyReports from "./pages/MyReports";
 import OperatorAnalytics from "./pages/OperatorAnalytics";
 import OperatorEventAnalytics from "./pages/OperatorEventAnalytics";
+import MyActivity from "./pages/MyActivity";
 
 // "/" and "/dashboard": club operators get the Club Operator Dashboard, students the Student Dashboard
 function RoleDashboard() {
@@ -68,6 +69,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["student"]}>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Student Activity (Week 8: report 4) */}
+          <Route
+            path="/my-activity"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <MyActivity />
               </ProtectedRoute>
             }
           />

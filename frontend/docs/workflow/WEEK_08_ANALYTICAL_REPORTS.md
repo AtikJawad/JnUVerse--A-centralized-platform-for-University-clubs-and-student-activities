@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stages 1–5 Completed (Stages 2–5 Source & Build Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–6 Completed (Stages 2–6 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -76,8 +76,12 @@
    - **Report 2 — post-event rating:** `MetricRow` (average ★, ratings, attended, response rate); `ColumnChart` of the 1★–5★ distribution in the validated ordinal ramp, tooltip with the share; table view (rating, count, share); "No ratings yet" when empty.
    - Entry points: "Report" button on every launched event in `OperatorEvents.jsx`, "Event Report" on the attendees page, the operator dashboard's Recent Events, and the My Club per-event table (Stage 4).
 
-6. [ ] **Stage 6: Student Activity (`/my-activity`)**
-   - Activity score (`clubs_joined + events_attended + ratings_given`) with its breakdown, clubs joined/followed, events registered/attended, attendance rate, ratings given, following the Stitch student dashboard style; links from the Profile page and Navbar.
+6. [x] **Stage 6: Student Activity (`/my-activity`)** — `MyActivity.jsx` (students only)
+   - No Stitch screen exists; uses the Stitch student-dashboard patterns (eyebrow-dot header, white `rounded-3xl` cards with tinted icon squircles, 4rem section rhythm, Stitch margins).
+   - **Hero:** the activity score as the view's single `HeroFigure` (56px) with its formula, and a tall `SegmentedBar` of its parts (clubs joined, events attended, ratings given) in the validated categorical slots, with legend, tooltips and keyboard focus; a hint when the score is 0.
+   - **Stat cards:** clubs joined, clubs followed ("not part of the score"), events registered, events attended, attendance rate ("attended ÷ registered events that have ended"), ratings given — each with a link to where the student can act (My Clubs, Explore Clubs, My Registrations, Dashboard rating prompts). The cards also serve as the readable values of the segmented bar.
+   - Loading skeleton, error with Retry.
+   - Navigation: `/my-activity` route (students only); student Navbar "Activity" pill link and "My Activity" in the mobile menu; "Your campus activity" card on the Profile page.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
    - `npm run lint`, `npm run build`, read-only API role matrix, demo-data verification (Section 7), README and readiness updates.
@@ -126,7 +130,7 @@ All endpoints are `GET` with JWT unless noted. Percentages have one decimal or a
 - `frontend/src/utils/format.js` (percent / rating / month formatters) *(created, Stage 1)*
 - `frontend/src/pages/OperatorAnalytics.jsx` *(created, Stage 4)*
 - `frontend/src/pages/OperatorEventAnalytics.jsx` *(created, Stage 5)*
-- `frontend/src/pages/MyActivity.jsx`
+- `frontend/src/pages/MyActivity.jsx` *(created, Stage 6)*
 
 ### Planned Modified Files
 - `frontend/src/services/api.js`
@@ -205,7 +209,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 | **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
 | **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
 | **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
-| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 20). |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 22). |
 
 ---
 
@@ -215,7 +219,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 - [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
 - [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving attendance (Section 20).
+- [ ] Manual browser QA of saving attendance (Section 22).
 
 ---
 
@@ -271,7 +275,7 @@ The components were rendered with demo report data (React server rendering + the
 - [x] One date filter scopes both reports; invalid ranges show the backend message.
 - [x] Every chart has a table view; `null` values show "—".
 - [x] Reachable from the Navbar and the operator dashboard; operators only.
-- [ ] Browser QA of the page with real data (Section 20).
+- [ ] Browser QA of the page with real data (Section 22).
 
 ---
 
@@ -293,11 +297,33 @@ The components were rendered with demo report data (React server rendering + the
 - [x] Each report independently shows a clear message when the backend returns `409`.
 - [x] Reachable from the events list, attendees page, operator dashboard and My Club table; operators only.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with real data (Section 20).
+- [ ] Browser QA with real data (Section 22).
 
 ---
 
-## 20. Manual Interactive Browser QA Checklist
+## 20. Stage 6 Verification Results
+
+| Verification Check | Command / Method | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `MyActivity.jsx`, `App.jsx`, `Navbar.jsx`, `Profile.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.21s)** | Bundle-size warning only (carried to Week 9). |
+| **Student Activity endpoint** | Stage 1 smoke tests | **PASS (200; operator 403)** | demo1: joined 2, followed 3, registered 9, attended 0, rate 0.0 %, ratings 1, score 3. |
+| **Hero + segmented bar render** | Stage 3 render check | **PASS** | Same components and demo values (score 3 = 2 + 0 + 1; the zero part draws nothing, legend keeps it). |
+| **Page render** | — | **PENDING (browser)** | Data loads in effects. |
+
+---
+
+## 21. Acceptance Criteria (Stage 6)
+
+- [x] Students see their activity score, its breakdown and all report 4 figures; `null` attendance rate shows "—".
+- [x] Each figure links to where the student can improve it.
+- [x] Reachable from the Navbar, mobile menu and Profile page; students only.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Browser QA with real data (Section 22).
+
+---
+
+## 22. Manual Interactive Browser QA Checklist
 
 ### Attendance (democlub1@demo.jnuverse.test)
 - [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
@@ -320,10 +346,17 @@ The components were rendered with demo report data (React server rendering + the
 - [ ] Chart / Table switches show the same numbers; hovering or tabbing to a bar/column shows its tooltip.
 - [ ] A cancelled event shows the "available for published events that have ended" card for Report 1 and the ratings card for Report 2.
 
+### Student Activity (demo1@demo.jnuverse.test)
+- [ ] Navbar "Activity" (or Profile → "Your campus activity") opens `/my-activity`.
+- [ ] Hero shows score 3; the bar shows Clubs joined 2 and Ratings given 1 (Events attended 0 draws no block but stays in the legend); hovering or tabbing a block shows its share.
+- [ ] Cards: joined 2, followed 3, registered 9, attended 0, attendance rate 0.0 %, ratings 1; links open the right pages.
+- [ ] After the operator marks demo1 as attended, events attended, attendance rate and the score increase.
+- [ ] As an operator, `/my-activity` shows "Access Restricted".
+
 ---
 
-## 21. Week 8 Readiness Classification
+## 23. Week 8 Readiness Classification
 
-* **Implementation:** Stages 1–5 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub; per-event reports).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stages 4–5 verified at source and build level, browser QA pending. Remaining stages pending.
+* **Implementation:** Stages 1–6 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub; per-event reports; student activity).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stages 4–6 verified at source and build level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.
