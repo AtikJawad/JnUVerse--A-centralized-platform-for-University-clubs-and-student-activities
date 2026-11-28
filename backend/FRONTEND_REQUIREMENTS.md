@@ -376,3 +376,5 @@ Current settings as used by the frontend (updated 2026-11-28):
 - **2026-11-28 (Week 9):** Added "Current Status", consolidated "Open Requests", "Checking Frontend Compatibility", and "Changes Made on the Shared Database"; marked Weeks 3–8 delivered and integrated; updated the club `PATCH` row (no `logo`), CORS/JWT/database/seed settings, and the task checklist.
 - **2026-11-28 (Week 9 review of `d0cc389`):** Marked requests 1–6 resolved with verification results; added request 7 (student `attendance_rate` > 100 %), 8 (local stack password) and 9 (macOS steps); noted the shared-database re-seed.
 - **2026-11-28 (Week 9 Stage 4):** Request 6 adopted by the frontend. Stage 4 audit was read-only on the shared database (logins and two cancelled dialogs only).
+- **2026-11-28 (Week 9 Stage 5):** Frontend journeys 26/26 (UI matches API); manual test script for the tester (`frontend/docs/testing/MANUAL_TEST_SCRIPT.md`) targets the local test stack and depends on request 8.
+

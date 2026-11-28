@@ -297,7 +297,7 @@ export default function OperatorDashboard() {
                       aria-label="Search membership requests"
                       className="w-56 text-[12px] bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-primary-container focus:border-primary-container transition-all"
                     />
-                    <Link to="/operator/members" className="text-[12px] font-medium text-slate-500 hover:text-primary-container transition-colors">
+                    <Link to="/operator/members" className="inline-flex items-center min-h-6 py-1 text-[12px] font-medium text-slate-500 hover:text-primary-container transition-colors">
                       View all
                     </Link>
                   </div>
@@ -389,7 +389,7 @@ export default function OperatorDashboard() {
                   <div key={col.key} className={`${sectionCard} p-6 flex flex-col gap-3`}>
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{col.title}</span>
-                      <Link to="/operator/events" className="text-[12px] font-medium text-slate-500 hover:text-primary-container">
+                      <Link to="/operator/events" className="inline-flex items-center min-h-6 py-1 text-[12px] font-medium text-slate-500 hover:text-primary-container">
                         Manage →
                       </Link>
                     </div>
@@ -440,7 +440,7 @@ export default function OperatorDashboard() {
                     <span>
                       {counts.followers ?? 0} followers · {counts.members ?? 0} members
                     </span>
-                    <Link to={publicPath} className="text-primary-container hover:text-primary-hover font-medium inline-flex items-center gap-1">
+                    <Link to={publicPath} className="text-primary-container hover:text-primary-hover font-medium inline-flex items-center gap-1 min-h-6 py-1">
                       <span>View live</span>
                       <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
                     </Link>

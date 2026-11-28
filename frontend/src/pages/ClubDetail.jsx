@@ -1143,7 +1143,7 @@ export default function ClubDetail() {
                               type="button"
                               onClick={handleCancelMembership}
                               disabled={membershipLoading}
-                              className="text-[11px] font-semibold text-rose-600 hover:underline"
+                              className="min-h-6 px-2 py-1 rounded-full text-[11px] font-semibold text-rose-600 hover:underline"
                             >
                               Leave Club
                             </button>

@@ -272,15 +272,16 @@ export default function Navbar() {
               {user?.role === "club_operator" && (
                 <Link
                   to="/events"
-                  className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  // Week 9: icon-only so the operator header fits at 1024–1536 px (measured overflow)
+                  className={`hidden xl:inline-flex w-9 h-9 items-center justify-center rounded-full transition-colors ${
                     isActive("/events")
-                      ? "bg-primary text-white font-bold shadow-xs"
-                      : "border border-border-subtle bg-surface-white hover:bg-surface-lavender text-text-muted hover:text-on-surface shadow-xs"
+                      ? "bg-surface-lavender text-primary"
+                      : "text-text-muted hover:bg-surface-lavender hover:text-primary"
                   }`}
-                  title="Explore public campus events calendar"
+                  title="Explore public campus events"
+                  aria-label="Explore public campus events"
                 >
-                  <span className="material-symbols-outlined text-[15px] text-primary">calendar_month</span>
-                  <span>Explore Events</span>
+                  <span className="material-symbols-outlined text-[20px]">calendar_month</span>
                 </Link>
               )}
 
@@ -305,7 +306,7 @@ export default function Navbar() {
               {(() => {
                 const identity = (
                   <>
-                    <div className="flex lg:hidden xl:flex flex-col text-right">
+                    <div className={`flex lg:hidden ${ownClubPath ? "" : "xl:flex"} flex-col text-right`}>
                       <span className="text-xs font-bold text-on-surface leading-tight truncate max-w-[170px]">
                         {getUserDisplayName()}
                       </span>
@@ -329,7 +330,8 @@ export default function Navbar() {
                 return profilePath ? (
                   <Link
                     to={profilePath}
-                    title={ownClubPath ? "Your club profile" : "Your profile and interests"}
+                    title={ownClubPath ? `${getUserDisplayName()} — club profile` : "Your profile and interests"}
+                    aria-label={ownClubPath ? `${getUserDisplayName()} — club profile` : `${getUserDisplayName()} — profile and interests`}
                     aria-current={isProfilePage ? "page" : undefined}
                     className={`hidden md:flex items-center gap-2.5 pl-3 pr-1 py-1 rounded-full transition-colors ${
                       isProfilePage ? "bg-surface-lavender" : "hover:bg-surface-lavender/70"

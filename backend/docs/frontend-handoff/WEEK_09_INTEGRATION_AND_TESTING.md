@@ -87,3 +87,8 @@ Pulled `d488455` ("ReSeeded demo data") and `d0cc389` ("Week 9 Backend Complete�
 - **Shared database:** the Stage 4 responsive/accessibility audit was read-only apart from logging in as demo1 and democlub1 and opening/cancelling two dialogs (nothing submitted).
 - No new backend requests from Stage 4; all Stage 4 defects were frontend-side (details in `frontend/docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md`).
 
+### 5.5 Frontend Stage 5 update (2026-11-28)
+- **UI ↔ API agreement:** `npm run test:journeys` signs in through the real login forms and compares 26 screen values with the API for demo1 and democlub1 — **26/26 pass**.
+- **Manual script for the tester:** `frontend/docs/testing/MANUAL_TEST_SCRIPT.md` covers every data-changing flow and is written for your **local test stack**. It lists the correct passwords (`Str0ng-Pass-123` only for `club1@example.com`, `Demo-Pass-12345` for the demo accounts) until request 8 is fixed in `LOCAL_TEST_STACK.md`.
+- **Observation (no request yet):** with the backend pointed at the shared Supabase database from a local machine, a signed-in page that makes several API calls (student dashboard, event page with session check) takes 5–9 s to render; the deployed Render service may be faster. Worth checking on the deployed stack before the demo.
+

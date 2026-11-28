@@ -35,7 +35,7 @@ function StatCard({ icon, iconClass, label, value, caption, to, cta }) {
       {to && (
         <Link
           to={to}
-          className="self-start inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover"
+          className="self-start inline-flex items-center gap-1 min-h-6 py-1 text-xs font-bold text-primary hover:text-primary-hover"
         >
           {cta}
           <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -96,7 +96,7 @@ export default function MyActivity() {
             </div>
             <Link
               to="/profile"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 min-h-6 py-1 text-sm font-bold text-primary hover:text-primary-hover self-start sm:self-auto"
             >
               Your profile
               <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **In Progress — Stages 1–3 Completed (Contract Audit Clean; Resilience 9/9; Main Chunk 846 kB → 255 kB)**  
+**Status:** **In Progress — Stages 1–5 Completed (Contract 64/64; Resilience 9/9; Journeys 26/26; Responsive Audit Clean of Overflow and Unlabelled Fields)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -69,10 +69,12 @@
      4. **Unlabelled form fields** (screen readers heard no name): search/filter fields on Explore Events, Explore Clubs (+ sort select), My Clubs, Members, Operator Events, Notices and Collaborations now have `aria-label`s.
      5. **Small tap targets:** login/register carousel dots are now 24 × 24 px buttons (visual pill unchanged, `aria-current` on the active slide); register "terms" and event-form "unlimited capacity" checkboxes 20 px with clickable labels; event-form back link and operator event title links have ≥ 24 px height.
      6. **Dialog keyboard support:** 12 dialogs (EventDetail ×2, OperatorEvents ×2, OperatorCollaborations ×4, OperatorNotices ×3, OperatorMembers ×1) had no Escape, no focus management and (Members) no `role="dialog"`. New `DialogA11y.jsx`: focus moves into the dialog, Tab is trapped, Escape uses the dialog's own close/cancel handler (busy guards respected), focus returns to the opener. Verified in Chrome with real key events on the "Create New Notice" and "Register for Event" dialogs (no submission).
+     7. **Operator header still overflowed from 1280 px up** (found by the confirmation audit once every page loaded): measured 275 + 689 + 445 px of content in a 1232 px header (max-width 1360 px), Logout ending at 1473–1561 px at 1280–1536 px. Fixed permanently: "Explore Events" is an icon button (title + `aria-label`), and for operators the club name text is hidden from `lg` (avatar link keeps the logo, tooltip and an `aria-label` with the club name). Re-measured: Logout inside the window at 1024 / 1280 / 1440 / 1536 / 1920 px.
+     8. **More small standalone links at 375 px** (visible once pages fully loaded): My Activity card links and "Your profile", operator dashboard "View all" / "Manage →" / "View live", club page "Leave Club", event breadcrumb "Events" — all ≥ 24 px tall now.
 
-5. [ ] **Stage 5: End-to-End Journey Verification**
-   - Scripted read-only checks of the main journeys (onboarding, club engagement, operator review, event lifecycle, ratings, collaboration, reports, analytics).
-   - Consolidated manual test script (Weeks 6–8 backlog + Week 9 journeys) for the tester, including the write steps (attendance, uploads, approvals, reports) on agreed demo data; record results.
+5. [x] **Stage 5: End-to-End Journey Verification**
+   - `scripts/test-journeys.mjs` (`npm run test:journeys`, headless Chrome, read-only apart from logins): signs in through the **real login forms** and walks the visitor, student and operator journeys, comparing what each screen shows with what the API returns for the same account — 26 checks (dashboard badges and counts, notification bell, My Clubs, My Activity score, My Registrations, My Reports, saved interests, operator metrics, pending requests, members, analytics figures, event report departments and totals, collaborations, notices). The backend's own `tests/test_journeys.py` covers the same four journeys at API level.
+   - `frontend/docs/testing/MANUAL_TEST_SCRIPT.md`: the consolidated manual script for the tester — every flow that changes data (registration, interests, follow/join/leave, event registration, ratings, notices, approvals, event lifecycle with banner, attendance, club logo, collaborations, reports, analytics, cross-cutting checks), 13 sections with expected results from the demo data and a defects table; to be run on the backend's local test stack.
 
 6. [ ] **Stage 6: Diagram Validation (frontend input)**
    - Map the use cases, classes/entities and sequence flows in `docs/uml/UML_Diagrams.pdf` to frontend routes, screens and API calls; list anything in the diagrams that the implementation does differently or does not have, for the UML designer.
@@ -205,7 +207,9 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 | **Event page direct load** | headless Chrome, demo1 | **PASS (3/3)** | Loaded in 8–9 s on the shared backend (previously stuck). |
 | **Dialog keyboard behaviour** | headless Chrome, real key events | **PASS (2/2)** | "Create New Notice", "Register for Event": focus in, Tab trapped (12 presses), Escape closes, focus back on opener. |
 | **Operator login request count** | headless Chrome | **PASS** | One `POST /api/auth/login/`, no `/me`. |
-| **Audit run 3** (after fixes) | `npm run audit:responsive` | **PENDING** | Running at commit time; result recorded in a follow-up. |
+| **Audit run 3** (after fixes 1–6) | `npm run audit:responsive` | **PASS for fixed items; 2 new findings** | 120 screens: **0 page overflow** (was 13), **0 unlabelled fields** (was 36), 0 crashes, 0 JS errors, 0 missing alt, 0 unnamed controls; carousel dots no longer flagged. New: operator Logout past the viewport at 1440 px (11 screens) and 10 small standalone links at 375 px → fixes 7 and 8. Student dashboard slower than 15 s at 375/768 px while other tests loaded the shared backend (renders correctly — journeys check). |
+| **Navbar re-measure** (after fix 7) | headless Chrome, 5 widths | **PASS** | Logout right edge 994 / 1276 / 1336 / 1384 / 1576 px at 1024 / 1280 / 1440 / 1536 / 1920 px. |
+| **Audit run 4** (375 + 1440 px, after fixes 7–8) | `npm run audit:responsive -- --widths 375,1440` | **see 16.2** | — |
 | **Static Code Analysis / Build** | `npm run lint`, `npm run build` | **PASS** | — |
 
 ---
@@ -217,11 +221,38 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 - [x] Form fields have accessible names; small tap targets enlarged.
 - [x] All 12 dialogs support Escape, focus entry, focus trap and focus return.
 - [x] Event page loads reliably from a direct URL when signed in.
-- [ ] Confirmation audit after fixes (run 3) — pending.
+- [x] Confirmation audit after fixes (run 3): overflow and unlabelled fields cleared; its two new findings fixed (7, 8).
 
 ---
 
-## 16. Backend Week 9 Delivery Check (2026-11-28)
+## 16. Stage 5 Verification Results
+
+### 16.1 Journeys
+`npm run test:journeys` against the local dev server and the shared backend:
+
+| Journey | Checks | Result |
+|---|:---:|:---:|
+| Visitor (clubs, club profile, no Report button, event asks to log in) | 4 | **PASS** |
+| Student (form login, dashboard sections and badges 2 to rate / 4 registered, next event, bell 8 unread, My Clubs, My Activity score 12, My Registrations, My Reports 3, profile interests) | 11 | **PASS** |
+| Operator (form login, Approved Members 2, Pending 1, pending names, members, analytics 5 launched + best-rated event, event report departments + registered total, collaborations, notices) | 11 | **PASS** |
+| **Total** | **26** | **26/26** |
+
+First run 25/26: the My Activity check read the score before the data loaded (the heading renders first); the check now waits for the figure. The page itself showed the correct score (12).
+
+### 16.2 Confirmation audit after Stage 4 fixes 7–8
+*Pending at commit time (audit run 4 was still running); recorded in a follow-up commit.*
+
+---
+
+## 17. Acceptance Criteria (Stage 5)
+
+- [x] Main journeys verified through the real UI with the API as the oracle (26/26).
+- [x] Manual test script for all data-changing flows delivered for the tester.
+- [ ] Manual script executed by the tester on the local stack (Weeks 6–8 backlog + Week 9 journeys) — pending.
+
+---
+
+## 18. Backend Week 9 Delivery Check (2026-11-28)
 
 Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md` and `backend/docs/LOCAL_TEST_STACK.md`.
 
@@ -237,9 +268,9 @@ Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/d
 
 ---
 
-## 17. Week 9 Readiness Classification
+## 19. Week 9 Readiness Classification
 
-* **Implementation:** Stages 1–4 of 7 complete (API contract audit; resilience and error handling; code splitting; responsive & accessibility audit).
+* **Implementation:** Stages 1–5 of 7 complete (API contract audit; resilience; code splitting; responsive & accessibility audit; end-to-end journeys).
 * **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
 * **Open:** backend requests 7–9 (Section 14); local stack setup on the frontend machine for write-flow QA.
 

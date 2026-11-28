@@ -514,7 +514,7 @@ export default function EventDetail() {
                       <span>Report</span>
                     </button>
                   )}
-                <Link to="/events" className="hover:text-primary transition-colors">
+                <Link to="/events" className="inline-flex items-center min-h-6 py-1 hover:text-primary transition-colors">
                   Events
                 </Link>
                 <span>/</span>
