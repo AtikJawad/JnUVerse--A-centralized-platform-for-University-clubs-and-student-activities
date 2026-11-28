@@ -1,7 +1,7 @@
 # Week 08 — Five Analytical Reports
 
 **Focus:** Event attendance marking and the five analytical reports (department participation, post-event rating, club vs club, student activity, club's own report)  
-**Status:** **In Progress — Stages 1–4 Completed (Stages 2–4 Source & Build Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–5 Completed (Stages 2–5 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_08_BACKEND_HANDOFF.md`; five `/api/analytics/` endpoints and `PUT /api/events/{id}/attendance/`, OpenAPI in `docs/api/openapi.yml`) — the earlier draft of this file listed endpoints that do not exist (`/api/analytics/club-popularity/`, `event-utilization/`, …); the handoff is the source of truth.  
 **Design Reference:** The Stitch export has no analytics screens. Operator reports follow Stitch `jnuverse_club_operator_dashboard_minimal_redesign` (hairline metric rows, minimal lists) and `jnuverse_reports_interface` (summary strip, table styling); the student report follows `jnuverse_student_dashboard_living_campus_experience`; charts follow `jnuverse/DESIGN.md` tokens.  
@@ -69,10 +69,12 @@
    - **Report 3 — club vs club:** ranked `BarChart` in **emphasis** mode (your club in slot 1, others gray) with a measure switch (Registrations / Attendance rate / Average rating; clubs without a value show "—" and sort last) and a full table view of every column with "(you)" on your row.
    - Navigation: `/operator/analytics` route (club operators only); Navbar "Analytics" link (pill from `xl`, mobile menu always — the operator pill would overflow at `lg`); operator dashboard header button and "View Analytics" quick action.
 
-5. [ ] **Stage 5: Per-Event Reports (`/operator/events/:id/analytics`)**
-   - **Department participation (report 1):** totals (registered, attended, attendance rate) and a bar chart of `attended` per department with a table (registered, attended, attendance rate, share of attended). Available only for ended, published events — `409` shown as "Available after the event ends".
-   - **Post-event rating (report 2):** average, total ratings, response rate and a 1–5 distribution column chart. Published events only.
-   - Entry points: OperatorEvents rows, the attendees page, the operator dashboard's recent events and the My Club per-event table.
+5. [x] **Stage 5: Per-Event Reports (`/operator/events/:id/analytics`)** — `OperatorEventAnalytics.jsx`
+   - Loads the event and both reports in parallel (`Promise.allSettled`); each report can be unavailable on its own. `409` shows a friendly card with the backend message ("This report is available for published events that have ended." / "Ratings exist only for published events."); `403` and `404` show an access message; other errors offer Retry.
+   - Event headline (club, date, venue, status) with links to **Attendees & attendance** and the public page; back link to Analytics.
+   - **Report 1 — department participation:** `MetricRow` (registered, attended, attendance rate); a note with a "Mark attendance" link when students registered but none are marked yet; ranked `BarChart` of attended students per department (one series, one hue; bar label "N of M") with a table view (registered, attended, attendance rate, share of attended).
+   - **Report 2 — post-event rating:** `MetricRow` (average ★, ratings, attended, response rate); `ColumnChart` of the 1★–5★ distribution in the validated ordinal ramp, tooltip with the share; table view (rating, count, share); "No ratings yet" when empty.
+   - Entry points: "Report" button on every launched event in `OperatorEvents.jsx`, "Event Report" on the attendees page, the operator dashboard's Recent Events, and the My Club per-event table (Stage 4).
 
 6. [ ] **Stage 6: Student Activity (`/my-activity`)**
    - Activity score (`clubs_joined + events_attended + ratings_given`) with its breakdown, clubs joined/followed, events registered/attended, attendance rate, ratings given, following the Stitch student dashboard style; links from the Profile page and Navbar.
@@ -123,7 +125,7 @@ All endpoints are `GET` with JWT unless noted. Percentages have one decimal or a
 - `frontend/src/components/charts/` *(created, Stage 3)*: `chartTheme.js`, `ChartFrame.jsx`, `BarChart.jsx`, `ColumnChart.jsx`, `LineChart.jsx`, `Figures.jsx` (MetricRow, HeroFigure, SegmentedBar), `useChartWidth.js`, `index.js`
 - `frontend/src/utils/format.js` (percent / rating / month formatters) *(created, Stage 1)*
 - `frontend/src/pages/OperatorAnalytics.jsx` *(created, Stage 4)*
-- `frontend/src/pages/OperatorEventAnalytics.jsx`
+- `frontend/src/pages/OperatorEventAnalytics.jsx` *(created, Stage 5)*
 - `frontend/src/pages/MyActivity.jsx`
 
 ### Planned Modified Files
@@ -203,7 +205,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 | **Production Build** | `npm run build` | **PASS (built in 1.16s)** | Bundle-size warning only (unchanged). |
 | **Registrations carry `attended`** | `GET /api/events/:id/registrations/` (Stage 1) | **PASS (200)** | Source of the saved attended set. |
 | **Permission guard** | `PUT /api/events/:id/attendance/` on another club's event (Stage 1) | **PASS (403)** | Refused before writing. |
-| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 18). |
+| **Saving attendance from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 20). |
 
 ---
 
@@ -213,7 +215,7 @@ Smoke tests used a Node script with the frontend's Axios 1.20 and the same defau
 - [x] Attendance is locked with a clear reason for drafts, cancelled and not-yet-started events.
 - [x] Server `409` / `400` messages are shown; unsaved changes are visible and can be discarded.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving attendance (Section 18).
+- [ ] Manual browser QA of saving attendance (Section 20).
 
 ---
 
@@ -269,11 +271,33 @@ The components were rendered with demo report data (React server rendering + the
 - [x] One date filter scopes both reports; invalid ranges show the backend message.
 - [x] Every chart has a table view; `null` values show "—".
 - [x] Reachable from the Navbar and the operator dashboard; operators only.
-- [ ] Browser QA of the page with real data (Section 18).
+- [ ] Browser QA of the page with real data (Section 20).
 
 ---
 
-## 18. Manual Interactive Browser QA Checklist
+## 18. Stage 5 Verification Results
+
+| Verification Check | Command / Method | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `OperatorEventAnalytics.jsx`, `App.jsx`, `OperatorEvents.jsx`, `OperatorEventAttendees.jsx`, `OperatorDashboard.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.20s)** | Bundle-size warning only (carried to Week 9). |
+| **Report endpoints** | Stage 1 smoke tests (Rated Workshop) | **PASS (200 / 200; student 403)** | Department: 4 registered, 0 attended (Bangla); ratings: 3, average 4.3, distribution 4★×2, 5★×1, response rate `null`. |
+| **409 messages** | Backend source (`apps/analytics/views.py`) | **CONFIRMED** | Texts shown as-is in the unavailable cards. |
+| **Page render** | — | **PENDING (browser)** | Data loads in effects; charts were render-checked in Stage 3. |
+
+---
+
+## 19. Acceptance Criteria (Stage 5)
+
+- [x] Department participation and rating reports render per event with charts, metrics and table views.
+- [x] Each report independently shows a clear message when the backend returns `409`.
+- [x] Reachable from the events list, attendees page, operator dashboard and My Club table; operators only.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Browser QA with real data (Section 20).
+
+---
+
+## 20. Manual Interactive Browser QA Checklist
 
 ### Attendance (democlub1@demo.jnuverse.test)
 - [ ] Open `/operator/events` → an ended Robotics event (e.g. `[DEMO] Rated Workshop`) → attendees. The toolbar shows "0 of 4 attended" and checkboxes are enabled.
@@ -290,10 +314,16 @@ The components were rendered with demo report data (React server rendering + the
 - [ ] Club vs club: Robotics bar highlighted; switching measure re-ranks the bars; clubs without values show "—".
 - [ ] Presets and a custom range update both reports; From later than To shows an error; the page dims instead of flashing while loading.
 
+### Per-Event Reports (democlub1@demo.jnuverse.test)
+- [ ] `/operator/events` → **Report** on `[DEMO] Rated Workshop`: Report 1 shows 4 registered / 0 attended with the "Mark attendance" note and a single "Bangla" bar; Report 2 shows ★ 4.3, 3 ratings, response rate "—", columns 4★ = 2 and 5★ = 1 in darkening indigo.
+- [ ] After marking attendance on the attendees page, Report 1 attended / attendance rate and Report 2 response rate update.
+- [ ] Chart / Table switches show the same numbers; hovering or tabbing to a bar/column shows its tooltip.
+- [ ] A cancelled event shows the "available for published events that have ended" card for Report 1 and the ratings card for Report 2.
+
 ---
 
-## 19. Week 8 Readiness Classification
+## 21. Week 8 Readiness Classification
 
-* **Implementation:** Stages 1–4 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub).
-* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stage 4 verified at source and build level, browser QA pending. Remaining stages pending.
+* **Implementation:** Stages 1–5 of 7 complete (API services foundation; attendance marking; chart components; operator analytics hub; per-event reports).
+* **Verification:** Stage 1 verified (lint, build, read-only API smoke tests); Stage 2 verified at source and build level, browser QA pending; Stage 3 verified by palette validation, render check, lint and build; Stages 4–5 verified at source and build level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Attendance is not seeded; attendance-based figures stay at 0 until attendance is marked or the seed is extended.

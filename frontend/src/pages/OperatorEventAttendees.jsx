@@ -352,6 +352,16 @@ export default function OperatorEventAttendees() {
               </button>
             )}
 
+            {event && event.status !== "draft" && (
+              <Link
+                to={`/operator/events/${event.id}/analytics`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-white border border-border-subtle hover:bg-surface-lavender text-on-surface text-xs font-semibold transition-colors shadow-xs"
+              >
+                <span className="material-symbols-outlined text-[15px] text-primary">insights</span>
+                <span>Event Report</span>
+              </Link>
+            )}
+
             {event && (
               <Link
                 to={`/events/${event.id}`}

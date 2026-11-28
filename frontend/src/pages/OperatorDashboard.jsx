@@ -395,7 +395,7 @@ export default function OperatorDashboard() {
                         {col.items.map((e) => (
                           <Link
                             key={e.id}
-                            to={`/events/${e.id}`}
+                            to={col.key === "recent" ? `/operator/events/${e.id}/analytics` : `/events/${e.id}`}
                             className="py-2.5 flex items-center justify-between gap-3 text-[13px] text-slate-700 hover:text-primary-container transition-colors group"
                           >
                             <span className="font-medium truncate">{e.title}</span>

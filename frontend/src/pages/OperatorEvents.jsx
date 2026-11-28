@@ -712,6 +712,18 @@ export default function OperatorEvents() {
                               </span>
                             </Link>
 
+                            {/* Week 8: per-event analytical reports (launched events) */}
+                            {!isDraft && (
+                              <Link
+                                to={`/operator/events/${event.id}/analytics`}
+                                className="px-3.5 py-1.5 rounded-full border border-border-subtle bg-surface-white hover:bg-surface-lavender text-xs font-semibold text-on-surface transition-colors flex items-center gap-1.5"
+                                title="Department participation and rating report"
+                              >
+                                <span className="material-symbols-outlined text-[15px] text-primary">insights</span>
+                                <span>Report</span>
+                              </Link>
+                            )}
+
                             {/* 4. Ratings Summary Action (Published Events) */}
                             {isPublished && (
                               <button
