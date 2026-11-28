@@ -32,6 +32,10 @@ frontend/
 ├── FRONTEND_README.md               # Primary authoritative frontend overview (this document)
 ├── README.md                        # Compatibility pointer to FRONTEND_README.md
 ├── docs/
+│   ├── testing/                     # Week 9: test documents
+│   │   ├── INTEGRATION_TEST_REPORT.md   # Frontend integration test report (results, defects, open items)
+│   │   ├── MANUAL_TEST_SCRIPT.md        # Manual script for all data-changing flows (local test stack)
+│   │   └── UML_DIAGRAM_VALIDATION.md    # UML diagrams vs implementation: traceability and differences
 │   └── workflow/                    # 10-Week frontend implementation history and planning
 │       ├── WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md
 │       ├── WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md
@@ -43,6 +47,13 @@ frontend/
 │       ├── WEEK_08_ANALYTICAL_REPORTS.md
 │       ├── WEEK_09_INTEGRATION_AND_TESTING.md
 │       └── WEEK_10_FINALIZATION_AND_DELIVERY.md
+├── scripts/                         # Week 9: read-only checks (Node 22 + installed Chrome, no dependencies)
+│   ├── lib/cdp.mjs                  # Headless Chrome driver over the DevTools Protocol
+│   ├── audit-api-contract.mjs       # npm run audit:api — frontend calls vs openapi.yml
+│   ├── audit-roles.mjs              # npm run audit:roles — role-permission matrix (GET only)
+│   ├── audit-responsive.mjs         # npm run audit:responsive — screenshots + layout/a11y checks
+│   ├── test-resilience.mjs          # npm run test:resilience — 404, session expiry, slow/offline
+│   └── test-journeys.mjs            # npm run test:journeys — UI vs API for visitor/student/operator
 ├── public/
 │   ├── favicon.svg                  # Primary-blue squircle favicon with centered Material Symbols hub mark
 │   └── favicon.ico                  # Multi-resolution ICO fallback (16x16, 32x32, 48x48) for browser tab compatibility
@@ -68,12 +79,15 @@ frontend/
 │   │   │   └── useChartWidth.js             # Real-width SVG sizing
 │   │   ├── dashboard/
 │   │   │   └── StudentDashboardSections.jsx  # Week 7: Stitch student dashboard sections
+│   │   ├── DialogA11y.jsx           # Week 9: dialog focus entry, Tab trap, Escape, focus return
 │   │   ├── EmptyState.jsx           # Empty list and search state presentation
+│   │   ├── ErrorBoundary.jsx        # Week 9: per-route crash fallback and "JnUVerse was updated" message
 │   │   ├── ErrorAlert.jsx           # Accessible error banner for DRF validation feedback
 │   │   ├── Input.jsx                # Form input field with icons, labels, and error states
 │   │   ├── JnUHubMark.jsx           # Reusable JnU brand mark and central hub symbol
 │   │   ├── LoadingState.jsx         # Accessible spinner and async state presentation
 │   │   ├── Navbar.jsx               # Reusable responsive navigation header with role-aware links
+│   │   ├── ServerStatusNotice.jsx   # Week 9: "waking up the server" and offline notices
 │   │   └── ProtectedRoute.jsx       # RBAC route guard supporting 'student' and 'club_operator'
 │   ├── context/
 │   │   └── AuthContext.jsx          # User state, token lifecycle, login, register, logout
@@ -89,6 +103,7 @@ frontend/
 │   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
 │   │   ├── MyActivity.jsx           # Week 8: report 4 — student activity score and figures
 │   │   ├── MyReports.jsx            # Week 7: Stitch reports interface — the user's own reports
+│   │   ├── NotFound.jsx             # Week 9: 404 page for unknown URLs
 │   │   ├── OperatorAnalytics.jsx    # Week 8: reports 5 (own club) and 3 (club vs club) with date filter
 │   │   ├── OperatorDashboard.jsx    # Week 7: Stitch club operator dashboard (GET /api/dashboard/club/)
 │   │   ├── OperatorEventAnalytics.jsx # Week 8: reports 1 (departments) and 2 (ratings) for one event
@@ -536,6 +551,17 @@ Built against `WEEK_08_BACKEND_HANDOFF.md`. No Stitch analytics screens exist, s
 - **Student activity (`/my-activity`):** activity score hero, segmented breakdown and six stat cards with links.
 - **Quality gates:** ESLint 0 / 0, Vite build passes, 31/31 role-permission checks. Browser QA pending; attendance is not seeded, so attendance-based figures stay 0 until attendance is marked.
 
+### 11. Week 9 Integration & Testing (Stages 1–7 Completed)
+Integration with the Week 9 backend (`d0cc389`), tested read-only against the shared database. Full details: [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md); results: [Integration Test Report](docs/testing/INTEGRATION_TEST_REPORT.md).
+
+- **Contract and roles:** `npm run audit:api` (64/64 operations used, 0 mismatches) and `npm run audit:roles` (30 operations × 4 identities, 120/120).
+- **Resilience:** per-route error boundary, Not Found page, "waking up the server" / offline notices, session-expired notice with the right login page and full return URL (`npm run test:resilience`, 9/9).
+- **Performance:** every page lazy-loaded; main chunk 846 kB → 255 kB; reload message after a new deployment.
+- **Responsive and accessibility:** `npm run audit:responsive` (30 routes × 375/768/1024/1440 px); operator navbar and Members overflow fixed, labels on all search fields, 24 px tap targets, keyboard support in all 12 dialogs (`DialogA11y`).
+- **Journeys:** `npm run test:journeys` compares 26 screen values with the API through the real login forms; `docs/testing/MANUAL_TEST_SCRIPT.md` covers the data-changing flows for the tester.
+- **UML validation:** `docs/testing/UML_DIAGRAM_VALIDATION.md` (use case → screen → API; 4 wrong status codes, the collaboration related-event step, missing `ContentReport`).
+- **Open:** backend request 7 (`attendance_rate` > 100 %); the manual script still has to be run on the local test stack.
+
 ---
 
 ## 9. Implementation Status Matrix
@@ -550,7 +576,7 @@ Built against `WEEK_08_BACKEND_HANDOFF.md`. No Stitch analytics screens exist, s
 | **Ratings & Collaboration** | Week 6 | **Completed** (Stages 1–7 Finalized: Implementation & verification complete; manual browser QA pending) | **Completed & Verified** (Contracts verified via source inspection & live API smoke tests; pytest runner blocked locally) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | **Completed** (Stages 1–7; lint, build and API checks passed; browser QA pending demo re-seed) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | **Completed** (Stages 1–7; lint, build and 31-check API matrix passed; browser QA pending) | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
-| **Integration & End-to-End Testing** | Week 9 | **In Progress** (Stages 1–6: contract 64/64, resilience 9/9, journeys 26/26, responsive audit, UML validation — [report](docs/testing/UML_DIAGRAM_VALIDATION.md); Stage 7 report pending) | **Delivered** (`d0cc389`; requests 7–9 open) | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
+| **Integration & End-to-End Testing** | Week 9 | **Completed** (Stages 1–7: contract 64/64, roles 120/120, resilience 9/9, journeys 26/26, responsive audit, UML validation — [test report](docs/testing/INTEGRATION_TEST_REPORT.md); manual write-flow QA pending) | **Delivered** (`d0cc389`; requests 7–9 open) | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
 | **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 
 ---

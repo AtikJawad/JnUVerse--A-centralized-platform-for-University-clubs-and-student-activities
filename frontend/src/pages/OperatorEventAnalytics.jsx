@@ -80,7 +80,7 @@ export default function OperatorEventAnalytics() {
         <div className="px-5 md:px-8 lg:px-14 py-10 max-w-6xl mx-auto w-full flex flex-col gap-10">
           <Link
             to="/operator/analytics"
-            className="self-start inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-500 hover:text-primary-container"
+            className="self-start inline-flex items-center gap-1.5 min-h-6 text-[12px] font-medium text-slate-500 hover:text-primary-container"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
             Analytics

@@ -239,7 +239,7 @@ export default function OperatorMembers() {
                   </div>
                   <Link
                     to={`/clubs/${club.slug}`}
-                    className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold"
+                    className="inline-flex items-center gap-1 min-h-6 text-[11px] text-primary hover:underline font-semibold"
                   >
                     <span>Public Page</span>
                     <span className="material-symbols-outlined text-[13px]">north_east</span>

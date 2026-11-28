@@ -3,7 +3,7 @@
 **To:** Atik Jawad (Backend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** End-to-End User Journey Contracts & Automated Test Validation  
-**Status:** **Backend Delivered (`d0cc389`) — Frontend Stages 1–6 Done; 3 Open Requests (7–9); UML Diagram Updates Listed** (updated 2026-11-28)  
+**Status:** **Week 9 Complete on the Frontend (Stages 1–7) — Backend Delivered (`d0cc389`); 3 Open Requests (7–9); Manual Write-Flow QA Pending on the Local Stack** (updated 2026-11-28)  
 
 ---
 
@@ -100,4 +100,10 @@ Pulled `d488455` ("ReSeeded demo data") and `d0cc389` ("Week 9 Backend Complete�
   - **Classes:** `ContentReport` and `EventRegistration.attended` are missing; `Club.logo` is drawn as a URL but is the uploaded `logo_image`.
   - **Activities:** notifications you send (membership request/decision, event published/updated/cancelled, collaboration request/response/cancel) and re-requesting membership after rejected/left/removed are not drawn.
 - **Shared database:** read-only (no logins needed for this stage).
+
+### 5.7 Frontend Stage 7 update — integration test report (2026-11-28)
+- **Report:** `frontend/docs/testing/INTEGRATION_TEST_REPORT.md` (results, 14 defects found by testing with 13 fixed, open items, how to re-run).
+- **New check you can run:** `npm run audit:roles` (from `frontend/`, backend only) calls the 30 GET operations the frontend uses as visitor, student, own-club operator and other-club operator — **120/120 match** your permission classes (401 / 403 / 200 as expected; other clubs' members, requests, registrations, rating summary and event reports are 403). If you change a permission, run it before pushing.
+- **Only open backend defect:** request 7 (`attendance_rate` > 100 %). Requests 8–9 (local stack docs) block the manual write-flow QA on the frontend developer's Mac.
+- **Shared database:** read-only (GET requests and logins as demo1, democlub1, democlub2).
 

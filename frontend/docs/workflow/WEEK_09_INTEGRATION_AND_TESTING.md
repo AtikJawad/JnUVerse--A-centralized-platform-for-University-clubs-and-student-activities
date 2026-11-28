@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **In Progress — Stages 1–6 Completed (Contract 64/64; Resilience 9/9; Journeys 26/26; Responsive Audit Clean of Overflow and Unlabelled Fields; UML Validated)**  
+**Status:** **Completed — Stages 1–7 (Contract 64/64; Roles 120/120; Resilience 9/9; Journeys 26/26; Responsive Audit Clean; UML Validated; Test Report Delivered). Manual write-flow QA pending on the local stack.**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -81,9 +81,11 @@
    - **Main findings:** (1) p3 "Attach Related Event" is drawn on *responding* to a collaboration; in the app the event is linked when *sending* and acceptance only makes the clubs partners. (2) Four sequence diagrams show the wrong status codes: registration no-match 403 → **400**, login 401 → **400**, event full/cancelled 400 → **409**, rating not allowed 400 → **403/409**. (3) Class diagrams lack `ContentReport` and `EventRegistration.attended` (needed by reports 3–5) plus 8 attributes; Club logo is an uploaded image, not a URL. (4) 20 implemented use cases are not drawn (follow, join/leave, register/cancel, rate, notifications, reports, dashboards, analytics, attendance, banner/logo uploads, edit/delete notice, cancel collaboration, partners). (5) All 6 activity diagrams match their main flow but miss branches (cancelled/started events, re-request after rejection, notifications, cancel collaboration).
    - Nothing in the diagrams required a code change; the diagrams are to be updated to match the tested implementation.
 
-7. [ ] **Stage 7: Integration Test Report & Final Quality Gates**
-   - Frontend integration test report (`frontend/docs/testing/INTEGRATION_TEST_REPORT.md`): contract audit, journeys, responsive/accessibility results, defects found and fixed, open issues.
-   - Lint, build, API role matrix, README and readiness updates.
+7. [x] **Stage 7: Integration Test Report & Final Quality Gates**
+   - `frontend/docs/testing/INTEGRATION_TEST_REPORT.md`: results of every suite, responsive audit history, 14 defects found by testing (13 fixed, 1 open on the backend), planned improvements delivered, open items with owners, and how to re-run.
+   - `scripts/audit-roles.mjs` (`npm run audit:roles`, read-only): the 30 GET operations the frontend uses, called as visitor, student, own-club operator and another club's operator; expected codes taken from the backend permission classes. **120/120.**
+   - Audit run 4 found 4 more small links at 375 px (Members "Public Page", Analytics "Event report", event report back link, event-form breadcrumb title); all now ≥ 24 px tall. Re-run 5 clean.
+   - `FRONTEND_README.md`: Week 9 section, directory tree (`docs/testing/`, `scripts/`, Week 9 components and page) and status row.
 
 ---
 
@@ -91,7 +93,7 @@
 
 | Item | From | Owner | Status |
 |---|---|---|---|
-| Browser QA of Weeks 6–8 write flows (uploads, interests, approvals, reports, attendance) | Weeks 6–8 | Anik + Nabil | Open — Stage 5 |
+| Browser QA of Weeks 6–8 write flows (uploads, interests, approvals, reports, attendance) | Weeks 6–8 | Anik + Nabil | Script ready (`MANUAL_TEST_SCRIPT.md`); execution pending on the local stack → Week 10 |
 | Re-seed demo data (time-based figures expired) | Week 7 | Atik | **Done** (`d488455`, verified) |
 | Seed attendance and varied departments for the Week 8 reports | Week 8 | Atik | **Done** (`d488455`, verified) |
 | Restore Robotics Club interests to Technology, Programming, Robotics | Week 7 QA | Anik | **Done** (by the re-seed) |
@@ -107,13 +109,13 @@ The local backend (`backend/.env`) connects to the **shared Supabase database** 
 
 ## 6. Acceptance Criteria (Week 9)
 
-- [ ] Every frontend API call matches `openapi.yml`; every backend feature is reachable from the UI or listed as intentionally unused.
-- [ ] No route can crash to a blank page; unknown URLs show a Not Found page; network and session errors show clear messages.
-- [ ] Main JavaScript chunk below 500 kB.
-- [ ] Every route checked at 375 / 768 / 1024 / 1440 px with defects fixed; modals and charts are keyboard-usable.
-- [ ] Main journeys verified; Weeks 6–8 browser QA backlog executed with results recorded.
+- [x] Every frontend API call matches `openapi.yml`; every backend feature is reachable from the UI or listed as intentionally unused.
+- [x] No route can crash to a blank page; unknown URLs show a Not Found page; network and session errors show clear messages.
+- [x] Main JavaScript chunk below 500 kB (255 kB).
+- [x] Every route checked at 375 / 768 / 1024 / 1440 px with defects fixed; modals and charts are keyboard-usable.
+- [ ] Main journeys verified (**done**, 26/26); Weeks 6–8 browser QA backlog executed with results recorded (**pending** — manual script on the local stack).
 - [x] Use-case / screen traceability delivered to the UML designer (`frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`).
-- [ ] Integration test report written; ESLint and Vite build pass; no backend files modified.
+- [x] Integration test report written; ESLint and Vite build pass; no backend files modified.
 
 ---
 
@@ -211,7 +213,7 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 | **Operator login request count** | headless Chrome | **PASS** | One `POST /api/auth/login/`, no `/me`. |
 | **Audit run 3** (after fixes 1–6) | `npm run audit:responsive` | **PASS for fixed items; 2 new findings** | 120 screens: **0 page overflow** (was 13), **0 unlabelled fields** (was 36), 0 crashes, 0 JS errors, 0 missing alt, 0 unnamed controls; carousel dots no longer flagged. New: operator Logout past the viewport at 1440 px (11 screens) and 10 small standalone links at 375 px → fixes 7 and 8. Student dashboard slower than 15 s at 375/768 px while other tests loaded the shared backend (renders correctly — journeys check). |
 | **Navbar re-measure** (after fix 7) | headless Chrome, 5 widths | **PASS** | Logout right edge 994 / 1276 / 1336 / 1384 / 1576 px at 1024 / 1280 / 1440 / 1536 / 1920 px. |
-| **Audit run 4** (375 + 1440 px, after fixes 7–8) | `npm run audit:responsive -- --widths 375,1440` | **see 16.2** | — |
+| **Audit run 4** (375 + 1440 px, after fixes 7–8) | `npm run audit:responsive -- --widths 375,1440` | **see 16.2** | 0 overflow; 4 small operator links → fixed in Stage 7 |
 | **Static Code Analysis / Build** | `npm run lint`, `npm run build` | **PASS** | — |
 
 ---
@@ -242,7 +244,12 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 First run 25/26: the My Activity check read the score before the data loaded (the heading renders first); the check now waits for the figure. The page itself showed the correct score (12).
 
 ### 16.2 Confirmation audit after Stage 4 fixes 7–8
-*Run 4 (375 and 1440 px) stopped responding after 28 screens: a Chrome DevTools command had no time limit. `scripts/lib/cdp.mjs` now fails any command after 60 s, and `audit-responsive.mjs` records a stuck screen as a failure and continues. The re-run was still in progress at the Stage 6 commit; its result is recorded with Stage 7.*
+Run 4 (375 and 1440 px) first stopped responding after 28 screens: a Chrome DevTools command had no time limit. `scripts/lib/cdp.mjs` now fails any command after 60 s, and `audit-responsive.mjs` records a stuck screen as a failure and continues.
+
+| Run | Screens | Result |
+|---|:---:|---|
+| 4 (re-run) | 60 | **0 page overflow, 0 elements past the viewport, 0 unlabelled fields, 0 unnamed controls, 0 missing alt, 0 JS errors.** 4 small links at 375 px on operator pages (fixed in Stage 7); student dashboard at 1440 px not ready within 15 s (shared database latency). |
+| 5 (after the Stage 7 fix) | 21 (operator 375 px, student 1440 px) | **0 findings**; every screen ready (student dashboard 12.1 s). |
 
 ---
 
@@ -277,7 +284,33 @@ Every claim in the report was checked in the code (endpoint paths against `opena
 
 ---
 
-## 20. Backend Week 9 Delivery Check (2026-11-28)
+## 20. Stage 7 Verification Results (Final Quality Gates)
+
+| Gate | Command | Result |
+|---|---|:---:|
+| Static analysis | `npm run lint` | **PASS (0 errors, 0 warnings)** |
+| Production build | `npm run build` | **PASS** — main chunk 255 kB (85 kB gzip), no size warning |
+| API contract | `npm run audit:api` | **PASS** — 64/64 operations used, 0 mismatches |
+| Role matrix | `npm run audit:roles` | **PASS — 120/120** (30 operations × 4 identities) |
+| Resilience | `npm run test:resilience` | **PASS — 9/9** |
+| Journeys | `npm run test:journeys` | **PASS — 26/26** |
+| Responsive / accessibility | `npm run audit:responsive` (run 5) | **PASS — 0 findings** |
+| Backend files modified by the frontend | `git diff --stat backend/apps` | **None** (docs only) |
+
+All gates ran read-only against the shared database (GET requests and logins as demo1, democlub1, democlub2).
+
+---
+
+## 21. Acceptance Criteria (Stage 7)
+
+- [x] Integration test report written with results, defects, open items and re-run steps.
+- [x] Role restrictions match the backend for every GET operation the frontend uses (120/120).
+- [x] ESLint and Vite build pass; all automated suites pass; no backend code modified.
+- [x] README Week 9 section, directory tree and status row updated; backend handoff updated (§5.7).
+
+---
+
+## 22. Backend Week 9 Delivery Check (2026-11-28)
 
 Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md` and `backend/docs/LOCAL_TEST_STACK.md`.
 
@@ -293,9 +326,10 @@ Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/d
 
 ---
 
-## 21. Week 9 Readiness Classification
+## 23. Week 9 Readiness Classification
 
-* **Implementation:** Stages 1–6 of 7 complete (API contract audit; resilience; code splitting; responsive & accessibility audit; end-to-end journeys; UML diagram validation).
-* **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
-* **Open:** backend requests 7–9 (Section 20); UML diagram updates (Section 18); local stack setup on the frontend machine for write-flow QA.
+* **Implementation:** all 7 stages complete (API contract audit; resilience; code splitting; responsive & accessibility audit; end-to-end journeys; UML diagram validation; integration test report and final gates).
+* **Verification:** lint and build pass; contract 64/64; role matrix 120/120; resilience 9/9; journeys 26/26; responsive audit run 5 with 0 findings; results in `frontend/docs/testing/INTEGRATION_TEST_REPORT.md`.
+* **Classification:** **Ready for Week 10** for everything that can be tested read-only. The data-changing flows still need the manual run on the local stack.
+* **Open:** backend requests 7–9 (Section 22); UML diagram updates (Section 18); local stack setup on the frontend machine for write-flow QA.
 

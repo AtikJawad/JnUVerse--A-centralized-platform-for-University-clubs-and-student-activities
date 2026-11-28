@@ -325,7 +325,7 @@ export default function OperatorAnalytics() {
                         </span>
                         <Link
                           to={`/operator/events/${myClub.best_rated_event.id}/analytics`}
-                          className="text-[12px] font-medium text-primary-container hover:text-primary-hover inline-flex items-center gap-1"
+                          className="text-[12px] font-medium text-primary-container hover:text-primary-hover inline-flex items-center gap-1 min-h-6"
                         >
                           Event report
                           <span className="material-symbols-outlined text-[13px]">arrow_forward</span>

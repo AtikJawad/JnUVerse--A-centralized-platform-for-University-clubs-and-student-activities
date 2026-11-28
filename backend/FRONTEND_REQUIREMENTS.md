@@ -22,7 +22,7 @@ This document formally specifies the API contracts, response payloads, role perm
 
 ## Current Status at a Glance (2026-11-28, after reviewing backend commit `d0cc389`)
 
-- **Backend:** Weeks 1–9 delivered (Week 9: local test stack, login returns `club` for operators, demo data re-seeded with attendance and three departments, three new test files — see `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md`). **Frontend:** Weeks 1–8 integrated; Week 9 Stages 1–6 done (Stage 6: UML diagrams checked against the implementation, `frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`; no backend change needed, please confirm the API points in Week 9 handoff §5.6).
+- **Backend:** Weeks 1–9 delivered (Week 9: local test stack, login returns `club` for operators, demo data re-seeded with attendance and three departments, three new test files — see `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md`). **Frontend:** Weeks 1–8 integrated; Week 9 Stages 1–7 done — integration test report `frontend/docs/testing/INTEGRATION_TEST_REPORT.md`, role matrix `npm run audit:roles` 120/120 (Stage 6: UML diagrams checked against the implementation, `frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`; no backend change needed, please confirm the API points in Week 9 handoff §5.6).
 - **Contract:** still clean after the Week 9 backend changes — `npm run audit:api` 64/64 operations, 0 mismatches; `npm run test:resilience` 9/9.
 - **What the frontend needs from the backend now:** open requests 7–9 below.
 
@@ -44,7 +44,8 @@ This document formally specifies the API contracts, response payloads, role perm
 
 1. Regenerate the spec: `python manage.py spectacular --file ../docs/api/openapi.yml` (from `backend/`).
 2. Run the contract audit: `cd frontend && npm run audit:api`. It lists frontend calls to paths or methods the spec no longer has, missing trailing slashes, and backend operations no screen uses; it exits 1 on a mismatch.
-3. Optional end-to-end checks against a running dev server and backend (read-only): `npm run test:resilience`.
+3. Run the role matrix (backend only, read-only): `npm run audit:roles`. It checks 30 GET operations as visitor, student, own-club operator and other-club operator and exits 1 if a status code changed.
+4. Optional end-to-end checks against a running dev server and backend (read-only): `npm run test:resilience`, `npm run test:journeys`.
 
 ## Changes Made on the Shared Database During Frontend Testing
 
@@ -67,7 +68,7 @@ Phase-by-phase requirements, acceptance criteria, and specific endpoint contract
 - [Week 6: Ratings (1–5 Stars Only) & Collaborations](docs/frontend-handoff/WEEK_06_RATINGS_AND_COLLABORATION.md) (Status: **Delivered & Integrated**)
 - [Week 7: Content Reports & Dashboards](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) (Status: **Delivered & Integrated**)
 - [Week 8: Five Analytical Reports](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) (Status: **Delivered & Integrated**)
-- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **Backend delivered (`d0cc389`); frontend Stages 1–6 done — see §4–5.6**)
+- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **Backend delivered (`d0cc389`); frontend Stages 1–7 done — see §4–5.7; manual write-flow QA pending**)
 - [Week 10: Finalization & Delivery](docs/frontend-handoff/WEEK_10_FINALIZATION_AND_DELIVERY.md) (Status: **Pending**)
 
 ---
@@ -378,3 +379,4 @@ Current settings as used by the frontend (updated 2026-11-28):
 - **2026-11-28 (Week 9 Stage 4):** Request 6 adopted by the frontend. Stage 4 audit was read-only on the shared database (logins and two cancelled dialogs only).
 - **2026-11-28 (Week 9 Stage 5):** Frontend journeys 26/26 (UI matches API); manual test script for the tester (`frontend/docs/testing/MANUAL_TEST_SCRIPT.md`) targets the local test stack and depends on request 8.
 - **2026-11-28 (Week 9 Stage 6):** UML diagrams validated against the implementation (`frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`). No backend request; the diagrams show 4 wrong status codes, the collaboration related-event step in the wrong place, and miss `ContentReport` / `attended` (handoff §5.6). Read-only on the shared database.
+- **2026-11-28 (Week 9 Stage 7):** Integration test report published; new read-only role matrix `npm run audit:roles` (120/120). Open: request 7 (backend defect), requests 8–9 (local stack docs).

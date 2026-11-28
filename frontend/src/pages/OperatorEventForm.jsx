@@ -431,7 +431,7 @@ export default function OperatorEventForm() {
                 <>
                   <Link
                     to={`/events/${id}`}
-                    className="hover:text-primary transition-colors truncate max-w-[200px]"
+                    className="hover:text-primary transition-colors inline-block align-middle min-h-6 py-1 truncate max-w-[200px]"
                   >
                     {existingEvent?.title || "Event Detail"}
                   </Link>
