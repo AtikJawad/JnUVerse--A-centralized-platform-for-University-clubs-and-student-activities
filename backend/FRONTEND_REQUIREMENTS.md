@@ -3,8 +3,8 @@
 **Platform:** JnUVerse (Centralized Platform for University Clubs & Student Activities)  
 **Target Audience:** Backend MVP Coder (Atik Jawad) & Development Team  
 **Author:** Frontend MVP Coder (Anik Khondokar)  
-**Stage:** Step 1 Foundation & Architecture Audit  
-**Date:** October 2026  
+**Stage:** Week 9 — Integration & Testing (originally Step 1 Foundation & Architecture Audit)  
+**Date:** October 2026 · **Last updated:** 2026-11-28  
 
 ---
 
@@ -20,24 +20,57 @@ This document formally specifies the API contracts, response payloads, role perm
 
 ---
 
+## Current Status at a Glance (2026-11-28)
+
+- **Backend:** Weeks 1–8 delivered (see `frontend/docs/backend-handoff/`). **Frontend:** Weeks 1–8 integrated; Week 9 integration and testing in progress (Stages 1–3 done).
+- **Contract:** every frontend API call matches `docs/api/openapi.yml`, and **all 64 backend operations are used by the frontend** (`npm run audit:api`, Week 9 Stage 1). The committed spec matches a spec regenerated from the current code.
+- **What the frontend needs from the backend now:** the open requests below.
+
+## Open Requests for the Backend (consolidated)
+
+| # | Request | Why | Priority | Details |
+|:---:|---|---|:---:|---|
+| 1 | **Test database for Week 9** (local PostgreSQL or a separate Supabase project) | `backend/.env` points at the shared Supabase database used by the deployed app, so the frontend's automated tests are limited to read-only checks. | High | [Week 9 handoff §4.2](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) |
+| 2 | **Re-seed the demo data** (`seed_demo_events --reset --allow-remote`, then `seed_demo_events --allow-remote`) | Time-based figures expired (dashboards show 0 upcoming / 0 to rate / 0 weekly registrations); also restores demo data changed during frontend QA (see below). | High — before the demo | [Week 7 follow-ups](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+| 3 | **Seed attendance** for ended `[DEMO]` events | Attendance is never seeded, so reports 1, 3, 4 and 5 show 0 % attendance and "—" response rates. | High — before the demo | [Week 8 follow-ups](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) |
+| 4 | **Spread demo students across several departments** | All five demo students are in Bangla; the department chart shows one bar. | Medium | [Week 8 follow-ups](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) |
+| 5 | *(Cosmetic)* Regenerate the committed `docs/api/openapi.yml` | It uses `api_`-prefixed `operationId`s and one `api` tag; the current code generates per-app tags, which group Swagger UI better. | Low | [Week 9 handoff §4.2](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) |
+| 6 | *(Optional)* Include `club` in the `user` object returned by `POST /api/auth/login/` for operators | Only `/api/auth/me/` has `club`; the frontend makes one extra `/me` call after operator login. | Low | [Week 7 follow-ups](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+
+## Checking Frontend Compatibility After an API Change
+
+1. Regenerate the spec: `python manage.py spectacular --file ../docs/api/openapi.yml` (from `backend/`).
+2. Run the contract audit: `cd frontend && npm run audit:api`. It lists frontend calls to paths or methods the spec no longer has, missing trailing slashes, and backend operations no screen uses; it exits 1 on a mismatch.
+3. Optional end-to-end checks against a running dev server and backend (read-only): `npm run test:resilience`.
+
+## Changes Made on the Shared Database During Frontend Testing
+
+The frontend keeps automated checks read-only. Known writes so far (all on `[DEMO]` data, restored by a re-seed):
+- 2026-11-28, Week 7 Stage 1: a test logo was uploaded to `[DEMO] Robotics Club` and removed immediately (logo back to `null`).
+- Week 7 manual QA by the frontend developer: `[DEMO] Robotics Club` interests now include Entrepreneurship and Environment (seed: Technology, Programming, Robotics). Other manual QA steps (uploads, approvals, reports, attendance) may also have changed `[DEMO]` data.
+
+---
+
 ## Weekly Handoff Documentation Index
 
 Phase-by-phase requirements, acceptance criteria, and specific endpoint contracts are organized in:
 
 - [Week 1: Project Foundation & Health Check](docs/frontend-handoff/WEEK_01_REPOSITORY_AUDIT_AND_DESIGN_FOUNDATION.md) (Status: **Completed & Verified**)
 - [Week 2: Authentication, Registration & Student Verification](docs/frontend-handoff/WEEK_02_AUTHENTICATION_AND_LOGIN_UI.md) (Status: **Completed & Verified**)
-- [Week 3: Club Discovery, Profiles & Memberships](docs/frontend-handoff/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) (Status: **Backend Complete; Frontend Pending Step 2**)
-- [Week 4: Events & RSVP Registration](docs/frontend-handoff/WEEK_04_EVENTS_AND_REGISTRATION.md) (Status: **Pending Backend Implementation**)
-- [Week 5: Notices & Notifications](docs/frontend-handoff/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) (Status: **Pending Backend Implementation**)
-- [Week 6: Ratings (1–5 Stars Only) & Collaborations](docs/frontend-handoff/WEEK_06_RATINGS_AND_COLLABORATION.md) (Status: **Pending Backend Implementation**)
-- [Week 7: Content Reports & Dashboards](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) (Status: **Pending Backend Implementation**)
-- [Week 8: Five Analytical Reports](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) (Status: **Pending Backend Implementation**)
-- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **Pending**)
+- [Week 3: Club Discovery, Profiles & Memberships](docs/frontend-handoff/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md) (Status: **Delivered & Integrated**)
+- [Week 4: Events & RSVP Registration](docs/frontend-handoff/WEEK_04_EVENTS_AND_REGISTRATION.md) (Status: **Delivered & Integrated**)
+- [Week 5: Notices & Notifications](docs/frontend-handoff/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) (Status: **Delivered & Integrated**)
+- [Week 6: Ratings (1–5 Stars Only) & Collaborations](docs/frontend-handoff/WEEK_06_RATINGS_AND_COLLABORATION.md) (Status: **Delivered & Integrated**)
+- [Week 7: Content Reports & Dashboards](docs/frontend-handoff/WEEK_07_REPORTS_AND_DASHBOARDS.md) (Status: **Delivered & Integrated**)
+- [Week 8: Five Analytical Reports](docs/frontend-handoff/WEEK_08_ANALYTICAL_REPORTS.md) (Status: **Delivered & Integrated**)
+- [Week 9: Cross-Module Integration & Comprehensive Testing](docs/frontend-handoff/WEEK_09_INTEGRATION_AND_TESTING.md) (Status: **In Progress — frontend Stages 1–3 done; see §4 for findings and requests**)
 - [Week 10: Finalization & Delivery](docs/frontend-handoff/WEEK_10_FINALIZATION_AND_DELIVERY.md) (Status: **Pending**)
 
 ---
 
 ## B. Existing API Inventory
+
+> **Update 2026-11-28:** The backend now exposes **64 operations** (see `docs/api/openapi.yml`), all used by the frontend. The table below is the original Week 1–3 inventory; the "Partially Implemented" and "Not Implemented" tables (B.2, B.3) were all resolved by the Week 3–8 backend handoffs.
 
 Based on an audit of `backend/config/urls.py`, `backend/apps/accounts/`, `backend/apps/clubs/`, and open apps:
 
@@ -54,7 +87,7 @@ Based on an audit of `backend/config/urls.py`, `backend/apps/accounts/`, `backen
 | **Department List** | `GET` | `/api/auth/departments/` | **Verified** | None (`AllowAny`) | Registration department selector dropdown | Returns `{ "departments": [...] }` with 38 JnU departments. |
 | **Club Discovery & Search** | `GET` | `/api/clubs/` | **Verified** | None (`AllowAny`) | Explore Clubs screen | Paginated (`page`, `page_size`, max 50). Supports `?search=<name>`. Annotates `follower_count`, `member_count`, `is_following`, `my_membership`. |
 | **Club Detail** | `GET` | `/api/clubs/<slug>/` | **Verified** | None (`AllowAny`) | Club Profile screen | Returns detailed club profile annotated with follower and member counts, following status, and membership state. |
-| **Club Profile Update** | `PATCH` | `/api/clubs/<slug>/` | **Verified** | Bearer JWT (`IsClubOperator` + Owner) | Operator Club Settings | Permitted editable fields: `description`, `logo`, `contact_email`. Other fields rejected. |
+| **Club Profile Update** | `PATCH` | `/api/clubs/<slug>/` | **Verified** | Bearer JWT (`IsClubOperator` + Owner) | Operator Club Settings | Editable fields: `description`, `contact_email`, `interests` (Week 7). **`logo` is no longer accepted here** — use `PUT/DELETE /api/clubs/<slug>/logo/` (Week 7 image addendum). |
 | **Follow Club** | `POST` | `/api/clubs/<slug>/follow/` | **Verified** | Bearer JWT (`IsStudent`) | Club Profile "Follow" toggle | Creates `ClubFollow` for student. Returns `{"following": true, "follower_count": int}` (201 or 200). |
 | **Unfollow Club** | `DELETE` | `/api/clubs/<slug>/follow/` | **Verified** | Bearer JWT (`IsStudent`) | Club Profile "Unfollow" toggle | Deletes `ClubFollow` for student. Returns 204 No Content. |
 | **Check My Membership** | `GET` | `/api/clubs/<slug>/membership/` | **Verified** | Bearer JWT (`IsStudent`) | Club Profile membership badge | Returns `{ "status": "pending"|"approved"|null, "requested_at": "..."|null }`. |
@@ -68,12 +101,16 @@ Based on an audit of `backend/config/urls.py`, `backend/apps/accounts/`, `backen
 
 ### 2. Partially Implemented or Requiring Confirmation
 
+> **Resolved:** "My Clubs" is served by `GET /api/clubs/?joined=true` / `?following=true` (Week 3); club categories were replaced by the shared interests list (Week 7).
+
 | Feature | Proposed / Unverified Endpoint | Status in Backend Code | Required Confirmation from Backend Developer |
 |:---|:---|:---|:---|
 | **Student's Joined Clubs List ("My Clubs")** | Proposed: `GET /api/clubs/my/` or filter `GET /api/clubs/?joined=true` | Currently no explicit endpoint or filter parameter exists in `ClubListView`. | Can backend add a query parameter `?filter=my-clubs` to `ClubListView`, or a dedicated `GET /api/clubs/my/` endpoint for authenticated students? |
 | **Club Category Filtering** | Proposed: `GET /api/clubs/?category=...` | Model has no explicit `category` field currently; `search_fields = ["name"]`. | Is a club category/genre taxonomy planned (e.g. cultural, research, tech, debate), or should frontend search by keyword/tag? |
 
 ### 3. Not Implemented & Required for Later Stages
+
+> **Resolved:** everything below was delivered in Weeks 4–7 (final paths differ from these proposals, e.g. ratings use `PUT /api/events/<id>/rating/`, notices use `/api/notices/`). See the weekly backend handoffs and `openapi.yml`.
 
 | Feature | Target Week | Proposed Path | Model Status | Endpoints Status | Notes |
 |:---|:---:|:---|:---|:---|:---|
@@ -291,17 +328,17 @@ For all upcoming endpoints, please maintain the standard DRF error response stru
 
 ## K. CORS & Local Development Configuration
 
-Please verify that the following local development settings remain active in `backend/.env`:
+Current settings as used by the frontend (updated 2026-11-28):
 
-- **Backend Base URL:** `http://127.0.0.1:8000`
-- **Frontend Dev Origin:** `http://localhost:5173` and `http://127.0.0.1:5173`
-- **CORS Configuration:** `CORS_ALLOWED_ORIGINS` includes `http://localhost:5173` and `http://127.0.0.1:5173`
-- **JWT Lifespan:**
-  - Access Token: standard 15–60 minutes
-  - Refresh Token: standard 1–7 days
-- **Database Seed Command:**
+- **Backend Base URL:** local `http://127.0.0.1:8000`; deployed `https://jnuverse-a-centralized-platform-for.onrender.com` (Render free tier — the first request after idling can take about a minute; the frontend shows a "waking up the server" notice after 4 s).
+- **Frontend Origins:** `http://localhost:5173` (dev) and `https://jnuverse.vercel.app` (production). Vercel preview URLs and other local ports (e.g. `vite preview`) are not in `CORS_ALLOWED_ORIGINS`.
+- **JWT Lifespan:** access token 30 minutes, refresh token 7 days (Week 2 handoff). When refresh fails the frontend signs the user out with a "session expired" message.
+- **Database:** `backend/.env` currently points at the **shared Supabase database** (also used by the deployed app). See Open Request 1.
+- **Seed Commands:**
   ```bash
   python manage.py import_student_records data/student_records_sample.csv
+  python manage.py seed_demo_events --reset --allow-remote   # removes [DEMO] data only
+  python manage.py seed_demo_events --allow-remote           # recreates demo data with fresh dates
   ```
 
 ---
@@ -318,21 +355,18 @@ Please verify that the following local development settings remain active in `ba
 | **Week 3** | `clubs`: Club list with search & pagination | **Completed & Tested** | Verified operational |
 | **Week 3** | `clubs`: Follow & Unfollow endpoints | **Completed & Tested** | Verified operational |
 | **Week 3** | `clubs`: Membership request, approve, reject, leave, remove | **Completed & Tested** | Verified operational |
-| **Week 3** | `clubs`: Student "My Clubs" filter query param | **Needs Confirmation** | Needed for student portal view |
-| **Week 4** | `events`: Event list, detail, and filter endpoints | **Required Implementation** | Models exist; views pending |
-| **Week 4** | `events`: Event creation & edit (Operator) | **Required Implementation** | Models exist; views pending |
-| **Week 4** | `events`: Event RSVP / registration (Student) | **Required Implementation** | Models exist; views pending |
-| **Week 5** | `notifications`: Notification list & mark-as-read | **Required Implementation** | Models exist; views pending |
-| **Week 5** | `notifications`: Notice creation (Operator) | **Required Implementation** | Models exist; views pending |
-| **Week 6** | `feedback`: Event rating submission (1-5 stars only) | **Required Implementation** | Models exist; views pending |
-| **Week 6** | `collaborations`: Collaboration requests & approvals | **Required Implementation** | Models exist; views pending |
-| **Week 7** | `reports`: Content report submission endpoint | **Required Implementation** | Models exist; views pending |
-| **Week 8** | Analytical reports (5 specific reports) | **Scheduled** | Specifications pending Week 8 |
-| **Week 9** | Integration defect fixes & validation | **Scheduled** | End-to-end testing |
-| **Week 10** | Final documentation, deployment & security review | **Scheduled** | Course delivery |
+| **Week 3** | `clubs`: Student "My Clubs" filter query param | **Completed & Integrated** | `?joined=true` / `?following=true` |
+| **Week 4** | `events`: list, detail, filters, create/edit, publish/cancel, registration | **Completed & Integrated** | Week 4 handoff |
+| **Week 5** | `notifications` and `notices` | **Completed & Integrated** | Week 5 handoff |
+| **Week 6** | `feedback` ratings and `collaborations` | **Completed & Integrated** | Week 6 handoff |
+| **Week 7** | `reports`, dashboards, interests, logo/banner uploads | **Completed & Integrated** | Week 7 handoff + addendum |
+| **Week 8** | Attendance and the five analytical reports | **Completed & Integrated** | Week 8 handoff |
+| **Week 9** | Integration defect fixes & validation | **In Progress** | Open Requests 1–6 above |
+| **Week 10** | Final documentation, deployment & security review | **Scheduled** | [Week 10 handoff](docs/frontend-handoff/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 
 ---
 
 ## M. Change Log
 
 - **2026-10-24 (Step 1 Foundation):** Initial creation of `FRONTEND_REQUIREMENTS.md`. Audited all 7 apps, recorded 20 verified endpoints from Week 1–3, documented privacy rules, and prioritized upcoming requirements for Weeks 4–10.
+- **2026-11-28 (Week 9):** Added "Current Status", consolidated "Open Requests", "Checking Frontend Compatibility", and "Changes Made on the Shared Database"; marked Weeks 3–8 delivered and integrated; updated the club `PATCH` row (no `logo`), CORS/JWT/database/seed settings, and the task checklist.

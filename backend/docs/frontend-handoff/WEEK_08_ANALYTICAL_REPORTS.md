@@ -75,3 +75,19 @@ All clubs are listed, including clubs with no events (zeros and nulls), most eve
 
 ## Errors
 `401` not logged in · `403` wrong role or another club's event · `404` unknown event or someone else's draft · `409` event state does not allow the report · `400` bad date filter.
+
+---
+
+## Frontend Integration Status & Follow-ups (2026-11-28, Anik)
+
+**Status:** Week 8 frontend completed (Stages 1–7, commit `c607fac`): attendance marking, all five reports with charts and table views, date filters — see [`frontend/docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md`](../../../frontend/docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md). All five endpoints and the attendance endpoint matched this contract (read-only role matrix 31/31).
+
+### Requests for the backend
+| # | Request | Why | Priority |
+|:---:|---|---|:---:|
+| 1 | **Seed attendance** in `seed_demo_events` (e.g. mark most registrations of ended `[DEMO]` events as attended) | Attendance is not seeded, so attendance rates are 0 %, response rates are "—" and reports 1, 3, 4, 5 look empty in a demo. | High (before demo) |
+| 2 | **Spread demo students across departments** (e.g. CSE, English, Physics, Bangla) | All five demo students are in Bangla, so the department-participation chart shows a single bar. | Medium |
+
+### Notes
+- Marking attendance from the UI writes to the shared Supabase database; it has not been done during verification. A re-seed would reset it.
+

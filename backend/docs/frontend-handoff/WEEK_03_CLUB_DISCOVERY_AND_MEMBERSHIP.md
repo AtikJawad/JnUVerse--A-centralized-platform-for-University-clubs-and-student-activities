@@ -3,9 +3,11 @@
 **To:** Atik Jawad (Backend MVP Coder) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** Club Catalog, Search, Follow/Unfollow, and Member Management Contracts  
-**Status:** **Backend Completed & Verified; Frontend Pending Step 2**  
+**Status:** **Delivered by Backend & Integrated by Frontend** (updated 2026-11-28)  
 
 ---
+
+> **Update 2026-11-28 (Anik):** The backend delivered this week with the contract in [`frontend/docs/backend-handoff/WEEK_01-03_BACKEND_HANDOFF.md`](../../../frontend/docs/backend-handoff/WEEK_01-03_BACKEND_HANDOFF.md), which supersedes the proposed endpoints below. The proposals are kept as the original request. Frontend integration: [`frontend/docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md`](../../../frontend/docs/workflow/WEEK_03_CLUB_DISCOVERY_AND_MEMBERSHIP.md).
 
 ## 1. Required Backend Capabilities
 - Searchable, paginated club catalog with counts annotated directly on club models.

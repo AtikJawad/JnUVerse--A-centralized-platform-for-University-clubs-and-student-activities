@@ -3,9 +3,11 @@
 **To:** Atik Jawad (Backend MVP Coder) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** Club Announcements, Student Notification Feeds & Audience Scoping  
-**Status:** **Pending Backend Implementation** (Models exist in `apps/notifications/`)  
+**Status:** **Delivered by Backend & Integrated by Frontend** (updated 2026-11-28)  
 
 ---
+
+> **Update 2026-11-28 (Anik):** The backend delivered this week with the contract in [`frontend/docs/backend-handoff/WEEK_05_BACKEND_HANDOFF.md`](../../../frontend/docs/backend-handoff/WEEK_05_BACKEND_HANDOFF.md), which supersedes the proposed endpoints below. The proposals are kept as the original request. Frontend integration: [`frontend/docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md`](../../../frontend/docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md).
 
 ## 1. Required Backend Capabilities
 - Student notifications stream with unread status tracking.

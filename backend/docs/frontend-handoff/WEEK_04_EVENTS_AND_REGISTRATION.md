@@ -3,9 +3,11 @@
 **To:** Atik Jawad (Backend MVP Coder) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** Event Endpoints, Capacity Constraints & Registration API Contract  
-**Status:** **Pending Backend Implementation** (Models exist in `apps/events/`)  
+**Status:** **Delivered by Backend & Integrated by Frontend** (updated 2026-11-28)  
 
 ---
+
+> **Update 2026-11-28 (Anik):** The backend delivered this week with the contract in [`frontend/docs/backend-handoff/WEEK_04_BACKEND_HANDOFF.md`](../../../frontend/docs/backend-handoff/WEEK_04_BACKEND_HANDOFF.md), which supersedes the proposed endpoints below. The proposals are kept as the original request. Frontend integration: [`frontend/docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md`](../../../frontend/docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md).
 
 ## 1. Required Backend Capabilities
 - Public event discovery endpoint filtering by upcoming vs. past events, club slug, and date ranges.

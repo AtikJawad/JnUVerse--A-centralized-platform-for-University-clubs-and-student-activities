@@ -3,9 +3,11 @@
 **To:** Atik Jawad (Backend MVP Coder) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** Inappropriate Content Reports & Dashboard Aggregate Metrics  
-**Status:** **Pending Backend Implementation** (Models exist in `apps/reports/`)  
+**Status:** **Delivered by Backend & Integrated by Frontend** (updated 2026-11-28)  
 
 ---
+
+> **Update 2026-11-28 (Anik):** The backend delivered this week with the contract in [`frontend/docs/backend-handoff/WEEK_07_BACKEND_HANDOFF.md`](../../../frontend/docs/backend-handoff/WEEK_07_BACKEND_HANDOFF.md), which supersedes the proposed endpoints below. The proposals are kept as the original request. Frontend integration: [`frontend/docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md`](../../../frontend/docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md).
 
 ## 1. Required Backend Capabilities
 - Content reporting endpoint for authenticated students to report inappropriate clubs, events, or notices.
@@ -88,3 +90,24 @@ const res = await fetch(`${API}/api/clubs/${slug}/logo/`, {
 - Student → `403`. Another club's operator → `403`. Not logged in → `401`. Unknown club or someone else's draft event → `404`.
 - Suggested UI: logo shown square (crop with `object-fit: cover`), banner about 16:9. Validate type and size in the browser too for faster feedback.
 - Replacing an image changes its URL, so the old URL stops working; refresh from the response.
+
+---
+
+## Frontend Integration Status & Follow-ups (2026-11-28, Anik)
+
+**Status:** Week 7 frontend completed (Stages 1–7, commit `2438ace`): interests, logo/banner upload, content reports, Student and Club Operator dashboards — see [`frontend/docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md`](../../../frontend/docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md).
+
+### Requests for the backend
+| # | Request | Why | Priority |
+|:---:|---|---|:---:|
+| 1 | **Re-seed the demo data** (`seed_demo_events --reset --allow-remote`, then `seed_demo_events --allow-remote`) | Time-based figures have expired: student dashboard shows 0 upcoming / 0 to rate, club dashboard 0 upcoming / 0 registrations in 7 days (handoff: 4 / 2 / 2 / 9). The re-seed also resets Robotics Club interests changed during QA (now include Entrepreneurship, Environment). | High (before demo) |
+| 2 | *(Optional)* Include `club` in the `user` object of `POST /api/auth/login/` for club operators | Login returns the user without `club`; only `/api/auth/me/` has it. The frontend now calls `/me` after an operator logs in (works, one extra request). | Low |
+
+### Changes made on the shared database during Week 7 testing
+- Week 7 Stage 1 verification uploaded a test logo to `[DEMO] Robotics Club` and removed it immediately (logo back to `null`).
+- Manual QA changed `[DEMO] Robotics Club` interests (now include Entrepreneurship and Environment). Other manual QA steps may also have changed `[DEMO]` data. The re-seed (request 1) restores all of it.
+
+### Notes
+- `PATCH /api/clubs/{slug}/` ignoring `logo` caused a silent no-op in the old club edit form; the frontend now uses the logo endpoint (no backend change needed).
+- Axios sends `FormData` as JSON when the instance default `Content-Type: application/json` is set; the frontend overrides it to `multipart/form-data` for uploads (verified 415 → 200). No backend change needed.
+

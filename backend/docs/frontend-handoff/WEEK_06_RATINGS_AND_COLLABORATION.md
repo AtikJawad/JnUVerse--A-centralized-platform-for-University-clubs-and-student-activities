@@ -3,9 +3,11 @@
 **To:** Atik Jawad (Backend MVP Coder) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** Numeric Event Ratings (1–5 Stars Only) & Inter-Club Collaboration Requests  
-**Status:** **Pending Backend Implementation** (Models exist in `apps/feedback/` and `apps/collaborations/`)  
+**Status:** **Delivered by Backend & Integrated by Frontend** (updated 2026-11-28)  
 
 ---
+
+> **Update 2026-11-28 (Anik):** The backend delivered this week with the contract in [`frontend/docs/backend-handoff/WEEK_06_BACKEND_HANDOFF.md`](../../../frontend/docs/backend-handoff/WEEK_06_BACKEND_HANDOFF.md), which supersedes the proposed endpoints below. The proposals are kept as the original request. Frontend integration: [`frontend/docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md`](../../../frontend/docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md).
 
 ## 1. Required Backend Capabilities
 
