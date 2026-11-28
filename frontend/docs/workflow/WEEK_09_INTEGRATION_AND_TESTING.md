@@ -59,10 +59,16 @@
    - Result: main chunk **846 kB → 255 kB** (85 kB gzip); 40 JS files, largest page chunk 57.5 kB (OperatorCollaborations); Vite's >500 kB warning is gone.
    - The resilience test now caches the `/events` chunk before emulating latency, so it measures API slowness rather than the (correct) "Loading page..." fallback during a slow chunk download.
 
-4. [ ] **Stage 4: Responsive & Accessibility Audit**
-   - Headless-Chrome screenshots (Chrome DevTools Protocol, logged in with demo accounts) of every route at 375, 768, 1024 and 1440 px for public, student and operator views.
-   - Check overflow, wrapping, touch targets, navbar/mobile menu, tables, charts and modals; keyboard navigation, visible focus, Escape on modals, and `prefers-reduced-motion`.
-   - Fix defects and re-shoot.
+4. [x] **Stage 4: Responsive & Accessibility Audit**
+   - **Follow-up from the Week 9 backend:** `AuthContext.login` now uses `user.club` from the login response for operators and calls `/api/auth/me/` only as a fallback (verified in Chrome: operator login makes a single `POST /api/auth/login/`).
+   - `scripts/audit-responsive.mjs` (`npm run audit:responsive`): visits 30 routes (9 visitor, 9 student, 12 operator) at 375 / 768 / 1024 / 1440 px = 120 screens, waits until each page is really rendered (no loading text, stable height), saves full-page screenshots and checks page overflow, elements past the viewport, tap targets < 24 px at 375 px (WCAG 2.5.8, with its label and inline-link exceptions), images without alt, unnamed buttons/links, unlabelled form fields and JavaScript errors. The first run waited a fixed 2.5 s and captured loading spinners on slow pages; the script now waits for readiness.
+   - **Defects found and fixed:**
+     1. **Event page stuck on "Loading event details..." for signed-in users opening it directly** (since Week 6): the session resolved after the first fetch started, the identity effect bumped the request generation and the fetch result was discarded without clearing `loading`. `fetchEvent` now also depends on the identity and re-fetches (verified: 3/3 event pages load from a direct URL as demo1).
+     2. **Operator navbar overflowed at 1024 px:** "OPERATOR PORTAL" and "Explore Clubs" wrapped, the club name was cut off and Logout was off-screen. At `lg` the portal badge and the name/subtitle text are hidden (avatar link remains); pill links never wrap.
+     3. **`/operator/members` overflowed by 28 px at 768 px:** the three metric cards now stack until `lg`.
+     4. **Unlabelled form fields** (screen readers heard no name): search/filter fields on Explore Events, Explore Clubs (+ sort select), My Clubs, Members, Operator Events, Notices and Collaborations now have `aria-label`s.
+     5. **Small tap targets:** login/register carousel dots are now 24 × 24 px buttons (visual pill unchanged, `aria-current` on the active slide); register "terms" and event-form "unlimited capacity" checkboxes 20 px with clickable labels; event-form back link and operator event title links have ≥ 24 px height.
+     6. **Dialog keyboard support:** 12 dialogs (EventDetail ×2, OperatorEvents ×2, OperatorCollaborations ×4, OperatorNotices ×3, OperatorMembers ×1) had no Escape, no focus management and (Members) no `role="dialog"`. New `DialogA11y.jsx`: focus moves into the dialog, Tab is trapped, Escape uses the dialog's own close/cancel handler (busy guards respected), focus returns to the opener. Verified in Chrome with real key events on the "Create New Notice" and "Register for Event" dialogs (no submission).
 
 5. [ ] **Stage 5: End-to-End Journey Verification**
    - Scripted read-only checks of the main journeys (onboarding, club engagement, operator review, event lifecycle, ratings, collaboration, reports, analytics).
@@ -190,7 +196,32 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 
 ---
 
-## 14. Backend Week 9 Delivery Check (2026-11-28)
+## 14. Stage 4 Verification Results
+
+| Verification Check | Command / Method | Result | Notes |
+|---|---|:---:|---|
+| **Audit run 1** (fixed 2.5 s wait) | `npm run audit:responsive` | Invalid for slow pages | Captured loading spinners; led to the readiness wait. |
+| **Audit run 2** (readiness wait, before fixes) | `npm run audit:responsive` | **Findings** | 120 screens; 0 crashes, 0 JS errors, 0 images without alt, 0 unnamed controls; operator navbar overflow at 1024 px (12 screens), Members overflow 28 px at 768 px, 36 unlabelled-field hits (8 fields), small targets at 375 px, student event page never ready (6 screens). |
+| **Event page direct load** | headless Chrome, demo1 | **PASS (3/3)** | Loaded in 8–9 s on the shared backend (previously stuck). |
+| **Dialog keyboard behaviour** | headless Chrome, real key events | **PASS (2/2)** | "Create New Notice", "Register for Event": focus in, Tab trapped (12 presses), Escape closes, focus back on opener. |
+| **Operator login request count** | headless Chrome | **PASS** | One `POST /api/auth/login/`, no `/me`. |
+| **Audit run 3** (after fixes) | `npm run audit:responsive` | **PENDING** | Running at commit time; result recorded in a follow-up. |
+| **Static Code Analysis / Build** | `npm run lint`, `npm run build` | **PASS** | — |
+
+---
+
+## 15. Acceptance Criteria (Stage 4)
+
+- [x] Every route checked at 375 / 768 / 1024 / 1440 px as visitor, student and operator (120 screens).
+- [x] Overflow defects fixed (operator navbar at 1024 px, Members at 768 px).
+- [x] Form fields have accessible names; small tap targets enlarged.
+- [x] All 12 dialogs support Escape, focus entry, focus trap and focus return.
+- [x] Event page loads reliably from a direct URL when signed in.
+- [ ] Confirmation audit after fixes (run 3) — pending.
+
+---
+
+## 16. Backend Week 9 Delivery Check (2026-11-28)
 
 Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md` and `backend/docs/LOCAL_TEST_STACK.md`.
 
@@ -206,9 +237,9 @@ Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/d
 
 ---
 
-## 15. Week 9 Readiness Classification
+## 17. Week 9 Readiness Classification
 
-* **Implementation:** Stages 1–3 of 7 complete (API contract audit; resilience and error handling; code splitting).
+* **Implementation:** Stages 1–4 of 7 complete (API contract audit; resilience and error handling; code splitting; responsive & accessibility audit).
 * **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
 * **Open:** backend requests 7–9 (Section 14); local stack setup on the frontend machine for write-flow QA.
 

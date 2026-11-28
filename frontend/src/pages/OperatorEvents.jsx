@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import DialogA11y from "../components/DialogA11y";
 import { eventsAPI, extractErrorMessage } from "../services/api";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
@@ -511,6 +512,7 @@ export default function OperatorEvents() {
                     setCurrentPage(1);
                   }}
                   placeholder="Filter by title or venue..."
+                  aria-label="Filter events by title or venue"
                   className="w-full h-10 pl-10 pr-8 rounded-full bg-surface-white text-xs text-on-surface border border-border-subtle focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none transition-all"
                 />
                 {searchQuery && (
@@ -633,7 +635,7 @@ export default function OperatorEvents() {
 
                             <Link
                               to={`/events/${event.id}`}
-                              className="text-base sm:text-lg font-bold text-on-surface hover:text-primary transition-colors block leading-tight truncate"
+                              className="text-base sm:text-lg font-bold text-on-surface hover:text-primary transition-colors block leading-tight truncate py-1"
                               title={event.title}
                             >
                               {event.title}
@@ -884,6 +886,9 @@ export default function OperatorEvents() {
             className="w-full max-w-md bg-surface-white rounded-3xl p-6 sm:p-8 shadow-xl border border-border-subtle space-y-5 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
+            <DialogA11y onClose={() => {
+            if (!actionLoading) setEventToPublish(null);
+          }} />
             <div className="w-12 h-12 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-[26px]">rocket_launch</span>
             </div>
@@ -968,6 +973,9 @@ export default function OperatorEvents() {
             className="w-full max-w-md bg-surface-white rounded-3xl p-6 sm:p-8 shadow-xl border border-border-subtle space-y-5 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
+            <DialogA11y onClose={() => {
+            if (!actionLoading) setEventToCancel(null);
+          }} />
             <div className="w-12 h-12 rounded-2xl bg-error-container/60 text-error flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-[26px]">cancel</span>
             </div>

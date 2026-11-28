@@ -304,10 +304,16 @@ export default function RegisterClub() {
                       type="button"
                       onClick={() => setActiveSlide(i)}
                       aria-label={`Show slide ${i + 1}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        activeSlide === i ? "w-6 bg-primary" : "w-2 bg-primary/25"
-                      }`}
-                    />
+                      aria-current={activeSlide === i ? "true" : undefined}
+                      className="h-6 min-w-6 px-1 flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`block h-1.5 rounded-full transition-all duration-300 ${
+                          activeSlide === i ? "w-6 bg-primary" : "w-2 bg-primary/25"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
               </div>

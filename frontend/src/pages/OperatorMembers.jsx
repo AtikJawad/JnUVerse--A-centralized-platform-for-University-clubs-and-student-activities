@@ -5,6 +5,7 @@ import api, { extractErrorMessage, fetchAllPages } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
 import ClubLogo from "../components/ClubLogo";
+import DialogA11y from "../components/DialogA11y";
 
 export default function OperatorMembers() {
   const { user } = useAuth();
@@ -250,7 +251,7 @@ export default function OperatorMembers() {
 
           {/* 2. METRICS & KEY STATS BAR (Direct from Stitch Reference) */}
           <div className="w-full bg-white rounded-2xl border border-border-subtle p-5 mb-6 shadow-xs">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
               {/* Metric 1 */}
               <div className="flex items-center gap-4">
                 <div className="w-11 h-11 rounded-xl bg-surface-lavender text-primary flex items-center justify-center shrink-0">
@@ -265,7 +266,7 @@ export default function OperatorMembers() {
               </div>
 
               {/* Metric 2 */}
-              <div className="flex items-center gap-4 md:border-l md:border-border-subtle md:pl-6">
+              <div className="flex items-center gap-4 lg:border-l lg:border-border-subtle lg:pl-6">
                 <div className="w-11 h-11 rounded-xl bg-surface-lavender text-primary flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[22px]">school</span>
                 </div>
@@ -278,7 +279,7 @@ export default function OperatorMembers() {
               </div>
 
               {/* Metric 3 */}
-              <div className="flex items-center justify-between md:border-l md:border-border-subtle md:pl-6">
+              <div className="flex items-center justify-between lg:border-l lg:border-border-subtle lg:pl-6">
                 <div className="flex items-center gap-3.5">
                   <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-[22px]">pending_actions</span>
@@ -333,6 +334,7 @@ export default function OperatorMembers() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Find a member by name, student ID, or department..."
+                aria-label="Find a member"
                 className="w-full h-10 pl-10 pr-4 rounded-xl bg-white border border-border-subtle text-on-surface placeholder:text-slate-400 text-xs focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all shadow-xs"
               />
             </div>
@@ -560,14 +562,20 @@ export default function OperatorMembers() {
 
       {/* 5. REMOVE MEMBER CONFIRMATION MODAL (Direct from Stitch Reference) */}
       {memberToRemove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-fadeIn">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remove-member-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-fadeIn"
+        >
           <div className="w-full max-w-md bg-white rounded-2xl p-6 border border-border-subtle shadow-2xl">
+            <DialogA11y onClose={() => setMemberToRemove(null)} />
             <div className="flex items-center gap-3.5 mb-4">
               <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[24px]">person_remove</span>
               </div>
               <div className="flex flex-col">
-                <h3 className="text-base font-bold text-on-surface">Remove this member?</h3>
+                <h3 id="remove-member-title" className="text-base font-bold text-on-surface">Remove this member?</h3>
                 <span className="text-[11px] text-text-muted">Student Revocation Confirmation</span>
               </div>
             </div>

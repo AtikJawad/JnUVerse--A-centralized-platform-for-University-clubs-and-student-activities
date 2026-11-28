@@ -136,7 +136,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-surface-lavender text-primary text-[11px] font-semibold tracking-wide uppercase select-none">
+          <span className="hidden sm:inline-flex lg:hidden xl:inline-flex items-center px-2.5 py-1 rounded-full bg-surface-lavender text-primary text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap select-none">
             {getPortalLabel()}
           </span>
         </div>
@@ -150,7 +150,7 @@ export default function Navbar() {
         >
           <Link
             to="/"
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
               isActive("/")
                 ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -160,7 +160,7 @@ export default function Navbar() {
           </Link>
           <Link
             to="/clubs"
-            className={`px-4 sm:px-4.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`px-4 sm:px-4.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
               isActive("/clubs") && !isOwnClubPage
                 ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -172,7 +172,7 @@ export default function Navbar() {
             <>
               <Link
                 to="/operator/members"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/operator/members")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -182,7 +182,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/operator/events"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/operator/events")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -192,7 +192,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/operator/analytics"
-                className={`hidden xl:inline-flex px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`hidden xl:inline-flex px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/operator/analytics")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -202,7 +202,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/operator/notices"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/operator/notices")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -212,7 +212,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/operator/collaborations"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/operator/collaborations")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -228,7 +228,7 @@ export default function Navbar() {
                 <>
               <Link
                 to="/my-clubs"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/my-clubs")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -238,7 +238,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/my-activity"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/my-activity")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -250,7 +250,7 @@ export default function Navbar() {
               )}
               <Link
                 to="/events"
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive("/events")
                     ? "bg-primary text-white font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -305,7 +305,7 @@ export default function Navbar() {
               {(() => {
                 const identity = (
                   <>
-                    <div className="flex flex-col text-right">
+                    <div className="flex lg:hidden xl:flex flex-col text-right">
                       <span className="text-xs font-bold text-on-surface leading-tight truncate max-w-[170px]">
                         {getUserDisplayName()}
                       </span>

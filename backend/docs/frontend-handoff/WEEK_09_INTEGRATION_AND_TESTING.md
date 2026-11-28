@@ -82,3 +82,8 @@ Pulled `d488455` ("ReSeeded demo data") and `d0cc389` ("Week 9 Backend Completeâ
 - Use `user.club` from the login response and keep `/api/auth/me/` only as a fallback (Week 9).
 - Run the local stack for the write-flow QA once PostgreSQL is installed on the frontend machine.
 
+### 5.4 Frontend Stage 4 update (2026-11-28)
+- **Request 6 adopted:** the frontend now uses `user.club` from the operator login response; `/api/auth/me/` is only a fallback (verified: operator login = one request).
+- **Shared database:** the Stage 4 responsive/accessibility audit was read-only apart from logging in as demo1 and democlub1 and opening/cancelling two dialogs (nothing submitted).
+- No new backend requests from Stage 4; all Stage 4 defects were frontend-side (details in `frontend/docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md`).
+

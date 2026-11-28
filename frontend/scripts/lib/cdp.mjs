@@ -60,6 +60,11 @@ export async function launchChrome({ port = 9333 } = {}) {
 
   const page = {
     send,
+    /** Subscribe to raw CDP events (e.g. Runtime.exceptionThrown); returns an unsubscribe function. */
+    on(fn) {
+      listeners.push(fn);
+      return () => listeners.splice(listeners.indexOf(fn), 1);
+    },
     async setViewport(width, height = 900, mobile = width < 768) {
       await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile });
     },

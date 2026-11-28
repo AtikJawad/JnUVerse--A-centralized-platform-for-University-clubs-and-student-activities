@@ -526,6 +526,7 @@ export default function ExploreClubs() {
                     setPage(1);
                   }}
                   placeholder="Search clubs by name, niche, or department..."
+                  aria-label="Search clubs"
                   className="w-full h-12 sm:h-14 2xl:h-[74px] pl-12 2xl:pl-16 pr-28 sm:pr-32 2xl:pr-40 rounded-xl 2xl:rounded-2xl bg-canvas-base text-on-surface placeholder:text-text-muted text-sm 2xl:text-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                 />
                 <button
@@ -746,6 +747,7 @@ export default function ExploreClubs() {
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   <span className="text-xs text-text-muted font-medium">Sort by:</span>
                   <select
+                    aria-label="Sort clubs"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="px-3 py-1.5 rounded-full bg-surface-white text-on-surface text-xs font-semibold shadow-sm focus:outline-none cursor-pointer border-0"

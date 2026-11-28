@@ -300,6 +300,7 @@ export default function MyClubs() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter your clubs..."
+                aria-label="Filter your clubs"
                 className="w-full h-10 pl-10 pr-4 rounded-xl bg-canvas-base text-on-surface text-xs focus:outline-none focus:bg-surface-white focus:ring-2 focus:ring-primary/20 transition-all border border-border-subtle/80 placeholder:text-text-muted"
               />
             </div>

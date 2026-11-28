@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import DialogA11y from "../components/DialogA11y";
 import { noticesAPI, authAPI, extractErrorMessage } from "../services/api";
 
 /**
@@ -883,6 +884,7 @@ export default function OperatorNotices() {
                 </span>
                 <input
                   type="text"
+                  aria-label="Search notices"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
@@ -1232,6 +1234,7 @@ export default function OperatorNotices() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn"
         >
           <div className="bg-surface-white rounded-2xl p-6 max-w-lg w-full border border-border-subtle shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <DialogA11y onClose={() => { if (!createLoading) setIsCreateOpen(false); }} />
             {/* Modal Header */}
             <div className="flex items-start justify-between pb-3 border-b border-border-subtle">
               <div className="flex items-center gap-2.5">
@@ -1462,6 +1465,7 @@ export default function OperatorNotices() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn"
         >
           <div className="bg-surface-white rounded-2xl p-6 max-w-lg w-full border border-border-subtle shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <DialogA11y onClose={() => { if (!editLoading) setEditingNotice(null); }} />
             {/* Modal Header */}
             <div className="flex items-start justify-between pb-3 border-b border-border-subtle">
               <div className="flex items-center gap-2.5">
@@ -1597,6 +1601,7 @@ export default function OperatorNotices() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn"
         >
           <div className="bg-surface-white rounded-2xl p-6 max-w-md w-full border border-border-subtle shadow-2xl flex flex-col gap-4">
+            <DialogA11y onClose={() => { if (!deleteLoading) setDeletingNotice(null); }} />
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-error-container text-on-error-container flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[20px]">delete_forever</span>

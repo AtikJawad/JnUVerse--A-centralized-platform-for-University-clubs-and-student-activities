@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import DialogA11y from "../components/DialogA11y";
 import ProposeCollaborationModal from "../components/ProposeCollaborationModal";
 import { collaborationsAPI, extractErrorMessage } from "../services/api";
 
@@ -810,6 +811,7 @@ export default function OperatorCollaborations() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter loaded collaborations by title, club, or scope..."
+                aria-label="Filter collaborations"
                 className="w-full h-10 pl-10 pr-10 rounded-xl bg-canvas-base text-xs text-on-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
               />
               {searchQuery && (
@@ -1169,6 +1171,9 @@ export default function OperatorCollaborations() {
               className="bg-surface-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-border-subtle flex flex-col gap-5"
               onClick={(e) => e.stopPropagation()}
             >
+              <DialogA11y onClose={() => {
+              if (!actionLoading) setRequestToAccept(null);
+            }} />
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center">
@@ -1268,6 +1273,9 @@ export default function OperatorCollaborations() {
               className="bg-surface-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-border-subtle flex flex-col gap-5"
               onClick={(e) => e.stopPropagation()}
             >
+              <DialogA11y onClose={() => {
+              if (!actionLoading) setRequestToReject(null);
+            }} />
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-error-container text-error flex items-center justify-center">
@@ -1363,6 +1371,9 @@ export default function OperatorCollaborations() {
               className="bg-surface-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-border-subtle flex flex-col gap-5"
               onClick={(e) => e.stopPropagation()}
             >
+              <DialogA11y onClose={() => {
+              if (!actionLoading) setRequestToCancel(null);
+            }} />
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center">
@@ -1455,6 +1466,7 @@ export default function OperatorCollaborations() {
               className="bg-surface-white w-full max-w-xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
               onClick={(e) => e.stopPropagation()}
             >
+              <DialogA11y onClose={() => setDetailSheetRequest(null)} />
               {/* Drawer Header */}
               <div className="h-16 px-6 border-b border-border-subtle flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">

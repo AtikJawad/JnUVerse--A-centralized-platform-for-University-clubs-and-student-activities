@@ -62,9 +62,9 @@ export function AuthProvider({ children }) {
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
 
-    // The login response's user object has no `club`; for club operators the full
-    // profile (with club id/slug/logo) comes from /api/auth/me/.
-    if (userData && userData.role !== "club_operator") {
+    // Since the Week 9 backend, the login response includes `club` for club operators.
+    // /api/auth/me/ is only a fallback (e.g. an older backend without that field).
+    if (userData && (userData.role !== "club_operator" || userData.club)) {
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       return userData;

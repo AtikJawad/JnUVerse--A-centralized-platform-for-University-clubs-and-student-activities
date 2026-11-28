@@ -563,6 +563,7 @@ export default function ExploreEvents() {
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     placeholder="Search events by title..."
+                    aria-label="Search events by title"
                     className="w-full h-11 pl-11 pr-24 bg-surface-white border border-border-subtle rounded-full text-xs text-on-surface placeholder:text-text-muted shadow-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                   />
                   <button

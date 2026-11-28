@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import DialogA11y from "../components/DialogA11y";
 import { eventsAPI, ratingsAPI, extractErrorMessage } from "../services/api";
 import { bannerStyle } from "../utils/banner";
 import LoadingState from "../components/LoadingState";
@@ -199,7 +200,11 @@ export default function EventDetail() {
         setLoading(false);
       }
     }
-  }, [id]);
+    // Week 9 fix: re-fetch when the identity changes. On a direct page load the session resolves after
+    // the first fetch starts; the identity effect bumps the generation, which used to discard that fetch
+    // and leave the page on "Loading event details..." forever. Re-fetching also refreshes
+    // is_registered / my_rating for the signed-in user.
+  }, [id, currentIdentity]);
 
   useEffect(() => {
     generationRef.current += 1;
@@ -1352,6 +1357,7 @@ export default function EventDetail() {
             className="w-full max-w-md bg-surface-white rounded-3xl p-6 sm:p-8 shadow-xl border border-border-subtle space-y-5 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
+            <DialogA11y onClose={() => setShowRegisterModal(false)} />
             <div className="w-12 h-12 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center">
               <span className="material-symbols-outlined text-[24px]">confirmation_number</span>
             </div>
@@ -1409,6 +1415,7 @@ export default function EventDetail() {
             className="w-full max-w-md bg-surface-white rounded-3xl p-6 sm:p-8 shadow-xl border border-border-subtle space-y-5 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
+            <DialogA11y onClose={() => setShowCancelModal(false)} />
             <div className="w-12 h-12 rounded-2xl bg-error-container/40 text-error flex items-center justify-center">
               <span className="material-symbols-outlined text-[24px]">cancel</span>
             </div>

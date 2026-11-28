@@ -421,7 +421,7 @@ export default function OperatorEventForm() {
             >
               <Link
                 to="/events"
-                className="hover:text-primary transition-colors flex items-center gap-1"
+                className="hover:text-primary transition-colors flex items-center gap-1 min-h-6 py-1"
               >
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
                 <span>Events</span>
@@ -815,7 +815,7 @@ export default function OperatorEventForm() {
                           }
                         }}
                         disabled={submitting || isReadOnly}
-                        className="w-4 h-4 rounded text-primary focus:ring-primary/20 accent-primary cursor-pointer disabled:cursor-not-allowed"
+                        className="w-5 h-5 rounded text-primary focus:ring-primary/20 accent-primary cursor-pointer disabled:cursor-not-allowed"
                       />
                       <label
                         htmlFor="unlimited-capacity-check"
