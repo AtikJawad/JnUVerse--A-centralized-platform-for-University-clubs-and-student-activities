@@ -1,7 +1,7 @@
 # Week 09 — Cross-Module Integration & Testing
 
 **Focus:** Frontend–backend integration audit, resilience, performance, responsive and accessibility refinements, end-to-end journey verification and the integration test report  
-**Status:** **In Progress — Stages 1–5 Completed (Contract 64/64; Resilience 9/9; Journeys 26/26; Responsive Audit Clean of Overflow and Unlabelled Fields)**  
+**Status:** **In Progress — Stages 1–6 Completed (Contract 64/64; Resilience 9/9; Journeys 26/26; Responsive Audit Clean of Overflow and Unlabelled Fields; UML Validated)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** `docs/api/openapi.yml` (48 API paths) and backend handoffs Weeks 1–8. No Week 9 backend handoff yet; backend Week 9 work is fixing API issues found during integration.  
 **Design Reference:** Google Stitch exports in `docs/ui/stitch-export/` and `jnuverse/DESIGN.md`; UML deliverable `docs/uml/UML_Diagrams.pdf` (21 pages) for diagram validation.  
@@ -76,8 +76,10 @@
    - `scripts/test-journeys.mjs` (`npm run test:journeys`, headless Chrome, read-only apart from logins): signs in through the **real login forms** and walks the visitor, student and operator journeys, comparing what each screen shows with what the API returns for the same account — 26 checks (dashboard badges and counts, notification bell, My Clubs, My Activity score, My Registrations, My Reports, saved interests, operator metrics, pending requests, members, analytics figures, event report departments and totals, collaborations, notices). The backend's own `tests/test_journeys.py` covers the same four journeys at API level.
    - `frontend/docs/testing/MANUAL_TEST_SCRIPT.md`: the consolidated manual script for the tester — every flow that changes data (registration, interests, follow/join/leave, event registration, ratings, notices, approvals, event lifecycle with banner, attendance, club logo, collaborations, reports, analytics, cross-cutting checks), 13 sections with expected results from the demo data and a defects table; to be run on the backend's local test stack.
 
-6. [ ] **Stage 6: Diagram Validation (frontend input)**
-   - Map the use cases, classes/entities and sequence flows in `docs/uml/UML_Diagrams.pdf` to frontend routes, screens and API calls; list anything in the diagrams that the implementation does differently or does not have, for the UML designer.
+6. [x] **Stage 6: Diagram Validation (frontend input)**
+   - All 21 pages of `docs/uml/UML_Diagrams.pdf` (4 use case, 5 class, 6 sequence, 6 activity diagrams) compared with the app, `openapi.yml` and the backend code at `d0cc389`. Report for the UML designer: `frontend/docs/testing/UML_DIAGRAM_VALIDATION.md` (use case → screen → API traceability, and every difference with a suggested change).
+   - **Main findings:** (1) p3 "Attach Related Event" is drawn on *responding* to a collaboration; in the app the event is linked when *sending* and acceptance only makes the clubs partners. (2) Four sequence diagrams show the wrong status codes: registration no-match 403 → **400**, login 401 → **400**, event full/cancelled 400 → **409**, rating not allowed 400 → **403/409**. (3) Class diagrams lack `ContentReport` and `EventRegistration.attended` (needed by reports 3–5) plus 8 attributes; Club logo is an uploaded image, not a URL. (4) 20 implemented use cases are not drawn (follow, join/leave, register/cancel, rate, notifications, reports, dashboards, analytics, attendance, banner/logo uploads, edit/delete notice, cancel collaboration, partners). (5) All 6 activity diagrams match their main flow but miss branches (cancelled/started events, re-request after rejection, notifications, cancel collaboration).
+   - Nothing in the diagrams required a code change; the diagrams are to be updated to match the tested implementation.
 
 7. [ ] **Stage 7: Integration Test Report & Final Quality Gates**
    - Frontend integration test report (`frontend/docs/testing/INTEGRATION_TEST_REPORT.md`): contract audit, journeys, responsive/accessibility results, defects found and fixed, open issues.
@@ -110,7 +112,7 @@ The local backend (`backend/.env`) connects to the **shared Supabase database** 
 - [ ] Main JavaScript chunk below 500 kB.
 - [ ] Every route checked at 375 / 768 / 1024 / 1440 px with defects fixed; modals and charts are keyboard-usable.
 - [ ] Main journeys verified; Weeks 6–8 browser QA backlog executed with results recorded.
-- [ ] Use-case / screen traceability delivered to the UML designer.
+- [x] Use-case / screen traceability delivered to the UML designer (`frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`).
 - [ ] Integration test report written; ESLint and Vite build pass; no backend files modified.
 
 ---
@@ -240,7 +242,7 @@ Also: `npm run lint` PASS (0 / 0), `npm run build` PASS. The error boundary fall
 First run 25/26: the My Activity check read the score before the data loaded (the heading renders first); the check now waits for the figure. The page itself showed the correct score (12).
 
 ### 16.2 Confirmation audit after Stage 4 fixes 7–8
-*Pending at commit time (audit run 4 was still running); recorded in a follow-up commit.*
+*Run 4 (375 and 1440 px) stopped responding after 28 screens: a Chrome DevTools command had no time limit. `scripts/lib/cdp.mjs` now fails any command after 60 s, and `audit-responsive.mjs` records a stuck screen as a failure and continues. The re-run was still in progress at the Stage 6 commit; its result is recorded with Stage 7.*
 
 ---
 
@@ -252,7 +254,30 @@ First run 25/26: the My Activity check read the score before the data loaded (th
 
 ---
 
-## 18. Backend Week 9 Delivery Check (2026-11-28)
+## 18. Stage 6 Verification Results
+
+| Diagram set (pages) | Checked against | Result |
+|---|---|---|
+| Use case (1–4) | Routes in `App.jsx`, calls in `api.js` | Shown use cases all implemented; 1 relation wrong (p3 Attach Related Event); 20 implemented use cases missing |
+| Class (5–9) | Backend models | Entities and relations match; `ContentReport` class and 8 attributes missing; Club logo type differs |
+| Sequence (10–15) | Backend views/serializers, frontend error handling | Message order matches; 4 diagrams with wrong status codes; S6 lacks the 409 duplicate branch; 9 alternative flows missing |
+| Activity (16–21) | Backend rules and notifications | Main flows match; branches missing in all 6 |
+
+Every claim in the report was checked in the code (endpoint paths against `openapi.yml`, messages and codes in the views/serializers). Read-only: nothing written to the shared database.
+
+---
+
+## 19. Acceptance Criteria (Stage 6)
+
+- [x] Every diagram page reviewed (21/21).
+- [x] Use case → screen → API traceability for all use cases, including those not in the diagrams.
+- [x] Every difference listed with the implemented behaviour and a suggested diagram change.
+- [x] Report placed where the team can find it and linked from the backend handoff.
+- [ ] Diagrams updated by the UML designer — pending (team).
+
+---
+
+## 20. Backend Week 9 Delivery Check (2026-11-28)
 
 Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/docs/backend-handoff/WEEK_09_BACKEND_HANDOFF.md` and `backend/docs/LOCAL_TEST_STACK.md`.
 
@@ -268,9 +293,9 @@ Pulled `d488455` and `d0cc389` (fast-forward, no conflicts) and read `frontend/d
 
 ---
 
-## 19. Week 9 Readiness Classification
+## 21. Week 9 Readiness Classification
 
-* **Implementation:** Stages 1–5 of 7 complete (API contract audit; resilience; code splitting; responsive & accessibility audit; end-to-end journeys).
+* **Implementation:** Stages 1–6 of 7 complete (API contract audit; resilience; code splitting; responsive & accessibility audit; end-to-end journeys; UML diagram validation).
 * **Verification:** contract audit clean; spec confirmed current; resilience suite 9/9 in headless Chrome; production build split and verified in Chrome.
-* **Open:** backend requests 7–9 (Section 14); local stack setup on the frontend machine for write-flow QA.
+* **Open:** backend requests 7–9 (Section 20); UML diagram updates (Section 18); local stack setup on the frontend machine for write-flow QA.
 

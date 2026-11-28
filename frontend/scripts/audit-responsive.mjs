@@ -158,13 +158,20 @@ try {
       await page.setViewport(width, 900);
       for (const route of routes) {
         errors.length = 0;
-        await page.goto(`${APP}${route}`, 300);
-        const readyMs = await waitForReady();
-        const check = await page.eval(CHECK);
         const file = `${role}_${width}_${route.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "home"}.png`;
-        await page.screenshot(join(OUT, file));
-        results.push({ role, width, route, file, readyMs, finalPath: await page.path(), errors: [...new Set(errors)], ...check });
-        process.stdout.write(".");
+        try {
+          await page.goto(`${APP}${route}`, 300);
+          const readyMs = await waitForReady();
+          const check = await page.eval(CHECK);
+          await page.screenshot(join(OUT, file));
+          results.push({ role, width, route, file, readyMs, finalPath: await page.path(), errors: [...new Set(errors)], ...check });
+          process.stdout.write(".");
+        } catch (e) {
+          // A stuck screen is recorded as a failure; the rest of the audit still runs
+          const empty = { pageOverflow: 0, sticking: [], smallTargets: [], noAlt: [], unnamed: [], unlabeled: [] };
+          results.push({ role, width, route, file, readyMs: -1, finalPath: route, errors: [`audit step failed: ${e.message}`], ...empty });
+          process.stdout.write("x");
+        }
       }
     }
   }

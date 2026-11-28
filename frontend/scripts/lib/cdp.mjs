@@ -48,10 +48,19 @@ export async function launchChrome({ port = 9333 } = {}) {
       listeners.forEach((fn) => fn(data));
     }
   };
-  const send = (method, params = {}) =>
+  // Every command times out so a stuck page (e.g. a huge full-page screenshot) fails the step instead of hanging the run
+  const send = (method, params = {}, timeoutMs = 60000) =>
     new Promise((resolve, reject) => {
       const msgId = ++id;
-      pending.set(msgId, { resolve, reject });
+      const timer = setTimeout(() => {
+        pending.delete(msgId);
+        reject(new Error(`CDP ${method} timed out after ${timeoutMs} ms`));
+      }, timeoutMs);
+      const done = (fn) => (value) => {
+        clearTimeout(timer);
+        fn(value);
+      };
+      pending.set(msgId, { resolve: done(resolve), reject: done(reject) });
       ws.send(JSON.stringify({ id: msgId, method, params }));
     });
 

@@ -3,7 +3,7 @@
 **To:** Atik Jawad (Backend MVP Coder), Sheak Noor Muhammad Nabil (Tester) & Development Team  
 **From:** Anik Khondokar (Frontend MVP Coder)  
 **Topic:** End-to-End User Journey Contracts & Automated Test Validation  
-**Status:** **Backend Delivered (`d0cc389`) — Frontend Stages 1–3 Done; 3 New Requests** (updated 2026-11-28)  
+**Status:** **Backend Delivered (`d0cc389`) — Frontend Stages 1–6 Done; 3 Open Requests (7–9); UML Diagram Updates Listed** (updated 2026-11-28)  
 
 ---
 
@@ -91,4 +91,13 @@ Pulled `d488455` ("ReSeeded demo data") and `d0cc389` ("Week 9 Backend Complete�
 - **UI ↔ API agreement:** `npm run test:journeys` signs in through the real login forms and compares 26 screen values with the API for demo1 and democlub1 — **26/26 pass**.
 - **Manual script for the tester:** `frontend/docs/testing/MANUAL_TEST_SCRIPT.md` covers every data-changing flow and is written for your **local test stack**. It lists the correct passwords (`Str0ng-Pass-123` only for `club1@example.com`, `Demo-Pass-12345` for the demo accounts) until request 8 is fixed in `LOCAL_TEST_STACK.md`.
 - **Observation (no request yet):** with the backend pointed at the shared Supabase database from a local machine, a signed-in page that makes several API calls (student dashboard, event page with session check) takes 5–9 s to render; the deployed Render service may be faster. Worth checking on the deployed stack before the demo.
+
+### 5.6 Frontend Stage 6 update — UML diagram validation (2026-11-28)
+- All 21 pages of `docs/uml/UML_Diagrams.pdf` were checked against the app, `openapi.yml` and the backend code at `d0cc389`. Full report: **`frontend/docs/testing/UML_DIAGRAM_VALIDATION.md`** (use case → screen → API table and every difference with a suggested change).
+- **No backend change is requested.** The differences are all on the diagram side; the implementation is the reference. Please check the points about your API before the diagrams are redrawn:
+  - **Status codes drawn wrongly:** student registration with no matching record (drawn 403, API **400**), invalid login (drawn 401, API **400** "Invalid credentials."), event registration full/cancelled (drawn 400, API **409**), rating not allowed (drawn 400, API **403** not registered / **409** not published, not ended or window over).
+  - **Collaboration (p3):** "Attach Related Event" is drawn on accepting; the API links the event when sending (`related_event`, own published event that has not ended), and acceptance only records partners.
+  - **Classes:** `ContentReport` and `EventRegistration.attended` are missing; `Club.logo` is drawn as a URL but is the uploaded `logo_image`.
+  - **Activities:** notifications you send (membership request/decision, event published/updated/cancelled, collaboration request/response/cancel) and re-requesting membership after rejected/left/removed are not drawn.
+- **Shared database:** read-only (no logins needed for this stage).
 

@@ -550,7 +550,7 @@ Built against `WEEK_08_BACKEND_HANDOFF.md`. No Stitch analytics screens exist, s
 | **Ratings & Collaboration** | Week 6 | **Completed** (Stages 1–7 Finalized: Implementation & verification complete; manual browser QA pending) | **Completed & Verified** (Contracts verified via source inspection & live API smoke tests; pytest runner blocked locally) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
 | **Reports & Dashboards** | Week 7 | **Completed** (Stages 1–7; lint, build and API checks passed; browser QA pending demo re-seed) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | **Completed** (Stages 1–7; lint, build and 31-check API matrix passed; browser QA pending) | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
-| **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
+| **Integration & End-to-End Testing** | Week 9 | **In Progress** (Stages 1–6: contract 64/64, resilience 9/9, journeys 26/26, responsive audit, UML validation — [report](docs/testing/UML_DIAGRAM_VALIDATION.md); Stage 7 report pending) | **Delivered** (`d0cc389`; requests 7–9 open) | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
 | **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
 
 ---
