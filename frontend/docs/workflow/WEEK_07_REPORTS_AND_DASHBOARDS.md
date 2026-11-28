@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stages 1–6 Completed (Stages 2–6 Source, Build & API Verified; Browser QA Pending)**  
+**Status:** **Completed — Stages 1–7 Finalized (Lint, Build & API Role Matrix Passed; Manual Browser QA Pending Demo Re-seed)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -98,9 +98,10 @@
    - "Report" button: ClubDetail header for logged-in users except the club's own operator; EventDetail breadcrumb row for published or cancelled events, hidden for the organizing club's operator.
    - Navbar: flag icon next to the notification bell and a "My Reports" link in the mobile menu.
 
-7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 21).
-   - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
+7. [x] **Stage 7: Final Quality Gates & Regression Audit**
+   - `npm run lint`, `npm run build` and a non-mutating 21-check role-permission API matrix (Section 20).
+   - Regression review of the shared changes (`AuthContext` login/`refreshUser`, `App.jsx` routing, `Navbar`, `ClubDetail`, `EventDetail`, `ExploreEvents`).
+   - `FRONTEND_README.md` updated: Week 7 section, directory tree entries for the new files, status matrix row.
 
 ---
 
@@ -244,14 +245,14 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 
 ## 7. Acceptance Criteria (Week 7)
 
-- [ ] All Week 7 API methods implemented in `api.js` using the shared Axios instance and trailing-slash URLs.
-- [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
-- [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
-- [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 21 and link to the correct management screens.
-- [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
-- [ ] No backend files modified; no new package dependencies.
-- [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
+- [x] All Week 7 API methods implemented in `api.js` using the shared Axios instance and trailing-slash URLs.
+- [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message. *(Upload transport verified live in Stage 1; UI flow pending browser QA.)*
+- [x] Every club and event screen renders the logo/banner or a placeholder when `null`. *(Except screens whose API objects carry no logo: EventDetail and collaboration rows.)*
+- [ ] Students can set, change and clear interests; club operators can set club interests. *(Implemented; saving pending browser QA.)*
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 22 and link to the correct management screens. *(Links and structure verified; populated figures blocked until demo re-seed.)*
+- [x] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels. *(400/409 guards verified via API; labels verified against demo data.)*
+- [x] No backend files modified; no new package dependencies.
+- [x] ESLint 0 errors, 0 warnings; Vite production build passes.
 
 ---
 
@@ -312,7 +313,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
 - [x] Operators can reach their own club profile from the navbar, immediately after login.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of uploads and interest saving (Section 21).
+- [ ] Manual browser QA of uploads and interest saving (Section 22).
 
 ---
 
@@ -325,7 +326,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 | **Prompt Trigger Data** | `GET /api/dashboard/student/` (demo1–demo5) | **PASS (200 OK)** | `has_interests: false` for demo2 and demo4 (prompt shown); `true` for demo1, demo3, demo5. |
 | **Suggestions from Interests** | same request | **PASS** | demo3 → Sports Club; demo5 → Robotics Club, Cultural Forum, Debate Society; demo1 → none ("all caught up"). |
 | **Interests RBAC** | `GET /api/auth/me/interests/` (operator / anonymous) | **PASS (403 / 401)** | `/profile` is student-only in the router as well. |
-| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 21). |
+| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 22). |
 
 ---
 
@@ -335,7 +336,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] The dashboard shows a skippable interests prompt only when `has_interests` is `false`.
 - [x] Students reach `/profile` from the navbar (desktop and mobile).
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of saving and clearing interests (Section 21).
+- [ ] Manual browser QA of saving and clearing interests (Section 22).
 
 ---
 
@@ -359,7 +360,7 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Next events, suggested clubs (with Follow) and both suggestion empty states implemented.
 - [x] Static Week 3 roadmap and profile placeholders removed.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA with re-seeded demo data (Section 21).
+- [ ] Browser QA with re-seeded demo data (Section 22).
 
 ---
 
@@ -409,11 +410,44 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Duplicate reports show a clear message instead of an error.
 - [x] `/my-reports` lists the user's own reports with the correct status labels, following the Stitch reports interface.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Browser QA of report submission (Section 21).
+- [ ] Browser QA of report submission (Section 22).
 
 ---
 
-## 20. Stitch Design Fidelity Review (Stages 2–6)
+## 20. Stage 7 — Final Quality Gates & Regression Audit
+
+### 20.1 Stage Status & Verification Matrix
+
+| Stage | Feature Area | Implementation Status | Verification Status | Notes |
+|:---:|---|:---:|:---:|---|
+| **1** | API Services Foundation | **Complete** | Live API Verified | Upload transport 415 (JSON) vs 200 (multipart) confirmed |
+| **2** | Logos, Banners & Club Interests | **Complete** | Source & Build Verified; navigation user-confirmed | Upload/interest saving pending browser QA; login `user.club` fix and navbar club link added from QA |
+| **3** | Student Profile & Interests Prompt | **Complete** | Source, Build & API Verified | Prompt triggers for demo2/demo4; saving pending browser QA |
+| **4** | Student Dashboard | **Complete** | Source, Build & API Verified; hero animation user-reviewed | Rebuilt against Stitch; populated events/ratings blocked until re-seed |
+| **5** | Club Operator Dashboard | **Complete** | Source, Build & API Verified | Built against Stitch; approve/reject from dashboard pending browser QA |
+| **6** | Content Reports | **Complete** | Source, Build & API Verified | Built against Stitch reports interface; new report submission pending browser QA |
+| **7** | Final Quality Gates & Audit | **Complete** | Automated Gates & Role Matrix Passed | See 20.2 |
+
+### 20.2 Automated Quality Gates Execution Summary
+
+| Quality Gate | Target Command | Result | Notes |
+|---|---|:---:|---|
+| **Frontend Lint** | `cd frontend && npm run lint` | **PASS (0 errors, 0 warnings)** | Entire frontend. |
+| **Production Build** | `cd frontend && npm run build` | **PASS (145 modules, built in 1.17s)** | JS bundle 796 kB (188 kB gzip); the >500 kB chunk warning is carried over and scheduled for Week 9 code splitting (`React.lazy`). |
+| **API Role Matrix** | Python `urllib` script (read-only), anonymous / demo1 / democlub1 | **PASS (21/21)** | `interests` 200/200/200; `me/interests` 401/200/403; `dashboard/student` 401/200/403; `dashboard/club` 401/403/200; `reports` 401/200/200; `membership-requests` 401/403/200; `events?registered=true` 401/200/403. |
+| **Backend Test Suite** | — | **NOT RUN** | Backend unchanged this week; the backend developer reports 181 passing tests for Week 7. |
+
+### 20.3 Regression Review
+
+- `AuthContext.login`: students keep the login response user; club operators now load `/api/auth/me/` (needed for `user.club`). Both login pages read `role` from the returned user, which `/me` also provides.
+- `App.jsx`: `RoleDashboard` is only rendered inside `ProtectedRoute`, which waits for auth loading, so `user` is resolved before the role check.
+- `Navbar`: "Explore Clubs" stays highlighted on other clubs' pages; only the operator's own club page highlights the club link.
+- Data writes performed by the Week 7 verification: one temporary Robotics Club logo upload in Stage 1, removed immediately (logo back to `null`). No other writes.
+- Note for the team: the Robotics Club interests currently include Entrepreneurship and Environment (changed during manual Stage 2 testing); the handoff seed has Technology, Programming and Robotics.
+
+---
+
+## 21. Stitch Design Fidelity Review (Stages 2–6)
 
 After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui/stitch-export/stitch_jnuverse_campus_community_platform/` and `jnuverse/DESIGN.md`, following the Week 3 approach.
 
@@ -443,7 +477,7 @@ After the first Stage 4 build, the Week 7 screens were reviewed against `docs/ui
 
 ---
 
-## 21. Manual Interactive Browser QA Checklist
+## 22. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -471,9 +505,10 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 22. Week 7 Readiness Classification
+## 23. Week 7 Final Readiness Classification
 
-* **Implementation:** Stages 1–6 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt; student dashboard; club operator dashboard; content reports).
-* **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–6 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
-* **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.
+* **Implementation Complete:** All 7 stages of Week 7 are implemented: API services; club logos, event banners and club interests; student profile and interests prompt; Student Dashboard and Club Operator Dashboard built against Stitch; content reports with My Reports.
+* **Verification Complete (automated):** ESLint, Vite production build and the 21-check read-only API role matrix pass.
+* **Manual Browser QA Pending:** Upload, interest saving, dashboard approve/reject and report submission flows (Section 22) write to the shared Supabase database and are left for manual QA with the team's agreement.
+* **Demo Data:** Time-based demo figures have expired; re-seed (`seed_demo_events --reset --allow-remote`, then `seed_demo_events --allow-remote`) before checking populated rating prompts, next events and weekly registrations.
+* **Carried to Week 9:** bundle code splitting (796 kB JS chunk).

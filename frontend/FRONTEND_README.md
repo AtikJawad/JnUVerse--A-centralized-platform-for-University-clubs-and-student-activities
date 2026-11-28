@@ -52,6 +52,14 @@ frontend/
 │   │   ├── Badge.jsx                # Category, role, status & department pill tags
 │   │   ├── Button.jsx               # Stitch full-pill buttons with loading states & variants
 │   │   ├── Card.jsx                 # Elevated white surface cards with subtle borders
+│   │   ├── ClubLogo.jsx             # Week 7: uploaded club logo with icon/initials fallback
+│   │   ├── ImageUploadField.jsx     # Week 7: Stitch logo/banner upload block (drag & drop, change, remove)
+│   │   ├── InterestPicker.jsx       # Week 7: toggle chips over the 13 interests (students & clubs)
+│   │   ├── InterestTags.jsx         # Week 7: read-only interest chips
+│   │   ├── InterestsPrompt.jsx      # Week 7: skippable "Choose your interests" dashboard card
+│   │   ├── ReportModal.jsx          # Week 7: report a club or event (reason + details)
+│   │   ├── dashboard/
+│   │   │   └── StudentDashboardSections.jsx  # Week 7: Stitch student dashboard sections
 │   │   ├── EmptyState.jsx           # Empty list and search state presentation
 │   │   ├── ErrorAlert.jsx           # Accessible error banner for DRF validation feedback
 │   │   ├── Input.jsx                # Form input field with icons, labels, and error states
@@ -65,19 +73,24 @@ frontend/
 │   ├── layouts/                     # Shared layout wrappers for student & operator views
 │   ├── pages/                       # Route-level screens
 │   │   ├── ClubDetail.jsx           # Club profile, follow/unfollow, membership application & operator edits
-│   │   ├── Dashboard.jsx            # Authenticated student/operator landing dashboard
+│   │   ├── Dashboard.jsx            # Week 7: Stitch student dashboard (GET /api/dashboard/student/)
 │   │   ├── EventDetail.jsx          # Event profile, schedule, venue, capacity tracking & student RSVP actions
 │   │   ├── ExploreClubs.jsx         # Club directory explorer with search, category filtering & pagination
 │   │   ├── ExploreEvents.jsx        # Campus events discovery, filters, search, featured spotlight & pagination
 │   │   ├── Login.jsx                # Student & Club Operator login with animated orbital hub
 │   │   ├── MyClubs.jsx              # Student portal: joined societies, pending requests, and followed clubs
+│   │   ├── MyReports.jsx            # Week 7: Stitch reports interface — the user's own reports
+│   │   ├── OperatorDashboard.jsx    # Week 7: Stitch club operator dashboard (GET /api/dashboard/club/)
 │   │   ├── OperatorEventForm.jsx    # Club operator event creation & editing with live preview & Dhaka timezone
 │   │   ├── OperatorMembers.jsx      # Operator portal: pending request approval/rejection & member list
+│   │   ├── Profile.jsx              # Week 7: student account details and interests
 │   │   ├── Register.jsx             # Stitch-aligned student registration (orbital left, form right, registrar sync)
 │   │   └── RegisterClub.jsx         # Stitch-aligned Club Operator registration (orbital left, form right, DRF sync)
 │   ├── services/
 │   │   └── api.js                   # Axios client with JWT request & 401 refresh interceptors
 │   ├── utils/                       # Shared utility functions and formatting helpers
+│   │   ├── banner.js                # Week 7: event banner background style with readability tint
+│   │   └── clubTheme.js             # Week 7: Stitch dashboard club palette (icon, tint, pill)
 │   ├── App.jsx                      # App root with React Router route declarations
 │   ├── index.css                    # Tailwind directives, base font, and custom keyframe animations
 │   └── main.jsx                     # Application bootstrap mounting into #root
@@ -488,6 +501,18 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
   - Audited all Weeks 1–6 screens against the backend handoffs and fixed six defects: operator club resolution and full member/request pagination in `OperatorMembers.jsx`, full club pagination in `MyClubs.jsx`, `collaboration_update` notification routing, slug-based owner check and rejected/removed membership note in `ClubDetail.jsx`, and a student "My Registrations" tab in `ExploreEvents.jsx`.
   - Added the shared `fetchAllPages()` helper to `api.js`. Details and verification: [Week 6 Workflow §21](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md).
 
+### 9. Week 7 Interests, Images, Reports & Dashboards (Stages 1–7 Completed)
+Built against the Week 7 backend handoff and the Stitch exports (`jnuverse_student_dashboard_living_campus_experience`, `jnuverse_club_operator_dashboard_minimal_redesign`, `jnuverse_club_profile_management`, `jnuverse_reports_interface`). Full details: [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md).
+
+- **API services (`api.js`):** `interestsAPI`, `reportsAPI`, `dashboardAPI`, `clubsAPI.update / uploadLogo / deleteLogo`, `eventsAPI.uploadBanner / deleteBanner`; uploads send `multipart/form-data` through `putImage()` (the shared JSON default header would otherwise make Axios send `FormData` as JSON — verified 415 vs 200).
+- **Logos, banners & club interests:** Stitch "Club Insignia & Logo" upload block on the club edit form and the event form (create mode uploads after the draft is created); logos on club cards, profile, My Clubs, Members and the navbar; banners on event pages, cards and operator rows; club interests editable and shown as tags. The obsolete `logo` field was removed from the club `PATCH`.
+- **Student profile & interests:** `/profile` (account details + interests) and a skippable dashboard prompt when `has_interests` is false.
+- **Student Dashboard:** Stitch "Living Campus" layout with animated hero tiles, rating prompts, "Find your community." (Follow + Join), "Your communities." and upcoming events.
+- **Club Operator Dashboard:** Stitch minimal dashboard — metrics linked to management screens, inline membership approve/reject, next/recent events with ratings, public snapshot and quick actions; `/` and `/dashboard` choose the dashboard by role.
+- **Content reports:** Report button on club and event pages (hidden for one's own club/events), `ReportModal` with reason/details validation and duplicate handling, and `/my-reports` built on the Stitch reports interface.
+- **Fixes found during Week 7 QA:** operators now load `/api/auth/me/` after login so `user.club` is available immediately; operators can open their club profile from the navbar.
+- **Quality gates:** ESLint 0 errors / 0 warnings, Vite production build passes, 21/21 role-permission API checks pass. Manual browser QA and populated dashboard checks are pending a demo-data re-seed.
+
 ---
 
 ## 9. Implementation Status Matrix
@@ -500,7 +525,7 @@ The Week 6 implementation integrates post-event attendee ratings (numeric 1–5 
 | **Events & RSVP Registration** | Week 4 | **Completed** (Re-verified in the post-Week 6 audit; "My Registrations" tab added) | **Completed & Verified** | [Week 4 Workflow](docs/workflow/WEEK_04_EVENTS_AND_REGISTRATION.md) |
 | **Notices & Notifications** | Week 5 | **Completed** (Implementation complete; authenticated runtime QA, backend automated tests and owner-side deployment remain pending) | **Completed & Verified** | [Week 5 Workflow](docs/workflow/WEEK_05_NOTICES_AND_NOTIFICATIONS.md) |
 | **Ratings & Collaboration** | Week 6 | **Completed** (Stages 1–7 Finalized: Implementation & verification complete; manual browser QA pending) | **Completed & Verified** (Contracts verified via source inspection & live API smoke tests; pytest runner blocked locally) | [Week 6 Workflow](docs/workflow/WEEK_06_RATINGS_AND_COLLABORATION.md) |
-| **Reports & Dashboards** | Week 7 | **Planned** (Stage 0: plan documented) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
+| **Reports & Dashboards** | Week 7 | **Completed** (Stages 1–7; lint, build and API checks passed; browser QA pending demo re-seed) | **Completed & Verified** (181 backend tests passing) | [Week 7 Workflow](docs/workflow/WEEK_07_REPORTS_AND_DASHBOARDS.md) |
 | **Five Analytical Reports** | Week 8 | Not Started | **Completed** (see `WEEK_08_BACKEND_HANDOFF.md`) | [Week 8 Workflow](docs/workflow/WEEK_08_ANALYTICAL_REPORTS.md) |
 | **Integration & End-to-End Testing** | Week 9 | Not Started | Not Started | [Week 9 Workflow](docs/workflow/WEEK_09_INTEGRATION_AND_TESTING.md) |
 | **Finalization & Production Delivery** | Week 10 | Not Started | Not Started | [Week 10 Workflow](docs/workflow/WEEK_10_FINALIZATION_AND_DELIVERY.md) |
