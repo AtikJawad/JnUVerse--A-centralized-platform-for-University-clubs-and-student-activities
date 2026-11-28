@@ -1,9 +1,33 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import InterestsPrompt, { isInterestsPromptDismissed } from "../components/InterestsPrompt";
+import { dashboardAPI } from "../services/api";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const isStudent = user?.role === "student";
+
+  // Week 7 Stage 3: show the interests prompt when the backend reports has_interests: false
+  const [showInterestsPrompt, setShowInterestsPrompt] = useState(false);
+  const [interestsSavedMessage, setInterestsSavedMessage] = useState("");
+
+  useEffect(() => {
+    if (!isStudent || isInterestsPromptDismissed(user?.id)) return undefined;
+    let active = true;
+    dashboardAPI
+      .student()
+      .then((res) => {
+        if (active && res.data?.has_interests === false) setShowInterestsPrompt(true);
+      })
+      .catch(() => {
+        // The prompt is optional; the rest of the dashboard does not depend on it
+      });
+    return () => {
+      active = false;
+    };
+  }, [isStudent, user?.id]);
 
   return (
     <div className="min-h-screen bg-canvas-base text-on-surface antialiased flex flex-col justify-between selection:bg-surface-variant selection:text-primary">
@@ -12,6 +36,34 @@ export default function Dashboard() {
 
       <main className="w-full pt-20 bg-canvas-base flex-1">
         <div className="max-w-[1360px] w-full mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col gap-8">
+          {showInterestsPrompt && (
+            <InterestsPrompt
+              userId={user?.id}
+              onSaved={(interests) => {
+                setShowInterestsPrompt(false);
+                setInterestsSavedMessage(
+                  `Saved ${interests.length} interest${interests.length === 1 ? "" : "s"}. You can change them any time from your profile.`
+                );
+              }}
+              onSkip={() => setShowInterestsPrompt(false)}
+            />
+          )}
+          {interestsSavedMessage && (
+            <div
+              role="status"
+              className="p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center justify-between gap-3"
+            >
+              <span>{interestsSavedMessage}</span>
+              <button
+                type="button"
+                onClick={() => setInterestsSavedMessage("")}
+                aria-label="Dismiss"
+                className="text-emerald-800/70 hover:text-emerald-900"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+          )}
           {/* 1. HERO SECTION (Living Campus Experience - Direct from Stitch) */}
           <section className="relative w-full rounded-3xl bg-gradient-to-b from-surface-white via-surface-container-low/40 to-canvas-base p-6 sm:p-10 lg:p-12 overflow-hidden shadow-[0_4px_30px_rgba(43,52,185,0.04)] border border-border-subtle/60">
             {/* Ambient Glow Behind Hero */}

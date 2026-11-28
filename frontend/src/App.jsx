@@ -18,6 +18,7 @@ import OperatorEventAttendees from "./pages/OperatorEventAttendees";
 import OperatorNotices from "./pages/OperatorNotices";
 import OperatorCollaborations from "./pages/OperatorCollaborations";
 import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -47,6 +48,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["student", "club_operator"]}>
                 <Notifications />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Student Profile & Interests Route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <Profile />
               </ProtectedRoute>
             }
           />

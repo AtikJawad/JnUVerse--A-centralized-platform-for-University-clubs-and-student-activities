@@ -30,6 +30,11 @@ export default function Navbar() {
     user?.role === "club_operator" && user?.club?.slug ? `/clubs/${user.club.slug}` : null;
   const isOwnClubPage = Boolean(ownClubPath) && location.pathname === ownClubPath;
 
+  // The identity block (name + avatar) links operators to their club and students to /profile
+  const isStudentUser = user?.role === "student";
+  const profilePath = ownClubPath || (isStudentUser ? "/profile" : null);
+  const isProfilePage = isOwnClubPage || (isStudentUser && location.pathname === "/profile");
+
   const getPortalLabel = () => {
     if (!isAuthenticated) return "Student Portal";
     return user?.role === "club_operator" ? "Operator Portal" : "Student Portal";
@@ -257,7 +262,7 @@ export default function Navbar() {
               {/* Notification Bell with Dropdown Popover & Poller */}
               <NotificationBell />
 
-              {/* User Details Stack & Profile Icon (operators: links to their club profile) */}
+              {/* User Details Stack & Profile Icon (operators: club profile; students: /profile) */}
               {(() => {
                 const identity = (
                   <>
@@ -273,7 +278,7 @@ export default function Navbar() {
                       src={ownClubPath ? user?.club?.logo : null}
                       name={getUserDisplayName()}
                       className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-xs ${
-                        isOwnClubPage ? "ring-2 ring-primary/30" : ""
+                        isProfilePage ? "ring-2 ring-primary/30" : ""
                       }`}
                     >
                       <span className="material-symbols-outlined text-[18px]">
@@ -282,13 +287,13 @@ export default function Navbar() {
                     </ClubLogo>
                   </>
                 );
-                return ownClubPath ? (
+                return profilePath ? (
                   <Link
-                    to={ownClubPath}
-                    title="Your club profile"
-                    aria-current={isOwnClubPage ? "page" : undefined}
+                    to={profilePath}
+                    title={ownClubPath ? "Your club profile" : "Your profile and interests"}
+                    aria-current={isProfilePage ? "page" : undefined}
                     className={`hidden md:flex items-center gap-2.5 pl-3 pr-1 py-1 rounded-full transition-colors ${
-                      isOwnClubPage ? "bg-surface-lavender" : "hover:bg-surface-lavender/70"
+                      isProfilePage ? "bg-surface-lavender" : "hover:bg-surface-lavender/70"
                     }`}
                   >
                     {identity}
@@ -446,6 +451,19 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              {isStudentUser && (
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                    isProfilePage
+                      ? "bg-primary text-white"
+                      : "text-on-surface hover:bg-surface-lavender"
+                  }`}
+                >
+                  My Profile
+                </Link>
+              )}
               <Link
                 to="/my-clubs"
                 onClick={() => setMobileMenuOpen(false)}

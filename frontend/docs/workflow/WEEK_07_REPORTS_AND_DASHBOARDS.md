@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stages 1–2 Completed (Stage 2 Source & Build Verified; Browser QA Pending)**  
+**Status:** **In Progress — Stages 1–3 Completed (Stages 2–3 Source, Build & API Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -64,10 +64,11 @@
    - **Navbar — operator club profile access (found during browser QA):** operators had no route to their own club page (where the edit form lives). The operator's name/avatar in the navbar now links to `/clubs/:slug` ("View club profile", avatar shows the club logo), the mobile menu has a "Club Profile" link, and on the own club page that link is highlighted instead of "Explore Clubs".
    - **AuthContext login fix (found during browser QA):** `POST /api/auth/login/` returns the user without `club`; only `/api/auth/me/` includes it. Operators now load `/api/auth/me/` after login, so `user.club` is available immediately (previously the Edit Profile button, the navbar club link, OperatorMembers and the collaboration modal's own-club exclusion only worked after a page reload).
 
-3. [ ] **Stage 3: Student Interests & Profile**
-   - `InterestPicker.jsx`: accessible chip toggles over the 13 interests, reused for students and clubs.
-   - `/profile` page (student only): account details from `/api/auth/me/` (read-only) and editable interests.
-   - Skippable "Choose your interests" prompt on the dashboard when `has_interests` is `false`.
+3. [x] **Stage 3: Student Interests & Profile**
+   - `InterestPicker.jsx` (built in Stage 2) reused for students.
+   - `Profile.jsx` at `/profile` (student only, `ProtectedRoute allowedRoles={["student"]}`): read-only account details from `/api/auth/me/` (name, Student ID, email, department, batch) and an interests editor loaded with `interestsAPI.getMine()` and saved with `interestsAPI.setMine()`; selected count, "Clear all", "Discard changes", Save enabled only when the selection changed, success/error messages, retry on load failure.
+   - `InterestsPrompt.jsx`: skippable "Choose your interests" card. `Dashboard.jsx` calls `dashboardAPI.student()` for students and shows it when `has_interests` is `false`; "Skip for now" is remembered per student in `localStorage` (`jnuverse:interests-prompt-dismissed:<user id>`); saving shows a confirmation with a link back to the profile.
+   - Navbar: a student's name/avatar links to `/profile` (highlighted there); mobile menu "My Profile" link. Operators keep the club profile link from Stage 2.
 
 4. [ ] **Stage 4: Student Dashboard (`Dashboard.jsx`)**
    - Rebuilt on `GET /api/dashboard/student/` following the Stitch "Living Campus" design.
@@ -88,7 +89,7 @@
    - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 12).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 14).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -215,7 +216,8 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - `frontend/src/utils/banner.js` *(created, Stage 2)*
 - `frontend/src/components/ReportModal.jsx`
 - `frontend/src/pages/OperatorDashboard.jsx`
-- `frontend/src/pages/Profile.jsx`
+- `frontend/src/pages/Profile.jsx` *(created, Stage 3)*
+- `frontend/src/components/InterestsPrompt.jsx` *(created, Stage 3)*
 - `frontend/src/pages/MyReports.jsx`
 
 ### Planned Modified Files
@@ -234,7 +236,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 12 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 14 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
@@ -298,11 +300,34 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 - [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
 - [x] Operators can reach their own club profile from the navbar, immediately after login.
 - [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
-- [ ] Manual browser QA of uploads and interest saving (Section 12).
+- [ ] Manual browser QA of uploads and interest saving (Section 14).
 
 ---
 
-## 12. Manual Interactive Browser QA Checklist
+## 12. Stage 3 Verification Results
+
+| Verification Check | Command / Request | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | `Profile.jsx`, `InterestsPrompt.jsx`, `Dashboard.jsx`, `Navbar.jsx`, `App.jsx`. |
+| **Production Build** | `npm run build` | **PASS (built in 1.04s)** | Bundle-size warning only (unchanged). |
+| **Prompt Trigger Data** | `GET /api/dashboard/student/` (demo1–demo5) | **PASS (200 OK)** | `has_interests: false` for demo2 and demo4 (prompt shown); `true` for demo1, demo3, demo5. |
+| **Suggestions from Interests** | same request | **PASS** | demo3 → Sports Club; demo5 → Robotics Club, Cultural Forum, Debate Society; demo1 → none ("all caught up"). |
+| **Interests RBAC** | `GET /api/auth/me/interests/` (operator / anonymous) | **PASS (403 / 401)** | `/profile` is student-only in the router as well. |
+| **Saving Interests from the UI** | — | **NOT RUN** | Writes to the shared Supabase database; covered by manual QA (Section 14). |
+
+---
+
+## 13. Acceptance Criteria (Stage 3)
+
+- [x] Students can view their verified account details and set, change and clear interests on `/profile`.
+- [x] The dashboard shows a skippable interests prompt only when `has_interests` is `false`.
+- [x] Students reach `/profile` from the navbar (desktop and mobile).
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Manual browser QA of saving and clearing interests (Section 14).
+
+---
+
+## 14. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -330,9 +355,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 13. Week 7 Readiness Classification
+## 15. Week 7 Readiness Classification
 
-* **Implementation:** Stages 1–2 of 7 complete (API services; logos, banners and club interests).
+* **Implementation:** Stages 1–3 of 7 complete (API services; logos, banners and club interests; student profile and interests prompt).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stage 2 verified at source and build level, browser QA pending. Remaining stages pending.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stages 2–3 verified at source, build and read-only API level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.
