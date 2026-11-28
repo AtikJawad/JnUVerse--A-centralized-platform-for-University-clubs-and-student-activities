@@ -8,6 +8,9 @@ import ErrorAlert from "../components/ErrorAlert";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import Badge from "../components/Badge";
+import ImageUploadField from "../components/ImageUploadField";
+
+const BANNER_MAX_BYTES = 5 * 1024 * 1024;
 
 /**
  * Converts ISO 8601 timestamp to HTML datetime-local format "YYYY-MM-DDTHH:mm"
@@ -119,6 +122,20 @@ export default function OperatorEventForm() {
   const [loadingEvent, setLoadingEvent] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
 
+  // Banner: in create mode the file is held locally and uploaded after the draft is created
+  const [pendingBanner, setPendingBanner] = useState(null);
+  const [pendingBannerUrl, setPendingBannerUrl] = useState(null);
+
+  useEffect(() => {
+    if (!pendingBanner) {
+      setPendingBannerUrl(null);
+      return undefined;
+    }
+    const url = URL.createObjectURL(pendingBanner);
+    setPendingBannerUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingBanner]);
+
   // Feedback & Error States
   const [fieldErrors, setFieldErrors] = useState({});
   const [generalError, setGeneralError] = useState("");
@@ -186,6 +203,27 @@ export default function OperatorEventForm() {
       fetchEvent();
     }
   }, [isEditMode, fetchEvent]);
+
+  const bannerPreviewUrl = isEditMode ? existingEvent?.banner || null : pendingBannerUrl;
+
+  // Edit mode: PUT/DELETE /api/events/:id/banner/ immediately; create mode: keep the file for later
+  const handleBannerUpload = async (file) => {
+    if (!isEditMode) {
+      setPendingBanner(file);
+      return;
+    }
+    const res = await eventsAPI.uploadBanner(id, file);
+    setExistingEvent(res.data);
+  };
+
+  const handleBannerRemove = async () => {
+    if (!isEditMode) {
+      setPendingBanner(null);
+      return;
+    }
+    await eventsAPI.deleteBanner(id);
+    setExistingEvent((prev) => (prev ? { ...prev, banner: null } : prev));
+  };
 
   // Client-side validation
   const validateForm = () => {
@@ -289,6 +327,24 @@ export default function OperatorEventForm() {
       } else {
         const res = await eventsAPI.create(payload);
         savedEvent = res.data;
+
+        if (pendingBanner) {
+          try {
+            await eventsAPI.uploadBanner(savedEvent.id, pendingBanner);
+          } catch (bannerErr) {
+            // The draft exists; send the operator to its edit page to retry the banner
+            setSuccessMessage(
+              `Event draft created, but the banner could not be uploaded: ${extractErrorMessage(
+                bannerErr,
+                "upload failed"
+              )} You can add it from the edit page.`
+            );
+            setTimeout(() => {
+              navigate(`/operator/events/${savedEvent.id}/edit`);
+            }, 2500);
+            return;
+          }
+        }
         setSuccessMessage("Event draft created successfully!");
       }
 
@@ -563,6 +619,25 @@ export default function OperatorEventForm() {
                         Markdown or plain text describing the agenda and guidelines for students.
                       </p>
                     </div>
+                  </div>
+
+                  {/* Event Banner (16:9) */}
+                  <div className="pt-4 border-t border-border-subtle/80">
+                    <ImageUploadField
+                      label="Event Banner (Optional)"
+                      currentUrl={bannerPreviewUrl}
+                      maxBytes={BANNER_MAX_BYTES}
+                      shape="wide"
+                      onUpload={handleBannerUpload}
+                      onRemove={handleBannerRemove}
+                      disabled={isReadOnly}
+                      disabledReason="Banners cannot be changed for cancelled or ended events."
+                    />
+                    {!isEditMode && pendingBanner && (
+                      <p className="text-[11px] text-text-muted mt-1.5">
+                        The banner will be uploaded when you create the draft.
+                      </p>
+                    )}
                   </div>
 
                   {/* Section B: Logistics & Schedule */}
@@ -850,6 +925,16 @@ export default function OperatorEventForm() {
                   <article className="w-full bg-surface-white rounded-3xl overflow-hidden border border-border-subtle shadow-xs space-y-0 transition-all">
                     {/* Visual Card Cover / Backdrop Plate */}
                     <div className="h-32 bg-gradient-to-br from-surface-lavender via-secondary-fixed/40 to-surface-lavender/30 p-5 flex flex-col justify-between relative overflow-hidden">
+                      {bannerPreviewUrl && (
+                        <>
+                          <img
+                            src={bannerPreviewUrl}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-surface-white/55" aria-hidden="true" />
+                        </>
+                      )}
                       <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-xl bg-surface-white flex items-center justify-center text-primary font-bold shadow-xs">

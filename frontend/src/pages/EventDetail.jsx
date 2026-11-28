@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { eventsAPI, ratingsAPI, extractErrorMessage } from "../services/api";
+import { bannerStyle } from "../utils/banner";
 import LoadingState from "../components/LoadingState";
 import ErrorAlert from "../components/ErrorAlert";
 import StarRating, { RATING_LABELS } from "../components/StarRating";
@@ -638,7 +639,10 @@ export default function EventDetail() {
 
                 {/* Branded Visual Backdrop Plate */}
                 <section aria-label="Campus Event Graphic Banner">
-                  <div className="relative w-full min-h-[220px] sm:min-h-[260px] rounded-3xl overflow-hidden shadow-inner bg-gradient-to-br from-primary via-primary-container to-secondary p-6 sm:p-8 flex flex-col justify-between text-white">
+                  <div
+                    className="relative w-full min-h-[220px] sm:min-h-[260px] rounded-3xl overflow-hidden shadow-inner bg-gradient-to-br from-primary via-primary-container to-secondary p-6 sm:p-8 flex flex-col justify-between text-white"
+                    style={bannerStyle(event.banner, "dark")}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 shadow-xs">
                         <span className="material-symbols-outlined text-[26px]">

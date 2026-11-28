@@ -1,7 +1,7 @@
 # Week 07 — Reports & Dashboards
 
 **Focus:** Interest selection, club logos and event banners, inappropriate club/event reporting, and Student / Club Operator dashboards  
-**Status:** **In Progress — Stage 1 Completed (API Services Foundation Verified)**  
+**Status:** **In Progress — Stages 1–2 Completed (Stage 2 Source & Build Verified; Browser QA Pending)**  
 **Assigned:** Anik Khondokar (Frontend MVP Coder) & Atik Jawad (Backend MVP Coder)  
 **Backend Reference:** Atik Jawad / Claude (`WEEK_07_BACKEND_HANDOFF.md`, 181 automated backend tests passing, OpenAPI validated in `docs/api/openapi.yml`)  
 **Design Reference:** Google Stitch `jnuverse_student_dashboard_living_campus_experience/code.html`, `jnuverse_club_operator_dashboard_minimal_redesign/code.html`, `jnuverse_reports_interface/code.html`, `jnuverse_club_profile_management/code.html`  
@@ -49,12 +49,20 @@
    - Shared constants `REPORT_REASONS` (value/label pairs) and `REPORT_STATUS_LABELS` (`open` → "Received", etc.) for report UI.
    - Validated against ESLint (0 errors, 0 warnings), Vite production build and live API smoke tests (Section 8).
 
-2. [ ] **Stage 2: Club Logos, Event Banners & Club Interests**
-   - `ClubLogo.jsx`: square logo with `object-cover`, initials placeholder when `logo` is `null`; used in ExploreClubs, ClubDetail, MyClubs, PartnerClubsSection, OperatorCollaborations, ProposeCollaborationModal and OperatorMembers.
-   - Club Detail edit form: remove the logo URL input; add logo upload/replace/remove with preview and client-side type/size checks; add `InterestPicker` for club interests (sent with `PATCH`).
-   - Interest tags on club cards and the club profile.
-   - `OperatorEventForm.jsx`: banner upload/remove (create mode uploads after the event is created); hidden for cancelled/ended events.
-   - 16:9 banner with placeholder on EventDetail, ExploreEvents cards and spotlight, and OperatorEvents rows.
+2. [x] **Stage 2: Club Logos, Event Banners & Club Interests**
+   - `ClubLogo.jsx`: renders `club.logo` (`object-cover`) inside the caller's container, or the caller's existing fallback (category icon or initials) when the logo is `null` or fails to load. Used in ExploreClubs (featured club and cards), ClubDetail (profile card), MyClubs and OperatorMembers (club badge from `user.club`).
+     - PartnerClubsSection and ProposeCollaborationModal already rendered `logo` with a fallback and were left unchanged.
+     - Collaboration and event objects carry only `{ id, name, slug }` for clubs (no `logo`), so OperatorCollaborations and EventDetail keep their icons.
+   - `ImageUploadField.jsx`: reusable upload / replace / remove control with preview (square or 16:9), browser-side type (JPEG/PNG/WebP) and size checks, busy state and server error display.
+   - `InterestPicker.jsx` (built here, reused for students in Stage 3): toggle chips over `GET /api/auth/interests/` with `aria-pressed`; `InterestTags.jsx`: read-only chips with optional `+N` overflow.
+   - Club Detail edit form: removed the obsolete `logo` from the `PATCH` payload; logo upload/remove saves immediately via `clubsAPI.uploadLogo / deleteLogo`; club interests edited with `InterestPicker` and saved via `clubsAPI.update` (`description`, `contact_email`, `interests`); Cancel now resets unsaved edits.
+   - Interest tags on Explore Clubs cards (max 3, `+N`) and in the Club Detail "About" view.
+   - `AuthContext.refreshUser()`: re-fetches `/api/auth/me/` after a logo change so `user.club.logo` stays current.
+   - `OperatorEventForm.jsx`: banner field (16:9, ≤ 5 MB). Edit mode uploads/removes immediately; create mode holds the file with a local preview and uploads it right after the draft is created (on upload failure the draft is kept and the operator is sent to its edit page). Disabled with a reason for cancelled/ended events. The live preview card shows the banner.
+   - `utils/banner.js` `bannerStyle(url, tone)`: paints the banner with a readability tint over the existing gradient covers on EventDetail and ExploreEvents (spotlight and cards); the gradient remains the placeholder when `banner` is `null`.
+   - OperatorEvents rows: 16:9 banner thumbnail with placeholder (hidden on mobile).
+   - **Navbar — operator club profile access (found during browser QA):** operators had no route to their own club page (where the edit form lives). The operator's name/avatar in the navbar now links to `/clubs/:slug` ("View club profile", avatar shows the club logo), the mobile menu has a "Club Profile" link, and on the own club page that link is highlighted instead of "Explore Clubs".
+   - **AuthContext login fix (found during browser QA):** `POST /api/auth/login/` returns the user without `club`; only `/api/auth/me/` includes it. Operators now load `/api/auth/me/` after login, so `user.club` is available immediately (previously the Edit Profile button, the navbar club link, OperatorMembers and the collaboration modal's own-club exclusion only worked after a page reload).
 
 3. [ ] **Stage 3: Student Interests & Profile**
    - `InterestPicker.jsx`: accessible chip toggles over the 13 interests, reused for students and clubs.
@@ -80,7 +88,7 @@
    - `MyReports.jsx` at `/my-reports` (both roles) with status badges and a Navbar link.
 
 7. [ ] **Stage 7: Final Quality Gates & Regression Audit**
-   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 10).
+   - `npm run lint`, `npm run build`, non-mutating API smoke tests, demo-account verification (Section 12).
    - Update `FRONTEND_README.md` (Week 7 section and status matrix) and this document's verification and readiness sections.
 
 ---
@@ -200,8 +208,11 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 ## 6. Files to Be Created & Modified
 
 ### Planned New Files
-- `frontend/src/components/ClubLogo.jsx`
-- `frontend/src/components/InterestPicker.jsx`
+- `frontend/src/components/ClubLogo.jsx` *(created, Stage 2)*
+- `frontend/src/components/InterestPicker.jsx` *(created, Stage 2)*
+- `frontend/src/components/InterestTags.jsx` *(created, Stage 2)*
+- `frontend/src/components/ImageUploadField.jsx` *(created, Stage 2)*
+- `frontend/src/utils/banner.js` *(created, Stage 2)*
 - `frontend/src/components/ReportModal.jsx`
 - `frontend/src/pages/OperatorDashboard.jsx`
 - `frontend/src/pages/Profile.jsx`
@@ -223,7 +234,7 @@ For event reports `club` is `null` and `event` is `{ "id", "title" }`. Status la
 - [ ] Logo and banner upload/remove work and the UI updates from the server response; invalid files show the server message.
 - [ ] Every club and event screen renders the logo/banner or a placeholder when `null`.
 - [ ] Students can set, change and clear interests; club operators can set club interests.
-- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 10 and link to the correct management screens.
+- [ ] Student Dashboard and Club Operator Dashboard show the demo figures in Section 12 and link to the correct management screens.
 - [ ] Reports cannot be submitted for one's own club or events; duplicates show a clear message; My Reports shows correct status labels.
 - [ ] No backend files modified; no new package dependencies.
 - [ ] ESLint 0 errors, 0 warnings; Vite production build passes.
@@ -264,7 +275,34 @@ Smoke tests ran with a Node script using the frontend's installed Axios 1.20 and
 
 ---
 
-## 10. Manual Interactive Browser QA Checklist
+## 10. Stage 2 Verification Results
+
+| Verification Check | Command / Method | Result | Verification Notes |
+|---|---|:---:|---|
+| **Static Code Analysis** | `npm run lint` | **PASS (0 errors, 0 warnings)** | All new components and modified pages. |
+| **Production Build** | `npm run build` | **PASS (built in 1.08s)** | Bundle-size warning only (unchanged). |
+| **Obsolete Logo Field** | Source inspection of `ClubDetail.jsx` | **PASS** | `logo` no longer sent in `PATCH /api/clubs/:slug/`. |
+| **Club Update Contract** | Backend `ClubUpdateSerializer` inspection | **PASS** | Accepts `description`, `contact_email`, `interests` (list of interest UUIDs). |
+| **Upload Transport** | Stage 1 live test of `putImage` | **PASS** | Multipart override verified (415 without, 200 with). |
+| **Login Response Shape** | `POST /api/auth/login/` (democlub1) | **CONFIRMED** | `user` keys: id, email, student_id, name, department, batch, role — no `club`; fixed by loading `/api/auth/me/` for operators. |
+| **Operator Navigation** | Browser (democlub1) | **PASS (user confirmed)** | Club profile reachable from the navbar; "Explore Clubs" no longer highlighted on the own club page. |
+| **Live Upload / Interest Save from the UI** | — | **NOT RUN** | The local backend uses the shared Supabase database; write tests are left for manual QA with the team's agreement. |
+
+---
+
+## 11. Acceptance Criteria (Stage 2)
+
+- [x] Club logo upload, replace and remove available to the owning operator only (inside the operator edit form).
+- [x] Club interests editable by the owning operator and shown as tags on cards and the profile.
+- [x] Event banner upload/remove in the event form, including create mode; disabled for cancelled/ended events.
+- [x] Logos and banners displayed with placeholders when `null` or when the image fails to load.
+- [x] Operators can reach their own club profile from the navbar, immediately after login.
+- [x] No backend files modified; no new dependencies; ESLint and Vite build pass.
+- [ ] Manual browser QA of uploads and interest saving (Section 12).
+
+---
+
+## 12. Manual Interactive Browser QA Checklist
 
 Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the backend developer to re-seed if figures differ.
 
@@ -292,9 +330,9 @@ Demo accounts use the password `Demo-Pass-12345`. Demo dates drift; ask the back
 
 ---
 
-## 11. Week 7 Readiness Classification
+## 13. Week 7 Readiness Classification
 
-* **Implementation:** Stage 1 of 7 complete (API services foundation).
+* **Implementation:** Stages 1–2 of 7 complete (API services; logos, banners and club interests).
 * **Backend Dependencies:** All Week 7 endpoints completed and verified by the backend (181 tests passing).
-* **Verification:** Stage 1 verified (lint, build, live API smoke tests). Remaining stages pending.
+* **Verification:** Stage 1 verified (lint, build, live API smoke tests); Stage 2 verified at source and build level, browser QA pending. Remaining stages pending.
 * **Demo Data:** Local time-based demo figures have expired; re-seed required before dashboard browser QA.

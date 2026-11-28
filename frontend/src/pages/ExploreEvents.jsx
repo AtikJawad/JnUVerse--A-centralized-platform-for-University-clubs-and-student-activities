@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { eventsAPI, extractErrorMessage } from "../services/api";
+import { bannerStyle } from "../utils/banner";
 
 /**
  * Date and Time Formatting Helpers using Asia/Dhaka Timezone.
@@ -509,7 +510,10 @@ export default function ExploreEvents() {
                     </div>
 
                     {/* Right Visual Banner Plate (5 cols on lg) */}
-                    <div className="lg:col-span-5 relative min-h-[260px] lg:min-h-full rounded-2xl overflow-hidden shadow-inner bg-gradient-to-br from-primary via-primary-container to-secondary p-6 sm:p-8 flex flex-col justify-between text-white">
+                    <div
+                      className="lg:col-span-5 relative min-h-[260px] lg:min-h-full rounded-2xl overflow-hidden shadow-inner bg-gradient-to-br from-primary via-primary-container to-secondary p-6 sm:p-8 flex flex-col justify-between text-white"
+                      style={bannerStyle(featuredEvent.banner, "dark")}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
                           <span className="material-symbols-outlined text-[24px]">
@@ -720,7 +724,10 @@ export default function ExploreEvents() {
                       >
                         <div>
                           {/* Card Top Banner Plate */}
-                          <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-surface-lavender via-surface-container to-secondary-fixed/40 p-5 flex flex-col justify-between">
+                          <div
+                            className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-surface-lavender via-surface-container to-secondary-fixed/40 p-5 flex flex-col justify-between"
+                            style={bannerStyle(event.banner, "light")}
+                          >
                             <div className="flex items-center justify-between">
                               <span className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-xs">
                                 <span className="material-symbols-outlined text-[20px]">

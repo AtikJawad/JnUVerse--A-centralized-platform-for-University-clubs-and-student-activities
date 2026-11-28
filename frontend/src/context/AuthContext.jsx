@@ -62,13 +62,14 @@ export function AuthProvider({ children }) {
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
 
-    if (userData) {
+    // The login response's user object has no `club`; for club operators the full
+    // profile (with club id/slug/logo) comes from /api/auth/me/.
+    if (userData && userData.role !== "club_operator") {
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       return userData;
     }
 
-    // Fallback if user object was omitted in login response
     const meResponse = await api.get("/api/auth/me/");
     setUser(meResponse.data);
     localStorage.setItem("user", JSON.stringify(meResponse.data));
@@ -81,6 +82,14 @@ export function AuthProvider({ children }) {
     return response.data;
   };
 
+  // Re-fetch /api/auth/me/ (e.g. after an operator changes the club logo)
+  const refreshUser = useCallback(async () => {
+    const response = await api.get("/api/auth/me/");
+    setUser(response.data);
+    localStorage.setItem("user", JSON.stringify(response.data));
+    return response.data;
+  }, []);
+
   const value = {
     user,
     loading,
@@ -88,6 +97,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     register,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

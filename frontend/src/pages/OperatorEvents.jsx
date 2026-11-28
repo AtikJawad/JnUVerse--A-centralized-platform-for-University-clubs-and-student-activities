@@ -594,6 +594,21 @@ export default function OperatorEvents() {
                       return (
                         <div key={event.id} className="transition-colors">
                           <div className="p-5 sm:p-6 hover:bg-surface-lavender/30 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                          {/* Event Banner Thumbnail (16:9, placeholder when none) */}
+                          <div className="hidden sm:flex w-28 aspect-video rounded-xl overflow-hidden bg-surface-lavender border border-border-subtle items-center justify-center shrink-0">
+                            {event.banner ? (
+                              <img
+                                src={event.banner}
+                                alt={`${event.title} banner`}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="material-symbols-outlined text-[22px] text-primary/60" aria-hidden="true">
+                                panorama
+                              </span>
+                            )}
+                          </div>
                           {/* Event Metadata */}
                           <div className="space-y-2 flex-1 min-w-0">
                             <div className="flex items-center flex-wrap gap-2">

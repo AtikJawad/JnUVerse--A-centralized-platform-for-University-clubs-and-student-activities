@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api, { extractErrorMessage } from "../services/api";
 import Navbar from "../components/Navbar";
+import ClubLogo from "../components/ClubLogo";
+import InterestTags from "../components/InterestTags";
 
 // Stitch Explore Clubs Filter Categories (Exact order from Reference Image)
 const CATEGORIES = [
@@ -589,11 +591,15 @@ export default function ExploreClubs() {
 
                     {/* Club Identity & Metadata Row */}
                     <div className="flex items-center gap-4 2xl:gap-5">
-                      <div className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <ClubLogo
+                        src={featuredClub.logo}
+                        name={featuredClub.name}
+                        className="w-14 h-14 2xl:w-16 2xl:h-16 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm"
+                      >
                         <span className="material-symbols-outlined text-[28px] 2xl:text-[34px]">
                           {featuredTheme?.icon || "terminal"}
                         </span>
-                      </div>
+                      </ClubLogo>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-baseline gap-2.5 flex-wrap">
                           <h2 className="text-2xl sm:text-[28px] 2xl:text-3xl font-extrabold text-on-surface tracking-tight">
@@ -832,11 +838,15 @@ export default function ExploreClubs() {
                         <div className="flex flex-col gap-4">
                           {/* Top Row: Icon & Status Badges */}
                           <div className="flex items-start justify-between gap-3">
-                            <div className={`w-12 h-12 rounded-xl ${theme.iconBg} flex items-center justify-center shrink-0`}>
+                            <ClubLogo
+                              src={club.logo}
+                              name={club.name}
+                              className={`w-12 h-12 rounded-xl ${theme.iconBg} flex items-center justify-center shrink-0`}
+                            >
                               <span className="material-symbols-outlined text-[26px]">
                                 {theme.icon}
                               </span>
-                            </div>
+                            </ClubLogo>
 
                             <div className="flex flex-col items-end gap-1">
                               {/* Primary verification / status badge */}
@@ -911,6 +921,7 @@ export default function ExploreClubs() {
                             <p className="text-xs text-text-muted mt-2 line-clamp-2 leading-relaxed">
                               {club.description || "Official university student society promoting talent, research, and campus community engagement."}
                             </p>
+                            <InterestTags interests={club.interests} max={3} className="mt-3" />
                           </div>
                         </div>
 

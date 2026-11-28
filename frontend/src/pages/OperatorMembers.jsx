@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import api, { extractErrorMessage, fetchAllPages } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
+import ClubLogo from "../components/ClubLogo";
 
 export default function OperatorMembers() {
   const { user } = useAuth();
@@ -223,9 +224,13 @@ export default function OperatorMembers() {
             {/* Club Identity Badge Card */}
             {club && (
               <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-white border border-border-subtle shadow-xs self-start lg:self-auto hover:border-primary/30 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-sm tracking-wider shadow-xs">
+                <ClubLogo
+                  src={club.logo}
+                  name={club.name}
+                  className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-sm tracking-wider shadow-xs"
+                >
                   {club.name ? club.name.substring(0, 2).toUpperCase() : "JU"}
-                </div>
+                </ClubLogo>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs text-on-surface">{club.name}</span>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
+import ClubLogo from "./ClubLogo";
 
 /**
  * Navbar Component — JnUVerse Stitch Reference Design
@@ -23,6 +24,11 @@ export default function Navbar() {
     }
     return location.pathname.startsWith(path);
   };
+
+  // Club operators reach their own public club profile (and its edit form) from the navbar
+  const ownClubPath =
+    user?.role === "club_operator" && user?.club?.slug ? `/clubs/${user.club.slug}` : null;
+  const isOwnClubPage = Boolean(ownClubPath) && location.pathname === ownClubPath;
 
   const getPortalLabel = () => {
     if (!isAuthenticated) return "Student Portal";
@@ -150,7 +156,7 @@ export default function Navbar() {
           <Link
             to="/clubs"
             className={`px-4 sm:px-4.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              isActive("/clubs")
+              isActive("/clubs") && !isOwnClubPage
                 ? "bg-primary text-white font-bold shadow-sm"
                 : "text-on-surface-variant hover:text-on-surface"
             }`}
@@ -251,23 +257,48 @@ export default function Navbar() {
               {/* Notification Bell with Dropdown Popover & Poller */}
               <NotificationBell />
 
-              {/* User Details Stack & Profile Icon */}
-              <div className="hidden md:flex items-center gap-2.5 pl-1">
-                <div className="flex flex-col text-right">
-                  <span className="text-xs font-bold text-on-surface leading-tight truncate max-w-[170px]">
-                    {getUserDisplayName()}
-                  </span>
-                  <span className="text-[11px] text-text-muted leading-tight truncate max-w-[170px] mt-0.5 font-medium">
-                    {getUserSecondaryText()}
-                  </span>
-                </div>
-                <div
-                  className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-xs"
-                  title={getUserDisplayName()}
-                >
-                  <span className="material-symbols-outlined text-[18px]">person</span>
-                </div>
-              </div>
+              {/* User Details Stack & Profile Icon (operators: links to their club profile) */}
+              {(() => {
+                const identity = (
+                  <>
+                    <div className="flex flex-col text-right">
+                      <span className="text-xs font-bold text-on-surface leading-tight truncate max-w-[170px]">
+                        {getUserDisplayName()}
+                      </span>
+                      <span className="text-[11px] text-text-muted leading-tight truncate max-w-[170px] mt-0.5 font-medium">
+                        {ownClubPath ? "View club profile" : getUserSecondaryText()}
+                      </span>
+                    </div>
+                    <ClubLogo
+                      src={ownClubPath ? user?.club?.logo : null}
+                      name={getUserDisplayName()}
+                      className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shrink-0 shadow-xs ${
+                        isOwnClubPage ? "ring-2 ring-primary/30" : ""
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {ownClubPath ? "groups" : "person"}
+                      </span>
+                    </ClubLogo>
+                  </>
+                );
+                return ownClubPath ? (
+                  <Link
+                    to={ownClubPath}
+                    title="Your club profile"
+                    aria-current={isOwnClubPage ? "page" : undefined}
+                    className={`hidden md:flex items-center gap-2.5 pl-3 pr-1 py-1 rounded-full transition-colors ${
+                      isOwnClubPage ? "bg-surface-lavender" : "hover:bg-surface-lavender/70"
+                    }`}
+                  >
+                    {identity}
+                  </Link>
+                ) : (
+                  <div className="hidden md:flex items-center gap-2.5 pl-1" title={getUserDisplayName()}>
+                    {identity}
+                  </div>
+                );
+              })()}
 
               {/* Logout Button */}
               <button
@@ -332,7 +363,7 @@ export default function Navbar() {
             to="/clubs"
             onClick={() => setMobileMenuOpen(false)}
             className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
-              isActive("/clubs")
+              isActive("/clubs") && !isOwnClubPage
                 ? "bg-primary text-white"
                 : "text-on-surface hover:bg-surface-lavender"
             }`}
@@ -341,6 +372,19 @@ export default function Navbar() {
           </Link>
           {user?.role === "club_operator" ? (
             <>
+              {ownClubPath && (
+                <Link
+                  to={ownClubPath}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                    isOwnClubPage
+                      ? "bg-primary text-white"
+                      : "text-on-surface hover:bg-surface-lavender"
+                  }`}
+                >
+                  Club Profile
+                </Link>
+              )}
               <Link
                 to="/operator/members"
                 onClick={() => setMobileMenuOpen(false)}

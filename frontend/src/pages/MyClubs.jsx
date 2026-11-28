@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api, { extractErrorMessage, fetchAllPages } from "../services/api";
 import Navbar from "../components/Navbar";
+import ClubLogo from "../components/ClubLogo";
 import LoadingState from "../components/LoadingState";
 
 function getClubIcon(club) {
@@ -365,9 +366,13 @@ export default function MyClubs() {
                     <div>
                       {/* Header: Logo, Chartered, Member status */}
                       <div className="flex items-start justify-between gap-3 mb-4">
-                        <div className="w-14 h-14 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center shrink-0 shadow-xs">
+                        <ClubLogo
+                          src={club.logo}
+                          name={club.name}
+                          className="w-14 h-14 rounded-2xl bg-surface-lavender text-primary flex items-center justify-center shrink-0 shadow-xs"
+                        >
                           <span className="material-symbols-outlined text-[28px]">{icon}</span>
-                        </div>
+                        </ClubLogo>
                         <div className="flex flex-col items-end gap-1.5">
                           <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-secondary-container text-[11px] font-semibold">
                             Chartered

@@ -1,10 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api, { extractErrorMessage, noticesAPI } from "../services/api";
+import api, { clubsAPI, extractErrorMessage, noticesAPI } from "../services/api";
 import Navbar from "../components/Navbar";
 import LoadingState from "../components/LoadingState";
 import PartnerClubsSection from "../components/PartnerClubsSection";
+import ClubLogo from "../components/ClubLogo";
+import InterestTags from "../components/InterestTags";
+import InterestPicker from "../components/InterestPicker";
+import ImageUploadField from "../components/ImageUploadField";
+
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+
+// Editable profile fields; the logo has its own upload endpoint
+function toEditForm(clubData) {
+  return {
+    description: clubData?.description || "",
+    contact_email: clubData?.contact_email || "",
+    interests: (clubData?.interests || []).map((i) => i.id),
+  };
+}
 
 function getClubIcon(club) {
   if (!club) return "groups";
@@ -133,7 +148,7 @@ function NoticeSkeletons() {
 
 export default function ClubDetail() {
   const { slug } = useParams();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -148,11 +163,7 @@ export default function ClubDetail() {
 
   // Operator Edit State
   const [isEditing, setIsEditing] = useState(false);
-  const [editFormData, setEditFormData] = useState({
-    description: "",
-    logo: "",
-    contact_email: "",
-  });
+  const [editFormData, setEditFormData] = useState(toEditForm(null));
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -189,11 +200,7 @@ export default function ClubDetail() {
       const response = await api.get(`/api/clubs/${slug}/`);
       const clubData = response.data;
       setClub(clubData);
-      setEditFormData({
-        description: clubData.description || "",
-        logo: clubData.logo || "",
-        contact_email: clubData.contact_email || "",
-      });
+      setEditFormData(toEditForm(clubData));
 
       if (isAuthenticated && user?.role === "student") {
         try {
@@ -484,11 +491,12 @@ export default function ClubDetail() {
     try {
       const payload = {
         description: editFormData.description.trim(),
-        logo: editFormData.logo.trim(),
         contact_email: editFormData.contact_email.trim(),
+        interests: editFormData.interests,
       };
-      const res = await api.patch(`/api/clubs/${slug}/`, payload);
+      const res = await clubsAPI.update(slug, payload);
       setClub(res.data);
+      setEditFormData(toEditForm(res.data));
       setIsEditing(false);
       setFeedback({
         type: "success",
@@ -499,6 +507,27 @@ export default function ClubDetail() {
     } finally {
       setEditLoading(false);
     }
+  };
+
+  // Logo changes save immediately (separate endpoint), independent of "Save Changes"
+  const handleLogoUpload = async (file) => {
+    const res = await clubsAPI.uploadLogo(slug, file);
+    setClub(res.data);
+    setFeedback({ type: "success", text: "Club logo updated." });
+    refreshUser().catch(() => {});
+  };
+
+  const handleLogoRemove = async () => {
+    await clubsAPI.deleteLogo(slug);
+    setClub((prev) => (prev ? { ...prev, logo: null } : prev));
+    setFeedback({ type: "info", text: "Club logo removed." });
+    refreshUser().catch(() => {});
+  };
+
+  const handleCancelEdit = () => {
+    setEditFormData(toEditForm(club));
+    setEditError("");
+    setIsEditing(false);
   };
 
   const isOperatorOfThisClub =
@@ -624,7 +653,7 @@ export default function ClubDetail() {
                           {isEditing ? "Edit Society Profile" : "About This Society"}
                         </h2>
                         <p className="text-xs text-text-muted mt-0.5">
-                          {isEditing ? "Update public description and correspondence contacts." : "Charter information visible to all students."}
+                          {isEditing ? "Update logo, description, contact email and interests." : "Charter information visible to all students."}
                         </p>
                       </div>
 
@@ -663,6 +692,16 @@ export default function ClubDetail() {
                           </div>
                         </div>
 
+                        {/* Club Logo (saved immediately via PUT/DELETE /api/clubs/:slug/logo/) */}
+                        <ImageUploadField
+                          label="Club Logo"
+                          currentUrl={club.logo}
+                          maxBytes={LOGO_MAX_BYTES}
+                          shape="square"
+                          onUpload={handleLogoUpload}
+                          onRemove={handleLogoRemove}
+                        />
+
                         {/* Club Description Textarea */}
                         <div className="flex flex-col gap-1.5">
                           <div className="flex items-center justify-between">
@@ -697,11 +736,25 @@ export default function ClubDetail() {
                           />
                         </div>
 
+                        {/* Club Interests */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-on-surface">Club Interests</label>
+                          <p className="text-[11px] text-text-muted">
+                            Students with matching interests see your club in their suggestions.
+                          </p>
+                          <InterestPicker
+                            value={editFormData.interests}
+                            onChange={(ids) => setEditFormData({ ...editFormData, interests: ids })}
+                            disabled={editLoading}
+                            label="Club interests"
+                          />
+                        </div>
+
                         {/* Form Action Controls */}
                         <div className="pt-4 border-t border-border-subtle flex items-center justify-end gap-3">
                           <button
                             type="button"
-                            onClick={() => setIsEditing(false)}
+                            onClick={handleCancelEdit}
                             className="px-5 py-2 rounded-full text-xs font-semibold text-text-muted hover:text-on-surface hover:bg-surface-lavender transition-colors"
                           >
                             Cancel
@@ -727,6 +780,15 @@ export default function ClubDetail() {
                             {club.description || "Official university student society promoting talent, research, and campus community engagement."}
                           </p>
                         </div>
+
+                        {Array.isArray(club.interests) && club.interests.length > 0 && (
+                          <div className="flex flex-col gap-2">
+                            <span className="text-xs font-bold text-text-muted uppercase tracking-wider">
+                              Interests
+                            </span>
+                            <InterestTags interests={club.interests} />
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border-subtle">
                           <div className="p-3.5 rounded-xl bg-canvas-base border border-border-subtle/80 flex items-center gap-3">
@@ -960,11 +1022,15 @@ export default function ClubDetail() {
                       {/* Avatar overlapping banner */}
                       <div className="flex items-end justify-between -mt-10">
                         <div className="relative">
-                          <div className="w-20 h-20 rounded-2xl bg-surface-white border-4 border-surface-white shadow-md flex items-center justify-center overflow-hidden">
+                          <ClubLogo
+                            src={club.logo}
+                            name={club.name}
+                            className="w-20 h-20 rounded-2xl bg-surface-white border-4 border-surface-white shadow-md flex items-center justify-center"
+                          >
                             <span className="material-symbols-outlined text-[34px] text-primary">
                               {getClubIcon(club)}
                             </span>
-                          </div>
+                          </ClubLogo>
                           <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary border-2 border-surface-white flex items-center justify-center text-white shadow-xs">
                             <span className="material-symbols-outlined text-[13px]">verified</span>
                           </div>
